@@ -3392,7 +3392,7 @@ def apply_theme_names():
     try:
         for k, v in _THEMES.items():
             try:
-                out.append((k, str((v or {}).get("label") or k)))
+                out.append((k, T(str((v or {}).get("label") or k))))
             except Exception:
                 out.append((k, k))
     except Exception:
@@ -3662,6 +3662,29 @@ class PluginAPI:
     def __init__(self, app, name):
         self.app = app
         self.name = name          # 插件名（记账时用）
+
+    # ---- 多语言 ----
+    def T(self, text, **kw):
+        """★★★ **给插件用的翻译函数**（插件里的界面文字也走这里）。
+
+        ★★ 用户原话：「要做就做全套」——
+          插件加进菜单的字、弹窗的字，**切英文时也得跟着变**。
+
+        ★ 为什么让插件用**主程序的** T（而不是让它自己 import i18n）：
+          · 插件的翻译**应该跟主程序同一套语言文件** ——
+            用户切语言时**一次生效**，不用每个插件各切一次
+          · 插件**不需要知道**语言文件在哪（那是主程序的事）
+        ★★ 判据：**"给插件的是能力，不是实现"** ——
+          插件只管"我要显示这句话"，**怎么翻、翻成什么，主程序管**。
+        ★ 用法（跟主程序一样）：`api.T("取消")` / `api.T("共 {n} 项", n=5)`
+        """
+        try:
+            return T(text, **kw)
+        except Exception:
+            try:
+                return str(text).format(**kw) if kw else str(text)
+            except Exception:
+                return str(text)
 
     # ---- 菜单 ----
     def add_menu(self, label, items):
@@ -9530,7 +9553,7 @@ except Exception:
         def _ok(self):
             name = self.name_var.get().strip()
             if not name:
-                messagebox.showwarning("提示", "请填写分类名称", parent=self)
+                messagebox.showwarning("提示", T("请填写分类名称"), parent=self)
                 return
             self.result = {
                 "name": name,
@@ -11314,7 +11337,7 @@ class StarGraphEditor(tk.Toplevel):
         """点「确定去除」→ 弹窗确认 → 真删。"""
         pairs = set(getattr(self, "_rel_checked", set()) or set())
         if not pairs:
-            messagebox.showinfo("去除关系", "还没有勾选任何标签。", parent=self)
+            messagebox.showinfo("去除关系", T("还没有勾选任何标签。"), parent=self)
             return
         tid = self._selected_tag_id()
         node = self.nodes.get(tid) if tid is not None else None
@@ -12602,7 +12625,7 @@ class StarGraphEditor(tk.Toplevel):
     def _align_left(self):
         nodes = self._selected_nodes()
         if len(nodes) < 2:
-            messagebox.showinfo("提示", "请先用鼠标框选至少两个标签。",
+            messagebox.showinfo("提示", T("请先用鼠标框选至少两个标签。"),
                                 parent=self)
             return
         # 用最左的 x 作为对齐目标
@@ -12618,7 +12641,7 @@ class StarGraphEditor(tk.Toplevel):
         """让所有被选中标签的竖直中心对齐到同一条水平线上（摆成一行）"""
         nodes = self._selected_nodes()
         if len(nodes) < 2:
-            messagebox.showinfo("提示", "请先用鼠标框选至少两个标签。",
+            messagebox.showinfo("提示", T("请先用鼠标框选至少两个标签。"),
                                 parent=self)
             return
         top = min(n.y for n in nodes)
@@ -12634,7 +12657,7 @@ class StarGraphEditor(tk.Toplevel):
     def _space_vertically(self):
         nodes = self._selected_nodes()
         if len(nodes) < 2:
-            messagebox.showinfo("提示", "请先用鼠标框选至少两个标签。",
+            messagebox.showinfo("提示", T("请先用鼠标框选至少两个标签。"),
                                 parent=self)
             return
         # 取选中节点最靠上的 y 作为起点，向下依次排列，间距按平均高度
@@ -12676,7 +12699,7 @@ class StarGraphEditor(tk.Toplevel):
 
     def _new_child_tag(self):
         if not self.selected_node_ids:
-            messagebox.showinfo("提示", "请先点击一个标签作为父级", parent=self)
+            messagebox.showinfo("提示", T("请先点击一个标签作为父级"), parent=self)
             return
         parent = self.nodes.get(next(iter(self.selected_node_ids)))
         if parent is None:
@@ -12708,7 +12731,7 @@ class StarGraphEditor(tk.Toplevel):
             return
         # 单个节点才允许改名（多选就不改了）
         if len(self.selected_node_ids) > 1:
-            messagebox.showinfo("提示", "一次只能重命名一个标签", parent=self)
+            messagebox.showinfo("提示", T("一次只能重命名一个标签"), parent=self)
             return
         tid = next(iter(self.selected_node_ids))
         n = self.nodes.get(tid)
@@ -18145,7 +18168,7 @@ class AutoRuleEditDialog(tk.Toplevel):
     def _save(self):
         tag_name = (self.tag_var.get() or "").strip()
         if not tag_name:
-            messagebox.showwarning("提示", "标签名不能为空", parent=self)
+            messagebox.showwarning("提示", T("标签名不能为空"), parent=self)
             return
         tag_id = self._tag_id_by_name.get(tag_name)
         if tag_id is None:
@@ -18159,7 +18182,7 @@ class AutoRuleEditDialog(tk.Toplevel):
         pattern = self._get_pattern()
         scope = self._get_scope()
         if rule_type != "*" and not pattern:
-            messagebox.showwarning("提示", "请输入匹配内容", parent=self)
+            messagebox.showwarning("提示", T("请输入匹配内容"), parent=self)
             return
         if rule_type == "*" and not scope:
             messagebox.showwarning(
@@ -18728,7 +18751,7 @@ class AutoTagRulesDialog(tk.Toplevel):
     def _add_rule(self):
         tag_name = (self.tag_var.get() or "").strip()
         if not tag_name:
-            messagebox.showwarning("提示", "请先输入一个标签名", parent=self)
+            messagebox.showwarning("提示", T("请先输入一个标签名"), parent=self)
             return
         tag_id = self._tag_id_by_name.get(tag_name)
         if tag_id is None:
@@ -18742,7 +18765,7 @@ class AutoTagRulesDialog(tk.Toplevel):
         pattern = self._get_pattern()
         scope = self._get_scope()
         if rule_type != "*" and not pattern:
-            messagebox.showwarning("提示", "请输入匹配内容", parent=self)
+            messagebox.showwarning("提示", T("请输入匹配内容"), parent=self)
             return
         if rule_type == "*" and not scope:
             messagebox.showwarning(
@@ -18791,7 +18814,7 @@ class AutoTagRulesDialog(tk.Toplevel):
         if not ids:
             return
         if len(ids) > 1:
-            messagebox.showinfo("提示", "一次只能编辑一条规则", parent=self)
+            messagebox.showinfo("提示", T("一次只能编辑一条规则"), parent=self)
             return
         rid = ids[0]
         all_rules = {r["id"]: r for r in self.store.all_auto_rules()}
@@ -18871,7 +18894,7 @@ class AutoTagRulesDialog(tk.Toplevel):
     def _scan_selected(self):
         ids = self._selected_rule_ids()
         if not ids:
-            messagebox.showinfo("提示", "请先选中要扫描的规则", parent=self)
+            messagebox.showinfo("提示", T("请先选中要扫描的规则"), parent=self)
             return
         all_rules = {r["id"]: r for r in self.store.all_auto_rules()}
         scopes = []
@@ -21537,7 +21560,7 @@ except Exception:
             self.destroy()
 
         def _clear_layout(self):
-            if not messagebox.askyesno("分格", "取消分格，恢复成原来的自动排列？",
+            if not messagebox.askyesno("分格", T("取消分格，恢复成原来的自动排列？"),
                                        parent=self):
                 return
             try:
@@ -23622,7 +23645,7 @@ class IndexManagerDialog(tk.Toplevel):
                 parent=self)
             return
         if self._scan_worker is not None:
-            messagebox.showinfo("提示", "已有扫描正在进行", parent=self)
+            messagebox.showinfo("提示", T("已有扫描正在进行"), parent=self)
             return
         # ★ 补丁24：如果该根目录有没扫完的任务，问一下是接着扫还是重头扫
         for rid in ids:
@@ -23641,11 +23664,11 @@ class IndexManagerDialog(tk.Toplevel):
         ids = [r["id"] for r in self.store.all_index_roots()
                if r["enabled"]]
         if not ids:
-            messagebox.showinfo("提示", "没有启用的根目录",
+            messagebox.showinfo("提示", T("没有启用的根目录"),
                                 parent=self)
             return
         if self._scan_worker is not None:
-            messagebox.showinfo("提示", "已有扫描正在进行", parent=self)
+            messagebox.showinfo("提示", T("已有扫描正在进行"), parent=self)
             return
         left = sum(self._pending_count(rid) for rid in ids)
         if left > 0:
@@ -24107,7 +24130,7 @@ class IndexManagerDialog(tk.Toplevel):
 
     def _resume_scan(self):
         if self._scan_worker is not None:
-            messagebox.showinfo("提示", "已有扫描正在进行", parent=self)
+            messagebox.showinfo("提示", T("已有扫描正在进行"), parent=self)
             return
         t = self._load_task()
         ids = []
@@ -24123,7 +24146,7 @@ class IndexManagerDialog(tk.Toplevel):
             if rid in valid and int((v or {}).get("remaining") or 0) > 0:
                 ids.append(rid)
         if not ids:
-            messagebox.showinfo("提示", "没有没扫完的任务，直接点「▶▶ 扫描全部」就行。",
+            messagebox.showinfo("提示", T("没有没扫完的任务，直接点「▶▶ 扫描全部」就行。"),
                                 parent=self)
             return
         # ★★★ 2026-10-08（方案 A）**把"接上了"说清楚** ★★★
@@ -25582,7 +25605,7 @@ class FloatingBall:
             for key, lbl in ball_style_names():
                 try:
                     m_ball.add_radiobutton(
-                        label=("● " if key == cur_ball else "　") + lbl,
+                        label=("● " if key == cur_ball else "　") + T(lbl),
                         value=key, variable=_var_ball,
                         command=lambda k=key: self.set_ball_style(k))
                 except Exception:
@@ -25596,7 +25619,7 @@ class FloatingBall:
             for skey, slab, _desc in BALL_SHAPES:
                 try:
                     m_shape.add_radiobutton(
-                        label=("● " if skey == cur_shape else "　") + slab,
+                        label=("● " if skey == cur_shape else "　") + T(slab),
                         value=skey, variable=_var_shape,
                         command=lambda s=skey: self.set_ball_shape(s))
                 except Exception:
@@ -26246,17 +26269,17 @@ class FileTaggerApp:
         #    从原来的「文件」和「界面」里抽出来的
         # ==================================================================
         m_edit = tk.Menu(menubar, tearoff=0)
-        m_edit.add_command(label="全选当前列表（Ctrl+A）",
+        m_edit.add_command(label=T("全选当前列表（Ctrl+A）"),
                            command=lambda: self.file_list.select_all_rows())
         m_edit.add_separator()
-        m_edit.add_command(label="复制（Ctrl+C）",
+        m_edit.add_command(label=T("复制（Ctrl+C）"),
                            command=lambda: self.copy_selected(cut=False))
-        m_edit.add_command(label="剪切（Ctrl+X）",
+        m_edit.add_command(label=T("剪切（Ctrl+X）"),
                            command=lambda: self.copy_selected(cut=True))
-        m_edit.add_command(label="粘贴到当前文件夹（Ctrl+V）",
+        m_edit.add_command(label=T("粘贴到当前文件夹（Ctrl+V）"),
                            command=self.paste_into_current)
         m_edit.add_separator()
-        m_edit.add_command(label="撤销上一步（Ctrl+Z）",
+        m_edit.add_command(label=T("撤销上一步（Ctrl+Z）"),
                            command=self.undo_do)
         menubar.add_cascade(label=T("编辑"), menu=m_edit)
 
@@ -26305,17 +26328,17 @@ class FileTaggerApp:
             self._menu_state_map.append(
                 (m_sw.index("end"), getter, label))
 
-        _sw("左侧分类库", self.toggle_sidebar,
+        _sw(T("左侧分类库"), self.toggle_sidebar,
             lambda: bool(getattr(self, "_sidebar_visible", True)))
-        _sw("顶部工具栏", self.toggle_top_bar,
+        _sw(T("顶部工具栏"), self.toggle_top_bar,
             lambda: bool(getattr(self, "_top_bar_visible", True)))
-        _sw("标签条", self.toggle_tagbar,
+        _sw(T("标签条"), self.toggle_tagbar,
             lambda: bool(getattr(getattr(self, "file_list", None),
                                  "tagbar_visible", False)))
-        _sw("标签盒", self.toggle_tagbox,
+        _sw(T("标签盒"), self.toggle_tagbox,
             lambda: bool(getattr(self, "tagbox_visible", False)))
         m_sw.add_separator()
-        _sw("鼠标悬停预览", self.toggle_hover_preview,
+        _sw(T("鼠标悬停预览"), self.toggle_hover_preview,
             lambda: bool(getattr(getattr(self, "hover", None),
                                  "enabled", False)))
         # ★ 2026-10-07：名字从「快速预览（空格键）」改成「快速预览窗」——
@@ -26327,7 +26350,7 @@ class FileTaggerApp:
         #       （只在状态栏闪一句提示）→ 用户以为"点了没用/只能开"。
         #   所以：① 改名（状态圆点已经能显示开/关）
         #        ② `toggle_quick_preview` 里没选中文件时**弹个明确提示**。
-        _sw("快速预览窗", self.toggle_quick_preview,
+        _sw(T("快速预览窗"), self.toggle_quick_preview,
             lambda: bool((getattr(self, "quick_preview", None) is not None)
                          and self.quick_preview.is_open()))
         m_sw.add_separator()
@@ -26336,7 +26359,7 @@ class FileTaggerApp:
         #     （见 FileList.__init__ 的 `self.layout_mode = "list"`），
         #     **FileTaggerApp 上没有这个属性**（踩过：写成 self.layout_mode →
         #      一点菜单就 AttributeError，被 except 吞掉、圆点永远显示"关"）。
-        _sw("瀑布流模式", self._toggle_layout_from_menu,
+        _sw(T("瀑布流模式"), self._toggle_layout_from_menu,
             lambda: (str(getattr(getattr(self, "file_list", None),
                                  "layout_mode", "list")) == "grid"))
         menubar.add_cascade(label=T("区域开关"), menu=m_sw)
@@ -26444,24 +26467,24 @@ class FileTaggerApp:
                          command=self.choose_background_image)
         m_bg.add_separator()
         # ★ "透不透"给几档（不用滑杆是因为菜单里滑杆不好用）
-        for _lbl, _v in (("面板：完全不透（看不太出背景图）", 0),
-                         ("面板：轻微透（背景若隐若现）", 30),
-                         ("面板：中等透（推荐）", 55),
-                         ("面板：很透（背景很清楚，字稍糊）", 80)):
+        for _lbl, _v in ((T("面板：完全不透（看不太出背景图）"), 0),
+                         (T("面板：轻微透（背景若隐若现）"), 30),
+                         (T("面板：中等透（推荐）"), 55),
+                         (T("面板：很透（背景很清楚，字稍糊）"), 80)):
             m_bg.add_command(
                 label=_lbl, command=lambda v=_v: self.set_bg_alpha(v))
         m_bg.add_separator()
-        for _lbl, _v in (("模糊：不模糊（图很清楚）", 0),
-                         ("模糊：轻微", 4),
-                         ("模糊：像毛玻璃（推荐）", 14),
-                         ("模糊：很糊（当纯色底用）", 30)):
+        for _lbl, _v in ((T("模糊：不模糊（图很清楚）"), 0),
+                         (T("模糊：轻微"), 4),
+                         (T("模糊：像毛玻璃（推荐）"), 14),
+                         (T("模糊：很糊（当纯色底用）"), 30)):
             m_bg.add_command(
                 label=_lbl, command=lambda v=_v: self.set_bg_blur(v))
         m_bg.add_separator()
-        for _lbl, _v in (("摆放：铺满（推荐）", "cover"),
-                         ("摆放：完整显示（留边）", "contain"),
-                         ("摆放：平铺", "tile"),
-                         ("摆放：居中", "center")):
+        for _lbl, _v in ((T("摆放：铺满（推荐）"), "cover"),
+                         (T("摆放：完整显示（留边）"), "contain"),
+                         (T("摆放：平铺"), "tile"),
+                         (T("摆放：居中"), "center")):
             m_bg.add_command(
                 label=_lbl, command=lambda v=_v: self.set_bg_mode(v))
         m_bg.add_separator()
@@ -26479,13 +26502,13 @@ class FileTaggerApp:
         m_bskin = tk.Menu(m_set, tearoff=0)
         for _bk, _bl in ball_style_names():
             m_bskin.add_command(
-                label="⚪ " + _bl,
+                label="⚪ " + T(_bl),
                 command=lambda k=_bk: self._set_ball_style_from_menu(k))
         m_bskin.add_separator()
         m_bshape = tk.Menu(m_bskin, tearoff=0)
         for _sk, _sl, _sd in BALL_SHAPES:
             m_bshape.add_command(
-                label=_sl,
+                label=T(_sl),
                 command=lambda s=_sk: self._set_ball_shape_from_menu(s))
         m_bskin.add_cascade(label=T("形状 / 样式"), menu=m_bshape)
         m_set.add_cascade(label=T("⚪ 球的皮肤（只管悬浮球）"), menu=m_bskin)
@@ -26501,9 +26524,16 @@ class FileTaggerApp:
         m_cache.add_command(label=T("目录缓存"), command=self.toggle_dir_cache)
         # ★ 记下**它真实的菜单对象**（在子菜单里，不是 _m_settings）——
         #   否则刷新时会在错的菜单上找序号，圆点刷不上去
+        # ★★ 2026-10-08：**这里要 `T(...)`** ——
+        #   `_refresh_menu_states()` 每次弹菜单都会拿这个 `name`
+        #   **重设一遍 label**。存裸中文的话，
+        #   切英文后菜单一弹就被**改回中文**（实测踩到，见错题本）。
+        #   ★ 判据：**"会被回写的文字"必须存"已经翻好的"** ——
+        #     不能存原文（否则等于每次都在"撤销翻译"）。
         self._menu_state_map2.append(
             (m_cache.index("end"), lambda: bool(
-                getattr(self, "dir_cache_enabled", False)), "目录缓存",
+                getattr(self, "dir_cache_enabled", False)),
+             T("目录缓存"),
              m_cache))
         m_cache.add_separator()
         m_cache.add_command(label=T("重扫当前目录（清缓存）"),
@@ -27543,7 +27573,7 @@ class FileTaggerApp:
             return
         new_scale = dlg.result
         if abs(new_scale - self.ui_scale) < 1e-6:
-            messagebox.showinfo("提示", "缩放比例未变。", parent=self.root)
+            messagebox.showinfo("提示", T("缩放比例未变。"), parent=self.root)
             return
         if save_ui_scale(new_scale):
             # ★★ 2026-10-08：**顺手把图标尺寸的缓存清掉**。
@@ -27760,7 +27790,7 @@ class FileTaggerApp:
                 if p and os.path.isfile(p):
                     os.startfile(os.path.dirname(p))
                 else:
-                    messagebox.showinfo("用法记录", "还没有记账文件。",
+                    messagebox.showinfo("用法记录", T("还没有记账文件。"),
                                         parent=win)
             except Exception as exc:
                 messagebox.showerror("打不开", str(exc), parent=win)
@@ -27887,7 +27917,7 @@ class FileTaggerApp:
             note_swallowed(T("打开「关于」失败"), _e)
             # 兜底：实在画不出来就退回系统弹窗（至少能看到信息）
             try:
-                messagebox.showinfo("关于", "文件标签管理器 v26", parent=self.root)
+                messagebox.showinfo("关于", T("文件标签管理器 v26"), parent=self.root)
             except Exception:
                 pass
 
@@ -28170,7 +28200,7 @@ class FileTaggerApp:
         self._taglib_btn.pack(side="right", padx=(_GAP_IN, 0))
         # A 组：标签盒
         self._tagbox_btn = _mk_btn(
-            status_bar, "tagbox", "🗃 标签盒 ▲",
+            status_bar, "tagbox", T("🗃 标签盒 ▲"),
             "显示 / 隐藏底部的标签盒",
             self.toggle_tagbox, "tag")
         self._tagbox_btn.pack(side="right", padx=(_GAP_IN, 0))
@@ -29684,11 +29714,11 @@ class FileTaggerApp:
                               command=self._do_new_folder)
         # ★ v25 补丁12：复制 / 剪切 / 粘贴
         self.menu.add_separator()
-        self.menu.add_command(label="复制（Ctrl+C）",
+        self.menu.add_command(label=T("复制（Ctrl+C）"),
                               command=lambda: self.copy_selected(cut=False))
-        self.menu.add_command(label="剪切（Ctrl+X）",
+        self.menu.add_command(label=T("剪切（Ctrl+X）"),
                               command=lambda: self.copy_selected(cut=True))
-        self.menu.add_command(label="粘贴到当前文件夹（Ctrl+V）",
+        self.menu.add_command(label=T("粘贴到当前文件夹（Ctrl+V）"),
                               command=self.paste_into_current)
         self.menu.add_separator()
         self.cat_menu = tk.Menu(self.menu, tearoff=0)
@@ -30095,13 +30125,13 @@ class FileTaggerApp:
             try:
                 ttl_v = float(ttl_var.get() or 0)
             except Exception:
-                messagebox.showerror("填错了", "「定时清理」那里要填数字（小时）",
+                messagebox.showerror("填错了", T("「定时清理」那里要填数字（小时）"),
                                      parent=win)
                 return
             try:
                 mb_v = float(maxmb_var.get() or 0)
             except Exception:
-                messagebox.showerror("填错了", "「超大小清理」那里要填数字（MB）",
+                messagebox.showerror("填错了", T("「超大小清理」那里要填数字（MB）"),
                                      parent=win)
                 return
             d = dir_var.get().strip()
@@ -32177,7 +32207,7 @@ class FileTaggerApp:
     def _do_new_folder(self):
         """在当前文件夹里新建一个文件夹（名字重复就自动加 (2)、(3)…）。"""
         if not self.current_dir:
-            messagebox.showinfo("提示", "先打开一个文件夹再说。", parent=self.root)
+            messagebox.showinfo("提示", T("先打开一个文件夹再说。"), parent=self.root)
             return
         base = str(self.current_dir)
         name = "新建文件夹"
@@ -32204,7 +32234,7 @@ class FileTaggerApp:
         if path is None:
             path = self.file_list.get_single_selection()
         if not path:
-            messagebox.showinfo("提示", "请先选中**一个**文件或文件夹（单击它）。",
+            messagebox.showinfo("提示", T("请先选中**一个**文件或文件夹（单击它）。"),
                                 parent=self.root)
             return
         old_name = os.path.basename(path.rstrip("\\")) or path
@@ -32399,7 +32429,7 @@ class FileTaggerApp:
             return
         gone = len(clip["paths"]) - len(srcs)
         if not srcs:
-            messagebox.showinfo("提示", "要粘贴的东西已经不在了（可能被删掉或改名了）。",
+            messagebox.showinfo("提示", T("要粘贴的东西已经不在了（可能被删掉或改名了）。"),
                                 parent=self.root)
             self._clip = None
             return
@@ -32897,7 +32927,7 @@ class FileTaggerApp:
         if not items:
             return
         if not self.current_dir:
-            messagebox.showinfo("提示", "先打开一个文件夹，再把东西拖进来。",
+            messagebox.showinfo("提示", T("先打开一个文件夹，再把东西拖进来。"),
                                 parent=self.root)
             return
         target = str(self.current_dir)
@@ -33847,7 +33877,7 @@ class FileTaggerApp:
 
     def remove_from_current_category(self):
         if self.view_mode != "cat" or not self.current_cat_id:
-            messagebox.showinfo("提示", "当前不在分类视图中")
+            messagebox.showinfo("提示", T("当前不在分类视图中"))
             return
         paths = self.file_list.get_selection()
         if not paths:
@@ -34133,7 +34163,7 @@ class FileTaggerApp:
             except Exception:
                 paths = []
         if not paths:
-            messagebox.showinfo("提示", "当前没有可更新标签的文件",
+            messagebox.showinfo("提示", T("当前没有可更新标签的文件"),
                                 parent=self.root)
             return
         if not messagebox.askyesno(
@@ -34454,7 +34484,7 @@ class FileTaggerApp:
             except Exception:
                 pass
             if not roots:
-                messagebox.showinfo("让网盘缓存过期", "没有网盘索引根。",
+                messagebox.showinfo("让网盘缓存过期", T("没有网盘索引根。"),
                                     parent=self.root)
                 return
             if not messagebox.askyesno(
@@ -35237,7 +35267,7 @@ class FileTaggerApp:
         try:
             base = cur or self._current_dir()
             if not base:
-                messagebox.showinfo("新建文件夹", "先打开一个文件夹。",
+                messagebox.showinfo("新建文件夹", T("先打开一个文件夹。"),
                                     parent=self.root)
                 return
             name = self._ask_one_line("新建文件夹", "文件夹名字：", "新建文件夹")
@@ -35274,7 +35304,7 @@ class FileTaggerApp:
         try:
             base = cur or self._current_dir()
             if not base:
-                messagebox.showinfo("新建文件", "先打开一个文件夹。",
+                messagebox.showinfo("新建文件", T("先打开一个文件夹。"),
                                     parent=self.root)
                 return
             name = self._ask_one_line("新建文本文件", "文件名：", "新建文本.txt")
@@ -35317,7 +35347,7 @@ class FileTaggerApp:
         if not path:
             sel = list(self.file_list.get_selection() or [])
             if not sel:
-                messagebox.showinfo("属性", "先选中一个文件或文件夹。",
+                messagebox.showinfo("属性", T("先选中一个文件或文件夹。"),
                                     parent=self.root)
                 return
             path = sel[0]
@@ -35413,7 +35443,7 @@ class FileTaggerApp:
         """
         paths = list(self.file_list.get_selection() or [])
         if not paths:
-            messagebox.showinfo("去除标签", "先选中文件。", parent=self.root)
+            messagebox.showinfo("去除标签", T("先选中文件。"), parent=self.root)
             return
         try:
             dlg = RemoveFileTagsDialog(self.root, self, self.store, paths)
@@ -35471,7 +35501,7 @@ class FileTaggerApp:
         """
         paths = list(self.file_list.get_selection() or [])
         if not paths:
-            messagebox.showinfo("标签盒", "先选中文件。", parent=self.root)
+            messagebox.showinfo("标签盒", T("先选中文件。"), parent=self.root)
             return
         try:
             info = self.store.tags_for_paths(paths) or {}
@@ -35487,7 +35517,7 @@ class FileTaggerApp:
                 except Exception:
                     continue
         if not want:
-            messagebox.showinfo("标签盒", "这些文件上一个标签都没有。",
+            messagebox.showinfo("标签盒", T("这些文件上一个标签都没有。"),
                                 parent=self.root)
             return
         if not getattr(self, "tagbox", None):
@@ -35497,7 +35527,7 @@ class FileTaggerApp:
                 pass
         box = getattr(self, "tagbox", None)
         if box is None:
-            messagebox.showinfo("标签盒", "标签盒打不开。", parent=self.root)
+            messagebox.showinfo("标签盒", T("标签盒打不开。"), parent=self.root)
             return
         try:
             have = set(box.box_ids())
@@ -35724,7 +35754,7 @@ class FileTaggerApp:
                 parent=self.root)
         else:
             self.set_status(T("同步完成：所有文件都是最新的，无需改动"))
-            messagebox.showinfo("同步完成", "所有文件的标签链都是最新的。",
+            messagebox.showinfo("同步完成", T("所有文件的标签链都是最新的。"),
                                 parent=self.root)
 
     def reassign_colors(self):
@@ -35920,7 +35950,7 @@ class FileTaggerApp:
             return
 
         if new_base == cur_base:
-            messagebox.showinfo("提示", "和当前位置相同，未做改动。",
+            messagebox.showinfo("提示", T("和当前位置相同，未做改动。"),
                                 parent=self.root)
             return
 
@@ -36038,7 +36068,7 @@ class FileTaggerApp:
            在后台线程执行，主界面不卡。"""
         paths = [r["path"] for r in self.file_list.rows]
         if not paths:
-            messagebox.showinfo("提示", "当前列表里没有文件", parent=self.root)
+            messagebox.showinfo("提示", T("当前列表里没有文件"), parent=self.root)
             return
         self.log_output(f"手动扫描当前列表 {len(paths)} 个文件的标签")
         self.begin_activity(f"为当前 {len(paths)} 个文件打标签")
