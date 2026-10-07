@@ -2503,134 +2503,58 @@ class CloudDriveApiClient:
         return out
 
 
-def scan_index_root_via_api(client, store, rid, root_path, cancel_flag=None,
-                            progress_cb=None, workers=None):
-    """★ v25 补丁17：通过 CloudDrive2 本地接口扫一个网盘根目录，写进 dir_cache。
-
-    返回 (目录数, 文件数, 说明字符串)，含义跟挂载盘那套完全一致：
-      - 目录数只统计「真的列到了内容」的目录；
-      - 列不到的目录先记着，整棵树扫完之后自动补扫两轮（隔 1 秒 / 3 秒）；
-      - 两轮都读不到才算「跳过 N 个目录」，说明照样是「人话」。
-
-    为什么可以并发：CloudDrive2 自己管着每个网盘的「每秒查询数」上限，
-    我们只要别一次发太多（默认 4 个并发）就行。实测单个目录 0.4 秒左右，
-    4 个并发把 3000 多个目录压到几分钟，比过 WinFSP 一层层摸快得多。
-    """
-    from concurrent.futures import ThreadPoolExecutor, as_completed
-
-    root_cd = None
-    try:
-        root_cd = client.cd_path_of(root_path)
-    except Exception:
-        root_cd = None
-    if not root_cd:
-        return 0, 0, "这个根目录不在 CloudDrive2 里（不是网盘目录？）"
-    if not workers:
-        workers = cd_api_workers()
-
-    pending = [root_cd]
-    retry = []
-    skipped = []
-    skip_count = 0
-    round_no = 0
-    dir_count = 0
-    file_count = 0
-    stat_skip = 0
-    last_err = ""
-
-    def _cancelled():
-        try:
-            return bool(cancel_flag and cancel_flag())
-        except Exception:
-            return False
-
-    with ThreadPoolExecutor(max_workers=workers) as pool:
-        while pending or (retry and round_no < 2):
-            if _cancelled():
-                break
-            if not pending:
-                # 主扫描跑完了，回头补扫刚才读不到的目录
-                round_no += 1
-                try:
-                    time.sleep(1.0 if round_no == 1 else 3.0)
-                except Exception:
-                    pass
-                pending = retry
-                retry = []
-            # 一批一批发（别把几千个请求一次性塞进去）
-            batch = pending[:max(workers * 4, 8)]
-            del pending[:len(batch)]
-            futs = {}
-            for p in batch:
-                futs[pool.submit(client.list_dir, p)] = p
-            for fut in as_completed(futs):
-                if _cancelled():
-                    break
-                p = futs[fut]
-                try:
-                    entries = fut.result()
-                    ok = True
-                    err = ""
-                except Exception as exc:
-                    ok = False
-                    err = str(exc)
-                if ok:
-                    key = None
-                    if p.strip("/") == root_cd.strip("/"):
-                        key = root_path            # 根目录沿用原来的写法（带结尾反斜杠）
-                    else:
-                        try:
-                            key = client.unc_path_of(p)
-                        except Exception:
-                            key = None
-                    if not key:
-                        key = p
-                    try:
-                        store.save_dir_entries(key, entries)
-                    except Exception as exc:
-                        last_err = str(exc)
-                    dir_count += 1
-                    for nm, is_d, sz, _mt in entries:
-                        if is_d:
-                            pending.append(p.rstrip("/") + "/" + nm)
-                        else:
-                            file_count += 1
-                            if sz is None:
-                                stat_skip += 1
-                else:
-                    last_err = err
-                    if round_no < 2:
-                        retry.append(p)            # 留着待会儿补扫
-                    else:
-                        skip_count += 1            # 补扫也读不到，才算真的跳过
-                        if len(skipped) < 3:
-                            skipped.append(p)
-                if progress_cb is not None:
-                    try:
-                        progress_cb(rid, root_path, dir_count, file_count, p)
-                    except Exception:
-                        pass
-
-    err_line = last_err
-    if skip_count:
-        parts = "、".join(skipped)
-        more = "…" if skip_count > len(skipped) else ""
-        err_line = (f"跳过 {skip_count} 个目录（这些目录在网盘里已经不存在了 / "
-                    f"一时读不到，不影响其它目录）：{parts}{more}")
-    if stat_skip and not err_line:
-        err_line = (f"有 {stat_skip} 个文件读不到大小"
-                    f"（网盘文件常见，列表里会显示成问号）")
-    # ★ v25 补丁20：扫完顺手把「幽灵目录」清掉（网盘里删掉的目录留下的空壳），
-    #   这样索引里不会一直留着一小撮点开就报错的目录。
-    try:
-        n_dirs, n_rows = prune_orphan_dir_cache(store, root_path)
-        if n_dirs:
-            err_line = ((err_line + "  ·  " if err_line else "")
-                        + f"顺带清掉 {n_dirs} 个已经不存在的目录缓存"
-                          f"（{n_rows} 行）")
-    except Exception:
-        pass
-    return dir_count, file_count, err_line
+# ==========================================================================
+#  ★★★ 2026-10-08 **搬到独立文件了**（第 2 批拆分）
+#  --------------------------------------------------------------------------
+#  ★ 搬走的是：`scan_index_root_via_api`、`_epub_chapters`、`_mobi_meta_and_text`、`get_video_thumbnail_pil`、`_cache_clean_old`
+#  ★ 为什么挑它们（**量过**）：`self.app` 出现 0 次、被别处引用 <= 3 次。
+#  ★ 怎么修（万一文件丢了）：
+#     见 `AIxiede拆分开\\程序分块\\_电子书和缓存.py`；
+#     或从 `备份\\AIxiede.py.bak-搬第2批前` 里把那段拷回来。
+# ==========================================================================
+try:
+    import _电子书和缓存 as _m2
+    _m2._set_app(sys.modules[__name__])
+    scan_index_root_via_api = _m2.scan_index_root_via_api
+    _epub_chapters = _m2._epub_chapters
+    _mobi_meta_and_text = _m2._mobi_meta_and_text
+    get_video_thumbnail_pil = _m2.get_video_thumbnail_pil
+    _cache_clean_old = _m2._cache_clean_old
+    _HAS_B2 = True
+except Exception as _e_b2:
+    _HAS_B2 = False
+    _ERR_B2 = _e_b2
+    # ★ 导不进来：给"一用就报清楚错"的替身（程序能起、界面能看）
+    def scan_index_root_via_api(*_a, **_kw):
+        raise RuntimeError(
+            "模块 _电子书和缓存.py 没找到或有问题（scan_index_root_via_api 用不了）。\n"
+            "  原因：%r\n"
+            "  怎么修：见 备份\\AIxiede.py.bak-搬第2批前"
+            % (_ERR_B2,))
+    def _epub_chapters(*_a, **_kw):
+        raise RuntimeError(
+            "模块 _电子书和缓存.py 没找到或有问题（_epub_chapters 用不了）。\n"
+            "  原因：%r\n"
+            "  怎么修：见 备份\\AIxiede.py.bak-搬第2批前"
+            % (_ERR_B2,))
+    def _mobi_meta_and_text(*_a, **_kw):
+        raise RuntimeError(
+            "模块 _电子书和缓存.py 没找到或有问题（_mobi_meta_and_text 用不了）。\n"
+            "  原因：%r\n"
+            "  怎么修：见 备份\\AIxiede.py.bak-搬第2批前"
+            % (_ERR_B2,))
+    def get_video_thumbnail_pil(*_a, **_kw):
+        raise RuntimeError(
+            "模块 _电子书和缓存.py 没找到或有问题（get_video_thumbnail_pil 用不了）。\n"
+            "  原因：%r\n"
+            "  怎么修：见 备份\\AIxiede.py.bak-搬第2批前"
+            % (_ERR_B2,))
+    def _cache_clean_old(*_a, **_kw):
+        raise RuntimeError(
+            "模块 _电子书和缓存.py 没找到或有问题（_cache_clean_old 用不了）。\n"
+            "  原因：%r\n"
+            "  怎么修：见 备份\\AIxiede.py.bak-搬第2批前"
+            % (_ERR_B2,))
 
 
 def cd_api_client_from_settings():
@@ -3458,7 +3382,7 @@ def apply_theme_names():
     """★ 现在**有哪些皮肤**（菜单要用这个，**不要写死 light/dark**）。
 
     ★ 为什么要这个（**这就是"预留入口"的意义**）：
-      原来菜单里写的是 `add_radiobutton(label="白天", value="light")` ——
+      原来菜单里写的是 `add_radiobutton(label=T("白天"), value="light")` ——
       **皮肤名硬编码在菜单里**。以后加了自定义皮肤，菜单里**看不到**。
       → 改成"**问 `_THEMES` 有哪些**"，加皮肤就自动出现在菜单里，
         **菜单代码一行都不用改**。
@@ -5482,301 +5406,6 @@ def get_pdf_page_pil(path, page=0, max_w=520, max_h=680):
 BOOK_EXTS = {".epub", ".mobi", ".azw", ".azw3", ".fb2"}
 
 
-def _epub_chapters(path):
-    """★ v25 补丁29：把 EPUB 拆成 [(章节名, 纯文本), ...]。
-
-    EPUB 本质就是个 zip：里面是 spine 里按阅读顺序排的 XHTML 文件。
-    这里用标准库 zipfile + html.parser 解析（**不需要装任何东西**）。
-    解析失败返回 []。
-    """
-    import zipfile
-    import html.parser
-
-    class _TextGrab(html.parser.HTMLParser):
-        """把 HTML 抠成纯文字（跳过 script/style，块级标签之间加换行）。"""
-
-        SKIP = {"script", "style", "head"}
-        BREAK = {"p", "div", "br", "li", "tr", "h1", "h2", "h3", "h4",
-                 "h5", "h6", "section", "article"}
-
-        def __init__(self):
-            super().__init__(convert_charrefs=True)
-            self.buf = []
-            self._skip = 0
-            self.title = None
-            self._in_title = False
-
-        def handle_starttag(self, tag, attrs):
-            t = tag.lower()
-            if t in self.SKIP:
-                self._skip += 1
-            if t in self.BREAK:
-                self.buf.append("\n")
-            if t == "title":
-                self._in_title = True
-
-        def handle_endtag(self, tag):
-            t = tag.lower()
-            if t in self.SKIP and self._skip:
-                self._skip -= 1
-            if t in self.BREAK:
-                self.buf.append("\n")
-            if t == "title":
-                self._in_title = False
-
-        def handle_data(self, data):
-            if self._in_title and not self.title:
-                self.title = data.strip()
-            if self._skip:
-                return
-            self.buf.append(data)
-
-        def text(self):
-            s = "".join(self.buf)
-            # 去掉多余空行
-            lines = [ln.strip() for ln in s.splitlines()]
-            out = []
-            for ln in lines:
-                if ln:
-                    out.append(ln)
-                elif out and out[-1] != "":
-                    out.append("")
-            return "\n".join(out).strip()
-
-    try:
-        z = zipfile.ZipFile(path)
-    except Exception:
-        return []
-    names = z.namelist()
-    order = []
-
-    def _read(name):
-        try:
-            return z.read(name)
-        except Exception:
-            return b""
-
-    # ① 想从 content.opf 里拿 spine（最准），拿不到就按文件名排
-    opf_name = None
-    for n in names:
-        if n.lower().endswith(".opf"):
-            opf_name = n
-            break
-    if opf_name:
-        try:
-            raw = _read(opf_name).decode("utf-8", "replace")
-            import re as _re
-            base_dir = os.path.dirname(opf_name)
-            # manifest: id -> href
-            id2href = {}
-            for m in _re.finditer(
-                    r"<item\b[^>]*\bid=[\"']([^\"']+)[\"'][^>]*>", raw):
-                tag = m.group(0)
-                h = _re.search(r'href=["\']([^"\']+)["\']', tag)
-                if h:
-                    id2href[m.group(1)] = h.group(1)
-            for m in _re.finditer(
-                    r"<itemref\b[^>]*\bidref=[\"']([^\"']+)[\"'][^>]*/?>", raw):
-                h = id2href.get(m.group(1))
-                if h:
-                    full = (base_dir + "/" + h) if base_dir else h
-                    order.append(full)
-        except Exception:
-            order = []
-    if not order:
-        for n in names:
-            low = n.lower()
-            if low.endswith((".xhtml", ".html", ".htm")) and "/" in low:
-                order.append(n)
-        order.sort()
-
-    chapters = []
-    for n in order:
-        if n not in names:
-            # 路径写法可能带 ./ 或反斜杠
-            cand = [x for x in names if x.endswith(n.split("/")[-1])]
-            if not cand:
-                continue
-            n = cand[0]
-        raw = _read(n)
-        for enc in ("utf-8", "utf-16", "gbk"):
-            try:
-                text = raw.decode(enc)
-                break
-            except Exception:
-                text = None
-        if text is None:
-            continue
-        p = _TextGrab()
-        try:
-            p.feed(text)
-        except Exception:
-            continue
-        body = p.text()
-        if body:
-            chapters.append((p.title or os.path.basename(n), body))
-    try:
-        z.close()
-    except Exception:
-        pass
-    return chapters
-
-
-def _mobi_meta_and_text(path):
-    """★ v25 补丁29：从 MOBI / AZW / AZW3 里抠出「书名 + 正文」。
-
-    MOBI 是二进制格式（PalmDOC 压缩），这里做**够用就好**的解析：
-      · 读 PalmDB 头 → 找 MOBI 记录 → 解出书名和正文的起始位置；
-      · 正文大多可能是压缩的（PalmDOC LZ77），能解就解一段纯文字。
-    解析不出来就返回 (None, "")，界面会退回显示文件信息 + 提示用系统阅读器打开。
-    """
-    try:
-        with open(path, "rb") as f:
-            data = f.read()
-    except Exception:
-        return None, ""
-    if len(data) < 200:
-        return None, ""
-    try:
-        # --- PalmDB 头 ---
-        num_records = int.from_bytes(data[76:78], "big")
-        rec_offsets = []
-        pos = 78
-        for i in range(num_records):
-            if pos + 8 > len(data):
-                break
-            off = int.from_bytes(data[pos:pos + 4], "big")
-            rec_offsets.append(off)
-            pos += 8
-        if not rec_offsets:
-            return None, ""
-        rec_offsets.append(len(data))
-        rec0 = data[rec_offsets[0]:rec_offsets[1]]
-        if len(rec0) < 24:
-            return None, ""
-        # --- MOBI 头 ---
-        if rec0[16:20] != b"MOBI":
-            return None, ""
-        header_len = int.from_bytes(rec0[20:24], "big")
-        text_encoding = int.from_bytes(rec0[28:32], "big")
-        # 书名在 MOBI 头里偏移 0x54（相对记录 0 开头）
-        title = None
-        try:
-            tlen = int.from_bytes(rec0[0x54:0x58], "big")
-            toff = int.from_bytes(rec0[0x58:0x5C], "big")
-            if 0 < tlen < 500 and toff + tlen <= len(rec0):
-                raw = rec0[toff:toff + tlen]
-                title = raw.decode("utf-8", "replace").strip("\x00 ").strip()
-        except Exception:
-            title = None
-        # --- 正文：第 1 条记录开始（记录 0 是头） ---
-        # 压缩方式在 rec0[0:2]
-        compression = int.from_bytes(rec0[0:2], "big")
-        text_start_rec = 1
-        chunk = data[rec_offsets[text_start_rec]:
-                     rec_offsets[min(text_start_rec + 8, len(rec_offsets) - 1)]]
-        txt = ""
-        if compression == 1:            # 不压缩
-            txt = chunk.decode("utf-8", "replace")
-        elif compression == 2:          # PalmDOC LZ77
-            out = bytearray()
-            i = 0
-            n = len(chunk)
-            while i < n and len(out) < 40000:
-                c = chunk[i]
-                i += 1
-                if c == 0:
-                    out.append(0)
-                elif 1 <= c <= 8:
-                    out.extend(chunk[i:i + c])
-                    i += c
-                elif c <= 0x7F:
-                    out.append(c)
-                elif c <= 0xBF:
-                    if i >= n:
-                        break
-                    c2 = chunk[i]
-                    i += 1
-                    pair = (c << 8) | c2
-                    dist = (pair >> 3) & 0x07FF
-                    length = (pair & 7) + 3
-                    if dist == 0:
-                        continue
-                    start = len(out) - dist
-                    for k in range(length):
-                        idx2 = start + k
-                        if 0 <= idx2 < len(out):
-                            out.append(out[idx2])
-                        elif len(out) > 100000:
-                            break
-                else:
-                    out.append(32)
-                    out.append(c ^ 0x80)
-            txt = out.decode("utf-8", "replace")
-        else:
-            txt = ""
-        # 只留能看的字符
-        keep = []
-        for ch in txt:
-            o = ord(ch)
-            if ch in "\n\r\t" or (32 <= o < 0x110000 and o != 0xFFFD):
-                keep.append(ch)
-            else:
-                keep.append(" ")
-        txt = "".join(keep)
-        # ★ 补丁29：MOBI 正文里常混着 HTML 标签（<html><head>…），
-        #   这里用同一个 HTML 解析器把标签和脚本抠掉，只留文字。
-        try:
-            import html.parser
-
-            class _G2(html.parser.HTMLParser):
-                SKIP = {"script", "style", "head"}
-                BREAK = {"p", "div", "br", "li", "tr", "h1", "h2", "h3",
-                         "h4", "h5", "h6"}
-
-                def __init__(self):
-                    super().__init__(convert_charrefs=True)
-                    self.buf = []
-                    self._skip = 0
-
-                def handle_starttag(self, tag, attrs):
-                    t = tag.lower()
-                    if t in self.SKIP:
-                        self._skip += 1
-                    if t in self.BREAK:
-                        self.buf.append("\n")
-
-                def handle_endtag(self, tag):
-                    t = tag.lower()
-                    if t in self.SKIP and self._skip:
-                        self._skip -= 1
-                    if t in self.BREAK:
-                        self.buf.append("\n")
-
-                def handle_data(self, d):
-                    if not self._skip:
-                        self.buf.append(d)
-
-            if "<" in txt and ">" in txt:
-                g = _G2()
-                g.feed(txt)
-                cleaned = "".join(g.buf)
-                lines = [ln.strip() for ln in cleaned.splitlines()]
-                txt = "\n".join(ln for ln in lines if ln)
-        except Exception:
-            pass
-        # 压掉连着的空行
-        while "\n\n\n" in txt:
-            txt = txt.replace("\n\n\n", "\n\n")
-        return (title or None), txt.strip()
-    except Exception as exc:
-        try:
-            note_swallowed("MOBI 解析失败", exc)
-        except Exception:
-            pass
-        return None, ""
-
-
 def book_load(path):
     """★ v25 补丁29：统一入口 —— 读电子书，返回 (书名, [章节文本...])。
 
@@ -6132,109 +5761,6 @@ def render_pdf_page(doc, page, max_w=520, max_h=680):
         except Exception:
             pass
         return None
-
-
-def get_video_thumbnail_pil(path, size=320):
-    """★ 补丁27+43：给视频弄一张「封面图」（PIL 图片对象），弄不到返回 None。
-
-    按省事程度依次试：
-      1) 问 Windows 资源管理器要它自己生成的缩略图；
-      2) 机器上要是装了 ffmpeg，就截第 1 秒那一帧（没装也不影响）；
-      3) cv2 直接解码（★★★ 重装系统后 Windows 缩略图丢失，主要靠这个）；
-      4) 都不行返回 None，调用方显示「▶ 视频」提示牌。
-    """
-    # ① Windows 缩略图（走 pywin32 的 shell 接口）
-    try:
-        import pythoncom  # type: ignore
-        import win32com.client  # type: ignore
-        from PIL import Image  # type: ignore
-        import io
-
-        pythoncom.CoInitialize()
-        try:
-            shell = win32com.client.Dispatch("Shell.Application")
-            folder = shell.Namespace(os.path.dirname(path))
-            item = folder.ParseName(os.path.basename(path)) if folder else None
-            if item is not None:
-                for idx in range(0, 340):
-                    try:
-                        nm = folder.GetDetailsOf(None, idx)
-                    except Exception:
-                        nm = None
-                    if nm and ("缩略图" in nm or "Thumbnail" in nm.lower()):
-                        stream = item.ExtendedProperty(nm)
-                        if stream is not None:
-                            try:
-                                data = stream.Read(stream.Stat()[2])
-                                im = Image.open(io.BytesIO(data))
-                                im.load()
-                                im.thumbnail((size, size))
-                                return im
-                            except Exception:
-                                pass
-        finally:
-            try:
-                pythoncom.CoUninitialize()
-            except Exception:
-                pass
-    except Exception:
-        pass
-    # ② ffmpeg 截帧
-    try:
-        import shutil as _sh
-        import subprocess as _sp
-        import tempfile
-        exe = _sh.which("ffmpeg")
-        if exe:
-            out = os.path.join(tempfile.gettempdir(),
-                               "dsh_vthumb_%d.jpg" % os.getpid())
-            r = _sp.run([exe, "-y", "-ss", "1", "-i", path, "-frames:v", "1",
-                         "-vf", "scale=%d:-1" % int(size), out],
-                        stdout=_sp.DEVNULL, stderr=_sp.DEVNULL, timeout=25,
-                        creationflags=getattr(_sp, "CREATE_NO_WINDOW", 0))
-            if r.returncode == 0 and os.path.exists(out):
-                from PIL import Image  # type: ignore
-                im = Image.open(out)
-                im.load()
-                try:
-                    os.remove(out)
-                except Exception:
-                    pass
-                return im
-    except Exception:
-        pass
-    # ③ cv2 直接解码（★★★ 重装系统后 Windows 缩略图丢失，主要靠这个）
-    if HAS_CV2:
-        try:
-            import cv2 as _cv2
-            cap = _cv2.VideoCapture(path)
-            if cap.isOpened():
-                try:
-                    total = int(cap.get(_cv2.CAP_PROP_FRAME_COUNT) or 0)
-                    # 取约 1/4 处的帧（跳过开场黑帧/字幕）
-                    # 注意：网络路径上 seek 到中间比从头读慢很多，
-                    # 故先试 1/4，失败再从头（两头都试，保证有输出）
-                    target_idx = max(1, total // 4) if total > 8 else 0
-                    cap.set(_cv2.CAP_PROP_POS_FRAMES, target_idx)
-                    ok, frame = cap.read()
-                    if not ok:
-                        cap.set(_cv2.CAP_PROP_POS_FRAMES, 0)
-                        ok, frame = cap.read()
-                    cap.release()
-                    if ok and frame is not None:
-                        frame = _cv2.cvtColor(frame, _cv2.COLOR_BGR2RGB)
-                        from PIL import Image as _PIL_Image
-                        im = _PIL_Image.fromarray(frame)
-                        im.thumbnail((size, size), _PIL_Image.LANCZOS)
-                        return im
-                except Exception:
-                    try:
-                        cap.release()
-                    except Exception:
-                        pass
-        except Exception:
-            pass
-    return None
 
 
 def auto_color(index):
@@ -10122,13 +9648,13 @@ except Exception:
             btns = ttk.Frame(body)
             btns.pack(fill="x", pady=(10, 0))
             ttk.Button(btns, text=T("保存关联"), command=self._save).pack(side="right")
-            ttk.Button(btns, text="取消", command=self._cancel).pack(
+            ttk.Button(btns, text=T("取消"), command=self._cancel).pack(
                 side="right", padx=6)
             ttk.Button(btns, text=T("全选"), command=lambda: self._set_all(True)
                        ).pack(side="left")
             ttk.Button(btns, text=T("全不选"), command=lambda: self._set_all(False)
                        ).pack(side="left", padx=4)
-            ttk.Button(btns, text="反选", command=self._invert
+            ttk.Button(btns, text=T("反选"), command=self._invert
                        ).pack(side="left", padx=4)
 
             self.bind("<Escape>", lambda e: self._cancel())
@@ -14315,126 +13841,6 @@ def _preview_cache_dir():
     return d
 
 
-def _cache_clean_old(d=None, force=False):
-    """★★ 2026-10-06：按用户的「缓存设置」清理旧缓存。
-
-    三种清理规则（都在「界面 → 📥 网盘预览缓存…」里能设）：
-      · 无痕模式（cache_incognito）：删掉**别的会话**留下的目录（阅后即焚）
-      · 定时清理（cache_ttl_hours）：多久没用过的文件就删
-      · 超大小清理（cache_max_mb）：整个缓存目录超过多少 MB 就清最旧的
-
-    返回一句人话说明（清理了多少、为什么）。**任何一步失败都不报错**
-    —— 清缓存这种事绝不能影响正常使用。
-    """
-    import time as _t
-    import tempfile as _tf
-    removed = 0
-    freed = 0
-    why = []
-    try:
-        base = str(load_ui_setting("preview_cache_dir", "") or "").strip() \
-            or os.path.join(_tf.gettempdir(), "file_tagger_cache")
-        if not os.path.isdir(base):
-            return "缓存目录不存在，不用清。"
-
-        # ① 无痕模式：删掉别的会话目录
-        try:
-            if bool(load_ui_setting("cache_incognito", True)):
-                mine = ""
-                try:
-                    mine = os.path.basename(_preview_cache_dir())
-                except Exception:
-                    mine = ""
-                for name in os.listdir(base):
-                    p = os.path.join(base, name)
-                    if not os.path.isdir(p) or not name.startswith("本次_"):
-                        continue
-                    if name == mine:
-                        continue          # 正在用的这个不能删
-                    try:
-                        sz = sum(os.path.getsize(os.path.join(dp, f))
-                                 for dp, dn, fs in os.walk(p)
-                                 for f in fs)
-                    except Exception:
-                        sz = 0
-                    try:
-                        shutil.rmtree(p, ignore_errors=True)
-                        removed += 1
-                        freed += sz
-                        why.append("无痕：清掉上次会话")
-                    except Exception:
-                        pass
-        except Exception:
-            pass
-
-        # ② 定时清理：太久没用的文件
-        try:
-            ttl = float(load_ui_setting("cache_ttl_hours", 24) or 0)
-        except Exception:
-            ttl = 24
-        if ttl > 0:
-            cut = _t.time() - ttl * 3600
-            for dp, dn, fs in os.walk(base):
-                for f in fs:
-                    p = os.path.join(dp, f)
-                    try:
-                        if os.path.getmtime(p) < cut:
-                            sz = os.path.getsize(p)
-                            os.remove(p)
-                            removed += 1
-                            freed += sz
-                    except Exception:
-                        pass
-            if removed:
-                why.append("超时（%g 小时没用）" % ttl)
-
-        # ③ 超大小清理：整个目录太大就把最旧的删掉，直到降到限制以下
-        try:
-            limit_mb = float(load_ui_setting("cache_max_mb", 2048) or 0)
-        except Exception:
-            limit_mb = 2048
-        if limit_mb > 0:
-            files = []
-            total = 0
-            for dp, dn, fs in os.walk(base):
-                for f in fs:
-                    p = os.path.join(dp, f)
-                    try:
-                        st = os.stat(p)
-                        files.append((st.st_mtime, st.st_size, p))
-                        total += st.st_size
-                    except Exception:
-                        pass
-            limit = limit_mb * 1024 * 1024
-            if total > limit:
-                files.sort()          # 最旧的排前面
-                dropped = 0
-                for mt, sz, p in files:
-                    if total <= limit:
-                        break
-                    try:
-                        os.remove(p)
-                        total -= sz
-                        freed += sz
-                        removed += 1
-                        dropped += 1
-                    except Exception:
-                        pass
-                if dropped:
-                    why.append("超 %g MB 上限" % limit_mb)
-    except Exception:
-        pass
-
-    if not removed:
-        return "缓存很干净，不用清。"
-    return ("已清理 %d 个缓存文件，腾出 %.1f MB（%s）"
-            % (removed, freed / 1024 / 1024, "、".join(why) or "手动清理"))
-
-
-# ★★ v26 补丁（2026-10-03）注意：**上面这个函数以前被原样写了两遍**，
-#   两段的代码一字不差。Python 里后写的会盖掉先写的，所以运行时看不出
-#   任何毛病 —— 但那是「白白多了一坨肉」，而且以后改一处忘了另一处，
-#   就会出现「改了没反应」这种最难查的毛病。第二份已经删掉了。
 class PreviewPane(ttk.Frame):
     """★ v25 补丁8：右侧「预览」窗格（方案 A：分类库 | 文件列表 | 预览 | 标签库）。
 
@@ -14537,7 +13943,7 @@ class PreviewPane(ttk.Frame):
             _zin = _zout = None
         try:
             self._zoom_bar = ttk.Frame(self)
-            ttk.Label(self._zoom_bar, text="缩放", anchor="w").pack(
+            ttk.Label(self._zoom_bar, text=T("缩放"), anchor="w").pack(
                 side="left")
             # ➖ 缩小
             # ★★ 2026-10-07 修（截图看出来的）：原来 `width=3` 把图片**裁掉了一半**
@@ -18893,7 +18299,7 @@ class AutoTagRulesDialog(tk.Toplevel):
             text="☁ 闲时自动跑（扫描全部范围 + 应用文件名规则）",
             variable=self.idle_var,
             command=self._save_idle_cfg).pack(side="left")
-        ttk.Label(idle_row, text="鼠标 / 键盘空闲").pack(
+        ttk.Label(idle_row, text=T("鼠标 / 键盘空闲")).pack(
             side="left", padx=(10, 2))
         self.idle_min_var = tk.StringVar(
             value=str(self._idle_cfg["rules_minutes"]))
@@ -18904,7 +18310,7 @@ class AutoTagRulesDialog(tk.Toplevel):
         _sp.pack(side="left")
         _sp.bind("<Return>", lambda e: self._save_idle_cfg())
         _sp.bind("<FocusOut>", lambda e: self._save_idle_cfg())
-        ttk.Label(idle_row, text="分钟后运行（你一动鼠标它就停）").pack(
+        ttk.Label(idle_row, text=T("分钟后运行（你一动鼠标它就停）")).pack(
             side="left", padx=(2, 0))
         self._idle_hint_lbl = ttk.Label(idle_row, text="",
                                        foreground=theme_get("fg_dim"))
@@ -19563,7 +18969,7 @@ class PropsDialog(tk.Toplevel):
             btns = ttk.Frame(body)
             btns.pack(fill="x", pady=(8, 0))
             ttk.Button(btns, text=T("刷新"), command=self._reload).pack(side="left")
-            ttk.Button(btns, text="复制全部", command=self._copy_all).pack(
+            ttk.Button(btns, text=T("复制全部"), command=self._copy_all).pack(
                 side="left", padx=6)
             ttk.Button(btns, text=T("关闭"), command=self.destroy).pack(side="right")
             self.bind("<Escape>", lambda e: self.destroy())
@@ -22223,7 +21629,7 @@ except Exception:
             btns = ttk.Frame(body)
             btns.pack(fill="x")
             ttk.Button(btns, text=T("确定"), command=self._ok).pack(side="right")
-            ttk.Button(btns, text="取消", command=self.destroy).pack(
+            ttk.Button(btns, text=T("取消"), command=self.destroy).pack(
                 side="right", padx=6)
             self.bind("<Escape>", lambda e: self.destroy())
             self._load()
@@ -22935,7 +22341,7 @@ class HoverPreview:
                     self._photo = ImageTk.PhotoImage(im)
                     self._img_lbl = tk.Label(body, image=self._photo, bg="#222")
                     self._img_lbl.pack()
-                    tk.Label(body, text="▶ 视频", bg="#222",
+                    tk.Label(body, text=T("▶ 视频"), bg="#222",
                              fg="#9cf", font=(FONT, UI_FONT_SIZE_SMALL)).pack()
                     shown = True
                 except Exception:
@@ -23568,7 +22974,7 @@ class IndexManagerDialog(tk.Toplevel):
             text=T("☁ 闲时自动跑（缓慢重扫所有启用的根目录）"),
             variable=self.idle_var,
             command=self._save_idle_cfg).pack(side="left")
-        ttk.Label(idle_row, text="鼠标 / 键盘空闲").pack(
+        ttk.Label(idle_row, text=T("鼠标 / 键盘空闲")).pack(
             side="left", padx=(10, 2))
         self.idle_min_var = tk.StringVar(
             value=str(self._idle_cfg["index_minutes"]))
@@ -24122,7 +23528,7 @@ class IndexManagerDialog(tk.Toplevel):
         row = ttk.Frame(top)
         row.pack(fill="x", pady=10, padx=12)
         ttk.Button(row, text=T("确定"), command=_ok).pack(side="right")
-        ttk.Button(row, text="取消", command=_cancel).pack(
+        ttk.Button(row, text=T("取消"), command=_cancel).pack(
             side="right", padx=(0, 6))
         ent.bind("<Return>", _ok)
         top.bind("<Escape>", _cancel)
@@ -28369,15 +27775,15 @@ class FileTaggerApp:
                 pass
             win.destroy()
 
-        ttk.Button(btns, text="复制本次记录", command=_copy_this).pack(
+        ttk.Button(btns, text=T("复制本次记录"), command=_copy_this).pack(
             side="left", padx=4)
-        ttk.Button(btns, text="保存本次记录…", command=_save_this).pack(
+        ttk.Button(btns, text=T("保存本次记录…"), command=_save_this).pack(
             side="left", padx=4)
-        ttk.Button(btns, text="打开记账文件", command=_open_file).pack(
+        ttk.Button(btns, text=T("打开记账文件"), command=_open_file).pack(
             side="left", padx=4)
-        ttk.Button(btns, text="清空历史记录", command=_clear).pack(
+        ttk.Button(btns, text=T("清空历史记录"), command=_clear).pack(
             side="left", padx=4)
-        ttk.Button(btns, text="关闭", command=win.destroy).pack(
+        ttk.Button(btns, text=T("关闭"), command=win.destroy).pack(
             side="right", padx=4)
 
         # ★ 顺便写进「问题」面板，这样关掉小窗还能回看（老行为保留）
@@ -28507,7 +27913,7 @@ class FileTaggerApp:
             self._clean_path_input(self.path_var.get())))
 
         # ★ 这几个按钮从右往左排，保证它们在窗口变窄时**最后**才被影响
-        ttk.Button(self._top_bar, text="刷新", command=self.refresh_all).pack(
+        ttk.Button(self._top_bar, text=T("刷新"), command=self.refresh_all).pack(
             side="right", padx=(4, 0))
         self._nav_fwd_btn = ttk.Button(self._top_bar, text=T("前进 ▶"), width=7,
                                        command=self.go_forward)
@@ -28515,9 +27921,9 @@ class FileTaggerApp:
         self._nav_back_btn = ttk.Button(self._top_bar, text=T("◀ 后退"), width=7,
                                         command=self.go_back)
         self._nav_back_btn.pack(side="right", padx=(6, 0))
-        ttk.Button(self._top_bar, text="上一级", command=self.go_up).pack(
+        ttk.Button(self._top_bar, text=T("上一级"), command=self.go_up).pack(
             side="right", padx=4)
-        ttk.Button(self._top_bar, text="浏览…", command=self.choose_dir).pack(
+        ttk.Button(self._top_bar, text=T("浏览…"), command=self.choose_dir).pack(
             side="right", padx=(6, 0))
 
         # ---- 第 2 行：位置（盘符 / 常用位置 / ⭐）----
@@ -31373,20 +30779,20 @@ class FileTaggerApp:
                 _set(self._problem_btn,
                      text="🔔 问题 %d" % self._problem_count, width=0)
                 _set(self._output_btn,
-                     text="📋 输出 " + ("▼" if self._log_panel_visible
+                     text=T("📋 输出 ") + ("▼" if self._log_panel_visible
                                        else "▲"), width=0)
                 _set(self._tagbar_btn,
-                     text="🏷 标签条 " + ("▼" if getattr(
+                     text=T("🏷 标签条 ") + ("▼" if getattr(
                          self.file_list, "tagbar_visible", False) else "▲"),
                      width=0)
                 _set(self._preview_btn,
-                     text="📄 预览 " + ("▼" if getattr(
+                     text=T("📄 预览 ") + ("▼" if getattr(
                          self, "_preview_visible", False) else "▲"), width=0)
                 _set(self._taglib_btn,
-                     text="🔖 标签库 " + ("▼" if getattr(
+                     text=T("🔖 标签库 ") + ("▼" if getattr(
                          self, "_taglib_visible", True) else "▲"), width=0)
                 _set(self._tagbox_btn,
-                     text="🗃 标签盒 " + ("▼" if getattr(
+                     text=T("🗃 标签盒 ") + ("▼" if getattr(
                          self, "tagbox_visible", False) else "▲"), width=0)
                 self._update_net_btn()
         except Exception:
