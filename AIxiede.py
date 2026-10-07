@@ -419,7 +419,7 @@ def privacy_scan_exe(path, extra_terms=None):
                 continue
     except Exception as exc:
         try:
-            note_swallowed("扫 exe 隐私失败", exc, level="warn")
+            note_swallowed(T("扫 exe 隐私失败"), exc, level="warn")
         except Exception:
             pass
         return (False, ["（读不了这个文件：%s）" % path])
@@ -609,7 +609,7 @@ def _init_i18n():
         return _i18n.set_language(_load_saved_language())
     except Exception as _e:
         try:
-            note_swallowed("初始化多语言失败（界面会显示中文）", _e)
+            note_swallowed(T("初始化多语言失败（界面会显示中文）"), _e)
         except Exception:
             pass
         return False
@@ -1237,7 +1237,7 @@ def _win_file_acl_info(path):
         text = r.stdout.decode("utf-8", "replace")
     except Exception as exc:
         try:
-            note_swallowed("属性：读文件权限失败", exc)
+            note_swallowed(T("属性：读文件权限失败"), exc)
         except Exception:
             pass
         return out
@@ -2219,7 +2219,7 @@ def load_ui_setting(key, default=None):
         # ★★ 2026-10-03：之前直接 return default，连日志都没记，
         #   用户发现设置丢了完全不知道为什么）。改成只记一笔 warn。
         try:
-            note_swallowed("读 UI 设置失败（%s），退回默认值" % key, exc,
+            note_swallowed(T("读 UI 设置失败（{x}），退回默认值", x=key), exc,
                            level="warn")
         except Exception:
             pass
@@ -2235,7 +2235,7 @@ def save_ui_setting(key, value):
     except Exception as exc:
         # ★★ 2026-10-03：之前连日志都没有，用户设的快捷键丢了不知道为什么。
         try:
-            note_swallowed("写 UI 设置失败（%s）" % key, exc, level="warn")
+            note_swallowed(T("写 UI 设置失败（{x}）", x=key), exc, level="warn")
         except Exception:
             pass
         return False
@@ -3372,7 +3372,7 @@ def register_theme(name, palette, label=None):
         return True
     except Exception as exc:
         try:
-            note_swallowed("注册皮肤失败（%s）" % (name,), exc)
+            note_swallowed(T("注册皮肤失败（{x}）", x=(name),), exc)
         except Exception:
             pass
         return False
@@ -3593,7 +3593,7 @@ def _load_custom_themes():
                     n += 1
         if n:
             try:
-                note_swallowed("已从设置里读了 %d 套自定义皮肤" % n, None,
+                note_swallowed(T("已从设置里读了 {x} 套自定义皮肤", x=n), None,
                                level="info")
             except Exception:
                 pass
@@ -3675,7 +3675,7 @@ class PluginAPI:
                 (str(label), list(items or [])))
             return True
         except Exception as exc:
-            self.note_error("注册菜单失败", exc)
+            self.note_error(T("注册菜单失败"), exc)
             return False
 
     def add_menu_item(self, menu_label, item_label, command):
@@ -3689,7 +3689,7 @@ class PluginAPI:
                 (str(menu_label), str(item_label), command))
             return True
         except Exception as exc:
-            self.note_error("注册菜单项失败", exc)
+            self.note_error(T("注册菜单项失败"), exc)
             return False
 
     # ---- 设置 ----
@@ -3703,7 +3703,7 @@ class PluginAPI:
         try:
             return register_theme(name, palette, label=label)
         except Exception as exc:
-            self.note_error("注册皮肤失败", exc)
+            self.note_error(T("注册皮肤失败"), exc)
             return False
 
     def theme_get(self, key, default=None):
@@ -3714,14 +3714,14 @@ class PluginAPI:
     def note_error(self, what, exc=None, level="warn"):
         """★ 记一笔到主程序的"账本"（用户能找到底是哪个插件出的问题）。"""
         try:
-            note_swallowed("插件「%s」：%s" % (self.name, what), exc, level=level)
+            note_swallowed(T("插件「{x}」：{y}", x=self.name, y=what), exc, level=level)
         except Exception:
             pass
 
     def log(self, text):
         """★ 往主程序的「输出」面板写一行（插件也能有日志）。"""
         try:
-            self.app.log_output("[插件 %s] %s" % (self.name, text))
+            self.app.log_output(T("[插件 {x}] {y}", x=self.name, y=text))
         except Exception:
             pass
 
@@ -3756,7 +3756,7 @@ def register_plugin(name, module=None):
     try:
         _PLUGINS.setdefault(str(name), {})
         try:
-            note_swallowed("已加载插件「%s」" % name, None, level="info")
+            note_swallowed(T("已加载插件「{x}」", x=name), None, level="info")
         except Exception:
             pass
         return True
@@ -3858,12 +3858,12 @@ def load_plugins(app):
                     pass
         if n:
             try:
-                app.log_output("已加载 %d 个插件" % n)
+                app.log_output(T("已加载 {x} 个插件", x=n))
             except Exception:
                 pass
     except Exception as exc:
         try:
-            note_swallowed("扫描插件目录失败", exc)
+            note_swallowed(T("扫描插件目录失败"), exc)
         except Exception:
             pass
     return n
@@ -4435,7 +4435,7 @@ def apply_theme(root, name=None):
         ok = _style_all_widgets(root, name) or ok
     except Exception as _e:
         try:
-            note_swallowed("换皮肤：设置控件样式失败", _e, quiet=True)
+            note_swallowed(T("换皮肤：设置控件样式失败"), _e, quiet=True)
         except Exception:
             pass
     # ② 常量（影响「以后新建」的控件）
@@ -4449,7 +4449,7 @@ def apply_theme(root, name=None):
         ok = ok or n > 0
     except Exception as _e:
         try:
-            note_swallowed("换皮肤：给已有控件换色失败", _e, quiet=True)
+            note_swallowed(T("换皮肤：给已有控件换色失败"), _e, quiet=True)
         except Exception:
             pass
     # ④ ★★ 再整体刷一遍样式表。
@@ -5021,7 +5021,7 @@ def get_file_icon(name, is_dir, px=48):
         return photo
     except Exception as _e:
         try:
-            note_swallowed("取文件图标失败（会退回 emoji 画法）", _e,
+            note_swallowed(T("取文件图标失败（会退回 emoji 画法）"), _e,
                            quiet=True)
         except Exception:
             pass
@@ -5251,17 +5251,19 @@ def get_ui_icon(name, px=16):
         return None
 
 
-def make_search_label(parent, text="搜索文件：", px=16, **kw):
+def make_search_label(parent, text=None, px=16, **kw):
     """★ 造一个「放大镜图片 + 文字」的小标签（搜索框前面那个）。
 
     ★ 为什么包一层：程序里**十几处**搜索框都写着
-        make_search_label(sbar, "搜索文件：")
+        make_search_label(sbar, T("搜索文件："))
       要是一个个手改，容易漏、也容易写歪。统一走这个函数，
       以后要换图标只改一处。
 
     ★ 取不到图片就**老老实实退回 emoji** —— 绝不显示空白。
       （错题本 #5 那条：「最坏情况要能看能点，不能一片空白」。）
     """
+    if text is None:
+        text = T("搜索文件：")
     try:
         img = get_ui_icon("search", px)
     except Exception:
@@ -5397,7 +5399,7 @@ def get_pdf_page_pil(path, page=0, max_w=520, max_h=680):
                 pass
     except Exception as exc:
         try:
-            note_swallowed("PDF 预览：渲染失败", exc)
+            note_swallowed(T("PDF 预览：渲染失败"), exc)
         except Exception:
             pass
         return None
@@ -5616,7 +5618,7 @@ def _drain_ui_mail(limit=80, budget_ms=35.0):
             fn(*a)
         except Exception as _e:
             try:
-                note_swallowed("后台任务交回主线程时失败了", _e, quiet=True)
+                note_swallowed(T("后台任务交回主线程时失败了"), _e, quiet=True)
             except Exception:
                 pass
         n += 1
@@ -5689,7 +5691,7 @@ def pdf_prepare(path, timeout=4.0):
         return None, "超时"
     if "err" in out:
         try:
-            note_swallowed("PDF 预览：打不开这个文件", out["err"], quiet=True)
+            note_swallowed(T("PDF 预览：打不开这个文件"), out["err"], quiet=True)
         except Exception:
             pass
         return None, 0
@@ -5757,7 +5759,7 @@ def render_pdf_page(doc, page, max_w=520, max_h=680):
         return Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
     except Exception as e:
         try:
-            note_swallowed("PDF 预览：后台渲染某一页失败", e, quiet=True)
+            note_swallowed(T("PDF 预览：后台渲染某一页失败"), e, quiet=True)
         except Exception:
             pass
         return None
@@ -6083,7 +6085,7 @@ class FileList(tk.Frame):
         self._sbar = ttk.Frame(self)
         self._sbar.pack(fill="x", pady=(0, 2))
         sbar = self._sbar
-        make_search_label(sbar, "搜索文件：").pack(side="left")
+        make_search_label(sbar, T("搜索文件：")).pack(side="left")
         self.search_var = tk.StringVar()
         self.search_entry = ttk.Entry(sbar, textvariable=self.search_var)
         self.search_entry.pack(side="left", fill="x", expand=True, padx=(4, 0))
@@ -6098,16 +6100,16 @@ class FileList(tk.Frame):
         # ★ "含子目录"开关：打开后按回车触发主程序递归扫描
         self.search_recursive = tk.BooleanVar(value=False)
         self._toggle_rec = self._make_toggle(
-            sbar, "含子目录", self.search_recursive)
+            sbar, T("含子目录"), self.search_recursive)
         self.on_recursive_search = None  # 主程序注入的回调
 
         # 三个开关：名称、标签、路径
         self._toggle_name = self._make_toggle(
-            sbar, "文件名", self.search_by_name)
+            sbar, T("文件名"), self.search_by_name)
         self._toggle_tag = self._make_toggle(
-            sbar, "标签", self.search_by_tag)
+            sbar, T("标签"), self.search_by_tag)
         self._toggle_loc = self._make_toggle(
-            sbar, "文件路径", self.search_by_location)
+            sbar, T("文件路径"), self.search_by_location)
 
         self.search_info_lbl = ttk.Label(sbar, text="", foreground=theme_get("ok"))
         self.search_info_lbl.pack(side="left", padx=8)
@@ -6560,7 +6562,7 @@ class FileList(tk.Frame):
         try:
             stats = self._collect_tag_stats()
         except Exception as _e:
-            note_swallowed("统计标签条上的标签失败", _e)
+            note_swallowed(T("统计标签条上的标签失败"), _e)
             stats = []
         sig = self._tagbar_sig_of(stats)
         if (sig == self._tagbar_sig and self._tagbar_pills
@@ -6621,7 +6623,8 @@ class FileList(tk.Frame):
 
         # ★ v25 补丁11：这三颗按钮**一直建好**，只是按情况显示/隐藏 ——
         #   这样「选中标签 / 屏蔽标签」就不用重建整条标签条了（重建很慢）。
-        mode_text = "🔗 全部满足" if self.filter_match_all else "🔀 任一满足"
+        mode_text = T("🔗 全部满足") if self.filter_match_all \
+            else T("🔀 任一满足")
         btn_mode = tk.Button(right_box, text=mode_text,
                              font=(FONT, UI_FONT_SIZE_SMALL), relief="flat",
                              bg=theme_get("panel_bg"), fg="#8e44ad", cursor="hand2",
@@ -6990,7 +6993,7 @@ class FileList(tk.Frame):
                 pass
             self.on_recursive_search(self.search_text)
         except Exception as _e:
-            note_swallowed("含子目录搜索失败", _e)
+            note_swallowed(T("含子目录搜索失败"), _e)
 
     def _search_debounce(self):
         """排一个「停手 0.25 秒后查一次」的任务（重复调用只会留最后一个）。"""
@@ -7022,7 +7025,7 @@ class FileList(tk.Frame):
                 self.search_text = (self.search_var.get() or "").strip().lower()
                 self.on_global_search(self.search_text)
         except Exception as _e:
-            note_swallowed("搜索失败", _e)
+            note_swallowed(T("搜索失败"), _e)
 
     def _trigger_search(self):
         """回车时触发。含子目录模式下交给主程序递归扫描。"""
@@ -7587,7 +7590,7 @@ class FileList(tk.Frame):
 
     def _list_cols(self):
         keys = ["name", "kind", "size", "location", "tags"]
-        names = ["名称", "类型", "大小", "所在位置", "标签"]
+        names = [T("名称"), T("类型"), T("大小"), T("所在位置"), T("标签")]
         # ★★ v26：**画布不够宽时，按「重要性权重」重新分配列宽。**
         #   原来列宽是死的（合计 920），而列表实际只有 788 ——
         #   Tk 不报错，只是把**名称列左边裁掉**（用识图看截图才发现：
@@ -8225,7 +8228,7 @@ class FileList(tk.Frame):
                 c.update_idletasks()
                 w = c.winfo_width()
             except Exception as _e:
-                note_swallowed("文件列表：量画布宽度失败", _e, quiet=True)
+                note_swallowed(T("文件列表：量画布宽度失败"), _e, quiet=True)
             if w <= 1:
                 try:
                     w = int(c.winfo_reqwidth()) or 0
@@ -8248,22 +8251,22 @@ class FileList(tk.Frame):
                 #   中途出错就**画一半停住**，用户看到的就是「显示不全」。
                 #   现在不但记一笔，还**自己重试一次**：先把画布清干净，
                 #   再退回「只画文件名」的简单画法，保证至少看得见东西。
-                note_swallowed("文件列表：画列表时中途出错（列表可能只显示一半）", _e)
+                note_swallowed(T("文件列表：画列表时中途出错（列表可能只显示一半）"), _e)
                 try:
                     c.delete("all")
                     self._redraw_list_fallback()
                 except Exception as _e2:
-                    note_swallowed("文件列表：退回简单画法也失败了（列表空着）", _e2)
+                    note_swallowed(T("文件列表：退回简单画法也失败了（列表空着）"), _e2)
         else:
             try:
                 self._redraw_grid()
             except Exception as _e:
-                note_swallowed("文件列表：画瀑布流缩略图时出错（可能只显示一部分）", _e)
+                note_swallowed(T("文件列表：画瀑布流缩略图时出错（可能只显示一部分）"), _e)
                 try:
                     c.delete("all")
                     self._redraw_list_fallback()
                 except Exception as _e2:
-                    note_swallowed("文件列表：退回简单画法也失败了（列表空着）", _e2)
+                    note_swallowed(T("文件列表：退回简单画法也失败了（列表空着）"), _e2)
         # 拖动到文件夹时，顶上飘一条黄色提示
         if getattr(self, "_drop_hint", None):
             try:
@@ -8291,7 +8294,7 @@ class FileList(tk.Frame):
             # ★★ 2026-10-05「先加说话」：以前这里是 `pass` —— 表头画不出来
             #   也没人知道，用户看到的就是「显示不全 / 表头错位」。
             #   现在记一笔，进「🔔 问题」面板。
-            note_swallowed("文件列表：画表头失败（列表顶部可能空着或错位）", _e)
+            note_swallowed(T("文件列表：画表头失败（列表顶部可能空着或错位）"), _e)
 
     def _redraw_list_fallback(self):
         """★★ 2026-10-05「先加说话」：**保命画法**。
@@ -8899,7 +8902,7 @@ class FileList(tk.Frame):
                         if self.on_select:
                             self.on_select()
                 except Exception as _e:
-                    note_swallowed("单击某一行（补选中）失败", _e)
+                    note_swallowed(T("单击某一行（补选中）失败"), _e)
             else:
                 # ★ v25 补丁40：在空白处**按一下没动 = 单击空白 = 取消选中**。
                 #   （以前这段逻辑在 _on_click 里，因为提前 return 变成了
@@ -8939,7 +8942,7 @@ class FileList(tk.Frame):
                             cb(paths, fd["target_row"])
                         except Exception as _e:
                             try:
-                                note_swallowed("拖动移动到文件夹失败", _e)
+                                note_swallowed(T("拖动移动到文件夹失败"), _e)
                             except Exception:
                                 pass
                 return
@@ -9104,7 +9107,7 @@ class FileList(tk.Frame):
                 return
         except Exception as _e:
             try:
-                note_swallowed("框选后的点击窗口期判定失败", _e)
+                note_swallowed(T("框选后的点击窗口期判定失败"), _e)
             except Exception:
                 pass
         # 补上「选中」这一步（双击时 Tk 没发 Button-1，这里替它做）
@@ -9157,7 +9160,7 @@ class FileList(tk.Frame):
                     self.on_right_click(event, None)
             except Exception as _e:
                 try:
-                    note_swallowed("空白处右键菜单失败", _e, quiet=True)
+                    note_swallowed(T("空白处右键菜单失败"), _e, quiet=True)
                 except Exception:
                     pass
             return
@@ -9270,7 +9273,7 @@ class FileList(tk.Frame):
             self._recompute_layout()
             self._redraw()
         except Exception as _e:
-            note_swallowed("全选后重画列表失败", _e)
+            note_swallowed(T("全选后重画列表失败"), _e)
         if self.on_select:
             try:
                 self.on_select()
@@ -9753,7 +9756,7 @@ except Exception:
             try:
                 self.store.set_category_tag_links(self.cid, chosen)
             except Exception as _e:
-                note_swallowed("保存「分类↔标签关联」失败", _e)
+                note_swallowed(T("保存「分类↔标签关联」失败"), _e)
                 messagebox.showerror(
                     "保存失败",
                     f"没能保存这个分类的标签关联：\n{_e}\n\n"
@@ -9969,7 +9972,7 @@ except Exception:
             try:
                 self.store.set_category_hidden_tags(self.cid, chosen)
             except Exception as _e:
-                note_swallowed("保存「打开时自动屏蔽的标签」失败", _e)
+                note_swallowed(T("保存「打开时自动屏蔽的标签」失败"), _e)
                 messagebox.showerror(
                     "保存失败",
                     f"没能保存这个分类要屏蔽的标签：\n{_e}\n\n"
@@ -10186,7 +10189,7 @@ except Exception:
             try:
                 self.store.set_auto_name_rule_tag_ids(chosen)
             except Exception as _e:
-                note_swallowed("保存「文件名规则」勾选失败", _e)
+                note_swallowed(T("保存「文件名规则」勾选失败"), _e)
                 messagebox.showerror(
                     "保存失败",
                     f"没能保存文件名规则的标签勾选：\n{_e}\n\n"
@@ -10452,12 +10455,12 @@ class StarGraphEditor(tk.Toplevel):
         # ---------- 提示 ----------
         hint = ttk.Label(
             self,
-            text="拖动 A → B：B 成为 A 的父级（框选多个后整组拖过去 = 一次全挂上）  |  "
-                 "Ctrl + 拖动 A → B：删除关系  |  "
-                 "点空白处拖出方框：框选多个节点  |  "
-                 "框选后拖动其中任何一个：整组一起移动  |  "
-                 "点线：选中该线，然后用「给选中线改色」  |  "
-                 "空格 + 拖动平移；Ctrl + 滚轮缩放。",
+            text=T("拖动 A → B：B 成为 A 的父级（框选多个后整组拖过去 = 一次全挂上）"
+                   "  |  Ctrl + 拖动 A → B：删除关系"
+                   "  |  点空白处拖出方框：框选多个节点"
+                   "  |  框选后拖动其中任何一个：整组一起移动"
+                   "  |  点线：选中该线，然后用「给选中线改色」"
+                   "  |  空格 + 拖动平移；Ctrl + 滚轮缩放。"),
             foreground=theme_get("fg_dim"), padding=(10, 0, 10, 4))
         hint.pack(fill="x")
 
@@ -11075,7 +11078,7 @@ class StarGraphEditor(tk.Toplevel):
             self.set_status_hint("已把标签摊开 1.25 倍（可以反复点）")
         except Exception as exc:
             try:
-                note_swallowed("摊开标签失败", exc)
+                note_swallowed(T("摊开标签失败"), exc)
             except Exception:
                 pass
 
@@ -11165,12 +11168,12 @@ class StarGraphEditor(tk.Toplevel):
         ups, downs = self._parents_children(tid)
         if getattr(self, "_rel_removing", False):
             self.relation_lbl.config(
-                text="【%s】勾选要去掉的上下游关系（勾好点下面「✔ 确定去除」）"
-                     % node.name)
+                text=T("【{x}】勾选要去掉的上下游关系（勾好点下面「✔ 确定去除」）",
+                       x=node.name))
         else:
             self.relation_lbl.config(
-                text="【%s】 上游（所有上级）%d 个 · 下游（所有下级）%d 个"
-                     % (node.name, len(ups), len(downs)))
+                text=T("【{a}】 上游（所有上级）{b} 个 · 下游（所有下级）{c} 个",
+                       a=node.name, b=len(ups), c=len(downs)))
         self._rel_row("上级", ups, "#5b8def", direction="up")
         self._rel_row("下级", downs, "#e67e22", direction="down")
         self._update_rel_action_buttons()
@@ -11231,7 +11234,7 @@ class StarGraphEditor(tk.Toplevel):
                     tag.bind("<Button-1>",
                              lambda e, t=tid: self._focus_node(t))
             if len(items) > 60:
-                tk.Label(row, text="…还有 %d 个" % (len(items) - 60),
+                tk.Label(row, text=T("…还有 {x} 个", x=len(items) - 60),
                          bg=theme_get("panel_bg"), fg=theme_get("fg_dim"),
                          font=(FONT, UI_FONT_SIZE)).pack(side="left", padx=4)
         except Exception:
@@ -11480,7 +11483,7 @@ class StarGraphEditor(tk.Toplevel):
                 n += 1
             except Exception as exc:
                 try:
-                    note_swallowed("加标签关系失败", exc)
+                    note_swallowed(T("加标签关系失败"), exc)
                 except Exception:
                     pass
         if n:
@@ -13982,7 +13985,7 @@ class PreviewPane(ttk.Frame):
             # 右边给一句"怎么用"（用户之前提过提示太少）
             try:
                 ttk.Label(self._zoom_bar,
-                          text="Ctrl+滚轮缩放 · 空格+拖动",
+                          text=T("Ctrl+滚轮缩放 · 空格+拖动"),
                           foreground=theme_get("fg_dim")).pack(
                     side="right", padx=(0, 4))
             except Exception:
@@ -13996,7 +13999,7 @@ class PreviewPane(ttk.Frame):
                 pass
         except Exception as _e:
             try:
-                note_swallowed("预览缩放条没建出来", _e, quiet=True)
+                note_swallowed(T("预览缩放条没建出来"), _e, quiet=True)
             except Exception:
                 pass
         # ★★ v26 新增：网盘文件预取**进度条**（默认隐藏，拷贝时才出现）。
@@ -14219,7 +14222,7 @@ class PreviewPane(ttk.Frame):
                 self._body.pack(fill="both", expand=True)
                 self._body_packed = True
         except Exception as _e:
-            note_swallowed("预览：把文本区摆出来失败（预览可能是空白）", _e)
+            note_swallowed(T("预览：把文本区摆出来失败（预览可能是空白）"), _e)
 
     def _show_img(self):
         """切到「画布显示图片」模式（收掉文本框和翻页条）。
@@ -14256,7 +14259,7 @@ class PreviewPane(ttk.Frame):
             self._zoom_label_update()
         except Exception as _e:
             try:
-                note_swallowed("缩放条没摆出来", _e, quiet=True)
+                note_swallowed(T("缩放条没摆出来"), _e, quiet=True)
             except Exception:
                 pass
 
@@ -14394,7 +14397,7 @@ class PreviewPane(ttk.Frame):
             self._img_relayout()
         except Exception as _e:
             try:
-                note_swallowed("预览缩放失败", _e, quiet=True)
+                note_swallowed(T("预览缩放失败"), _e, quiet=True)
             except Exception:
                 pass
         # 缩放条上的百分数也要跟着变
@@ -14404,7 +14407,7 @@ class PreviewPane(ttk.Frame):
             pass
         # 状态栏给个反馈（用户要知道现在几倍）
         try:
-            self.set_status("预览缩放：%d%%" % round(new * 100))
+            self.set_status(T("预览缩放：{x}", x="%d%%" % round(new * 100)))
         except Exception:
             pass
         # 缩放之后，滚动位置尽量**保持在原来的地方**
@@ -14425,7 +14428,7 @@ class PreviewPane(ttk.Frame):
         except Exception:
             pass
         try:
-            self.set_status("预览缩放：100%（适应窗格）")
+            self.set_status(T("预览缩放：100%（适应窗格）"))
         except Exception:
             pass
 
@@ -14536,7 +14539,7 @@ class PreviewPane(ttk.Frame):
         try:
             self._img_quick_rescale()
         except Exception as _e:
-            note_swallowed("预览：快速拉伸失败", _e, quiet=True)
+            note_swallowed(T("预览：快速拉伸失败"), _e, quiet=True)
         # ② 停手 700 毫秒后：再重新渲染一遍（要清晰）
         try:
             if getattr(self, "_pdf_scroll_path", None):
@@ -14696,7 +14699,7 @@ class PreviewPane(ttk.Frame):
                     _bg_post(_apply_safe)
                 except Exception as _e:
                     try:
-                        note_swallowed("预览：重排可见页失败", _e, quiet=True)
+                        note_swallowed(T("预览：重排可见页失败"), _e, quiet=True)
                     except Exception:
                         pass
                 finally:
@@ -14710,7 +14713,7 @@ class PreviewPane(ttk.Frame):
             return True
         except Exception as _e:
             self._pdf_render_width = old_w_bak
-            note_swallowed("预览：重排 PDF 可见页失败", _e, quiet=True)
+            note_swallowed(T("预览：重排 PDF 可见页失败"), _e, quiet=True)
             return False
 
     def _img_relayout(self):
@@ -14905,7 +14908,7 @@ class PreviewPane(ttk.Frame):
         self._pdf_scroll_got = 0
         try:
             self.kind_lbl.configure(
-                text="PDF · 正在打开… · %s" % size)
+                text=T("PDF · 正在打开… · {x}", x=size))
         except Exception:
             pass
 
@@ -14953,7 +14956,7 @@ class PreviewPane(ttk.Frame):
                                          doc)
             except Exception as _e:
                 try:
-                    note_swallowed("PDF 预览：打开失败（这次没显示出来）", _e,
+                    note_swallowed(T("PDF 预览：打开失败（这次没显示出来）"), _e,
                                    quiet=True)
                 except Exception:
                     pass
@@ -14972,7 +14975,7 @@ class PreviewPane(ttk.Frame):
                 return
             self._pdf_scroll_total = total
             try:
-                self._nav_info.config(text="连续滚动 · 共 %d 页" % total)
+                self._nav_info.config(text=T("连续滚动 · 共 {x} 页", x=total))
             except Exception:
                 pass
             if im0 is not None:
@@ -15015,14 +15018,14 @@ class PreviewPane(ttk.Frame):
                 command=self._pdf_back_to_top)
             self._nav_prev.pack(side="left")
         except Exception as _e:
-            note_swallowed("预览：摆『回到顶部』按钮失败", _e, quiet=True)
+            note_swallowed(T("预览：摆『回到顶部』按钮失败"), _e, quiet=True)
         try:
             self._nav_next.configure(
                 text=T("🔄 重新加载"), width=11, state="normal",
                 command=self._pdf_reload)
             self._nav_next.pack(side="left", padx=(6, 0))
         except Exception as _e:
-            note_swallowed("预览：摆『重新加载』按钮失败", _e, quiet=True)
+            note_swallowed(T("预览：摆『重新加载』按钮失败"), _e, quiet=True)
         return
 
     def _pdf_bg_done_label(self, got, total):
@@ -15036,7 +15039,7 @@ class PreviewPane(ttk.Frame):
         那儿常驻提示了，不重复。"""
         try:
             if total and got < total:
-                self.kind_lbl.configure(text="已显示前 %d 页" % got)
+                self.kind_lbl.configure(text=T("已显示前 {x} 页", x=got))
             else:
                 self.kind_lbl.configure(text=T("已全部排好"))
         except Exception:
@@ -15113,7 +15116,7 @@ class PreviewPane(ttk.Frame):
                          int(getattr(self, "_pdf_scroll_total", 0) or 0))
         except Exception as _e:
             try:
-                note_swallowed("PDF 后台渲染出错（可能后面几页没排上）", _e,
+                note_swallowed(T("PDF 后台渲染出错（可能后面几页没排上）"), _e,
                                quiet=True)
             except Exception:
                 pass
@@ -15183,9 +15186,9 @@ class PreviewPane(ttk.Frame):
             if cv is not None:
                 cv.yview_moveto(0.0)
                 cv.xview_moveto(0.0)
-                self.set_status("已回到 PDF 顶部")
+                self.set_status(T("已回到 PDF 顶部"))
         except Exception as _e:
-            note_swallowed("预览：回到 PDF 顶部失败", _e, quiet=True)
+            note_swallowed(T("预览：回到 PDF 顶部失败"), _e, quiet=True)
 
     def _pdf_reload(self):
         """★★ 2026-10-06：重新加载当前 PDF（用户要的「刷新」）。
@@ -15196,12 +15199,12 @@ class PreviewPane(ttk.Frame):
         try:
             p = getattr(self, "_pdf_scroll_path", None) or self.current_path
             if not p:
-                self.set_status("现在没有正在看的 PDF")
+                self.set_status(T("现在没有正在看的 PDF"))
                 return
-            self.set_status("正在重新加载 PDF…")
+            self.set_status(T("正在重新加载 PDF…"))
             self.show_path(p)
         except Exception as _e:
-            note_swallowed("预览：重新加载 PDF 失败", _e)
+            note_swallowed(T("预览：重新加载 PDF 失败"), _e)
 
     # ★★ 2026-10-07 新增：**PreviewPane 自己的 set_status**。
     #
@@ -15276,7 +15279,7 @@ class PreviewPane(ttk.Frame):
         #   Pillow 装在程序目录的 libs 里，直接 import 会失败，
         #   结果每个 PDF / 图片都被误判成「没装库」。
         if not HAS_PIL:
-            self._show_text("（这台机器没装 Pillow，看不了图片缩略图）")
+            self._show_text(T("（这台机器没装 Pillow，看不了图片缩略图）"))
             return
         try:
             from PIL import Image, ImageTk  # type: ignore
@@ -15294,7 +15297,7 @@ class PreviewPane(ttk.Frame):
             self._show_pil_image(im)
             self._photo = self._img_photos.get(0)
         except Exception as exc:
-            self._show_text("（这张图打不开：%s）" % exc)
+            self._show_text(T("（这张图打不开：{x}）", x=exc))
 
     # ---------- ★ v25 补丁29：电子书预览（EPUB / MOBI / AZW3 / FB2） ----------
 
@@ -15336,7 +15339,7 @@ class PreviewPane(ttk.Frame):
             self._show_text(note or "（读不出来）")
             try:
                 self.kind_lbl.configure(
-                    text="电子书 · %s · %s" % (size, mtime))
+                    text=T("电子书 · {a} · {b}", a=size, b=mtime))
             except Exception:
                 pass
             return
@@ -15359,7 +15362,7 @@ class PreviewPane(ttk.Frame):
         self._show_text("【%d / %d】\n%s" % (pg + 1, total, body))
         # ★ 补丁30：翻页条改用 PreviewPane 自己那一条（PDF / 电子书共用），
         #   位置固定在底部，不会被正文挡住。
-        self._show_nav("第 %d / %d 页" % (pg + 1, total),
+        self._show_nav(T("第 {a} / {b} 页", a=pg + 1, b=total),
                        lambda: self._book_goto(-1),
                        lambda: self._book_goto(1))
         # 翻页也能用左右方向键（焦点在预览里时）
@@ -15487,18 +15490,19 @@ class PreviewPane(ttk.Frame):
                 return
             try:
                 self.kind_lbl.configure(
-                    text="PDF 第 %d / %d 页 · %s"
-                    % (min(page + 1, total), total, size))
+                    text=T("PDF 第 {a} / {b} 页 · {c}",
+                           a=min(page + 1, total), b=total, c=size))
             except Exception:
                 pass
             try:
                 self._show_pil_image(im)
                 self._photo = self._img_photos.get(0)
             except Exception as exc:
-                self._show_text("（画不出来：%s）" % exc)
+                self._show_text(T("（画不出来：{x}）", x=exc))
                 return
             # ★ 补丁30：翻页按钮改用 PreviewPane 自己那一条
-            self._show_nav("第 %d / %d 页" % (min(page + 1, total), total),
+            self._show_nav(T("第 {a} / {b} 页",
+                                 a=min(page + 1, total), b=total),
                            lambda: self._pdf_goto(-1),
                            lambda: self._pdf_goto(1))
 
@@ -15624,7 +15628,8 @@ class PreviewPane(ttk.Frame):
         """
         _my_tag = int(getattr(self, "_content_tag", 0))
         try:
-            self._show_text("正在读取电子书…\n%s" % os.path.basename(path))
+            self._show_text(T("正在读取电子书…\n{x}",
+                                  x=os.path.basename(path)))
         except Exception:
             pass
 
@@ -15677,7 +15682,7 @@ class PreviewPane(ttk.Frame):
                 try:
                     self._show_book(local_path, size, mtime)
                 except Exception as _e2:
-                    note_swallowed("预览：显示电子书失败", _e2)
+                    note_swallowed(T("预览：显示电子书失败"), _e2)
 
             self._ui(_done)
 
@@ -15702,7 +15707,7 @@ class PreviewPane(ttk.Frame):
         """
         # ★ 2026-10-03：顶上那行类型信息别再停在「正在读取…」了
         try:
-            self.kind_lbl.configure(text="%s · 还在网盘上（没拷到本地）" % kind)
+            self.kind_lbl.configure(text=T("{k} · 还在网盘上（没拷到本地）", k=kind))
         except Exception:
             pass
         self._show_text(
@@ -15782,7 +15787,7 @@ class PreviewPane(ttk.Frame):
                 daemon=True).start()
         except Exception as exc:
             try:
-                note_swallowed("网盘预览：起拷贝线程失败", exc)
+                note_swallowed(T("网盘预览：起拷贝线程失败"), exc)
             except Exception:
                 pass
 
@@ -15926,13 +15931,13 @@ class PreviewPane(ttk.Frame):
             self._nav_prog.configure(value=pct)
             if total > 0:
                 self._nav_info.configure(
-                    text="正在拷贝到本地缓存… %s / %s（%d%%）"
-                    % (self._fmt_size(copied),
-                       self._fmt_size(total), pct))
+                    text=T("正在拷贝到本地缓存… {a} / {b}（{c}%）",
+                           a=self._fmt_size(copied),
+                           b=self._fmt_size(total), c=pct))
             else:
                 self._nav_info.configure(
-                    text="正在拷贝到本地缓存… %s"
-                    % self._fmt_size(copied))
+                    text=T("正在拷贝到本地缓存… {x}",
+                           x=self._fmt_size(copied)))
         except Exception:
             pass
 
@@ -15957,7 +15962,7 @@ class PreviewPane(ttk.Frame):
             self.show_path(path)
         except Exception as exc:
             try:
-                note_swallowed("网盘预览：拷贝完成后打开失败", exc)
+                note_swallowed(T("网盘预览：拷贝完成后打开失败"), exc)
             except Exception:
                 pass
 
@@ -16532,7 +16537,7 @@ except Exception:
 
             self.all_item = CategoryItem(
                 self.inner,
-                {"id": None, "name": "全部文件", "icon": "★", "icon_type": "text",
+                {"id": None, "name": T("全部文件"), "icon": "★", "icon_type": "text",
                  "color": "#5b8def", "cnt": ""},
                 app, self)
             self.all_item.pack(fill="x")
@@ -16755,7 +16760,7 @@ except Exception:
                 #   （用户要的「只有跟文件列表当前路径有关的部分被适当展开」）。
                 self._expand_current_chain(roots)
             except Exception as _e:
-                note_swallowed("刷新文件树失败", _e)
+                note_swallowed(T("刷新文件树失败"), _e)
 
         def _tree_root_display(self, root):
             """根节点显示成什么。
@@ -16838,7 +16843,7 @@ except Exception:
                         continue
             except Exception as _e:
                 try:
-                    note_swallowed("展开当前路径失败", _e, quiet=True)
+                    note_swallowed(T("展开当前路径失败"), _e, quiet=True)
                 except Exception:
                     pass
 
@@ -16961,10 +16966,10 @@ except Exception:
                 try:
                     self.app.navigate_to_path(path)
                 except Exception as _e:
-                    note_swallowed("从文件目录树跳转失败", _e)
+                    note_swallowed(T("从文件目录树跳转失败"), _e)
             except Exception as _e:
                 try:
-                    note_swallowed("文件树：点了一下没处理成", _e)
+                    note_swallowed(T("文件树：点了一下没处理成"), _e)
                 except Exception:
                     pass
 
@@ -17802,7 +17807,7 @@ except Exception:
                 self.count_lbl.config(
                     text=f"显示 {len(tags)} / {len(self.all_tags)}{extra}")
             else:
-                self.count_lbl.config(text=f"共 {len(tags)} 个标签{extra}")
+                self.count_lbl.config(text=T("共 {n} 个标签{x}", n=len(tags), x=extra))
 
             for t in tags:
                 tid, name, color = t[0], t[1], t[2]
@@ -17921,7 +17926,7 @@ class AutoRuleEditDialog(tk.Toplevel):
                         variable=self.rule_type_var).pack(side="left", padx=2)
         ttk.Radiobutton(r1, text=T("扩展名"), value="ext",
                         variable=self.rule_type_var).pack(side="left", padx=2)
-        ttk.Radiobutton(r1, text=T("全部文件"), value="*",
+        ttk.Radiobutton(r1, text=T(T("全部文件")), value="*",
                         variable=self.rule_type_var).pack(side="left", padx=2)
 
         r2 = ttk.Frame(body)
@@ -18462,7 +18467,7 @@ class AutoTagRulesDialog(tk.Toplevel):
                         variable=self.rule_type_var).pack(side="left", padx=2)
         ttk.Radiobutton(r1, text=T("扩展名"), value="ext",
                         variable=self.rule_type_var).pack(side="left", padx=2)
-        ttk.Radiobutton(r1, text=T("全部文件"), value="*",
+        ttk.Radiobutton(r1, text=T(T("全部文件")), value="*",
                         variable=self.rule_type_var).pack(side="left", padx=2)
 
         r_scope = ttk.Frame(add_box)
@@ -18688,7 +18693,7 @@ class AutoTagRulesDialog(tk.Toplevel):
             elif rtype == "ext":
                 type_label = "扩展名"
             elif rtype == "*":
-                type_label = "全部文件"
+                type_label = T("全部文件")
             else:
                 type_label = rtype
             scope = (r.get("scope_path") or "").strip()
@@ -19008,7 +19013,7 @@ class PropsDialog(tk.Toplevel):
         try:
             self.clipboard_clear()
             self.clipboard_append("\n".join(self._lines))
-            self.app.set_status("属性内容已复制到剪贴板")
+            self.app.set_status(T("属性内容已复制到剪贴板"))
         except Exception:
             pass
 
@@ -19725,7 +19730,7 @@ class ShortcutDialog(tk.Toplevel):
         save_shortcut_map(self.map)
         try:
             self.app._apply_shortcuts()
-            self.app.set_status("快捷键已保存并生效")
+            self.app.set_status(T("快捷键已保存并生效"))
             self.app.log_output("快捷键已更新：" + "，".join(
                 "%s=%s" % (dict((d[0], d[1]) for d in SHORTCUT_DEFS).get(k, k),
                            v or "（不用）")
@@ -19951,7 +19956,7 @@ class TagBox(tk.Toplevel):
             save_ui_setting("tag_box_layout", layout)
         except Exception as _e:
             try:
-                note_swallowed("保存标签盒分格设置失败", _e)
+                note_swallowed(T("保存标签盒分格设置失败"), _e)
             except Exception:
                 pass
 
@@ -20062,7 +20067,7 @@ class TagBox(tk.Toplevel):
         self._save_session(ids)
         self._redraw()
         try:
-            self.app.set_status("已放进标签盒：%s" % (name or tid))
+            self.app.set_status(T("已放进标签盒：{x}", x=(name or tid)))
         except Exception:
             pass
 
@@ -20075,7 +20080,7 @@ class TagBox(tk.Toplevel):
             return
         self._redraw()
         try:
-            self.app.set_status("已固定进标签盒：%s" % (name or tid))
+            self.app.set_status(T("已固定进标签盒：{x}", x=(name or tid)))
         except Exception:
             pass
 
@@ -20112,7 +20117,7 @@ class TagBox(tk.Toplevel):
                 self._write_layout({"dir": layout["dir"], "cells": cells})
         except Exception as _e:
             try:
-                note_swallowed("标签盒：从分格配置里删标签失败", _e)
+                note_swallowed(T("标签盒：从分格配置里删标签失败"), _e)
             except Exception:
                 pass
         self._redraw()
@@ -20236,7 +20241,7 @@ class TagBox(tk.Toplevel):
                                 pass
             except Exception as _e:
                 try:
-                    note_swallowed("标签盒：清理幽灵分格标签失败", _e)
+                    note_swallowed(T("标签盒：清理幽灵分格标签失败"), _e)
                 except Exception:
                     pass
             # ★ 空盒子时的提示：如果分了格，就放到「最下面」那一行，
@@ -20330,7 +20335,7 @@ class TagBox(tk.Toplevel):
                 self._write_layout({"dir": layout["dir"], "cells": cells})
         except Exception as _e:
             try:
-                note_swallowed("标签盒：回写分格配置失败", _e)
+                note_swallowed(T("标签盒：回写分格配置失败"), _e)
             except Exception:
                 pass
 
@@ -20525,7 +20530,7 @@ class TagBox(tk.Toplevel):
             self._sel_ids = set()
             self._redraw()
             try:
-                self.app.set_status("标签盒：已取消选中")
+                self.app.set_status(T("标签盒：已取消选中"))
             except Exception:
                 pass
 
@@ -20824,7 +20829,7 @@ class TagBox(tk.Toplevel):
                     pass
         except Exception as exc:
             try:
-                self.app.set_status("拖放打标签失败：%s" % exc)
+                self.app.set_status(T("拖放打标签失败：{x}", x=exc))
             except Exception:
                 pass
 
@@ -20913,7 +20918,7 @@ class TagBox(tk.Toplevel):
     def _apply_one(self, tid, name):
         paths = list(self.app.file_list.get_selection() or [])
         if not paths:
-            self.app.set_status("先选中文件，再从标签盒里点标签（或拖到文件上）")
+            self.app.set_status(T("先选中文件，再从标签盒里点标签（或拖到文件上）"))
             return
         n = 0
         _hit = []          # ★ 2026-10-06：真正打上的，用来记撤销
@@ -20924,7 +20929,7 @@ class TagBox(tk.Toplevel):
                 _hit.append((p, name))
             except Exception as exc:
                 try:
-                    note_swallowed("标签盒：打标签失败", exc)
+                    note_swallowed(T("标签盒：打标签失败"), exc)
                 except Exception:
                     pass
         try:
@@ -20934,16 +20939,16 @@ class TagBox(tk.Toplevel):
             pass
         if _hit:
             self.app.undo_record("tag_add", _hit)
-        self.app.set_status("已给 %d 个文件打上「%s」" % (n, name))
+        self.app.set_status(T("已给 {x} 个文件打上「{y}」", x=n, y=name))
 
     def _apply_to_selection(self):
         ids = self.box_ids()
         if not ids:
-            self.app.set_status("标签盒是空的")
+            self.app.set_status(T("标签盒是空的"))
             return
         paths = list(self.app.file_list.get_selection() or [])
         if not paths:
-            self.app.set_status("先选中文件，再点「一键打给选中文件」")
+            self.app.set_status(T("先选中文件，再点「一键打给选中文件」"))
             return
         names = []
         for tid in ids:
@@ -20992,7 +20997,7 @@ class TagBox(tk.Toplevel):
             return
         ids = self.box_ids()
         if not ids:
-            self.app.set_status("标签盒是空的：先把标签放进来")
+            self.app.set_status(T("标签盒是空的：先把标签放进来"))
             return
         names = []
         for tid in ids:
@@ -21371,7 +21376,7 @@ except Exception:
                              "cells": [list(c) for c in self.cells]})
                 except Exception as _e:
                     try:
-                        note_swallowed("标签盒分格：回写对齐后的配置失败", _e)
+                        note_swallowed(T("标签盒分格：回写对齐后的配置失败"), _e)
                     except Exception:
                         pass
             else:
@@ -21541,7 +21546,7 @@ except Exception:
                 pass
             try:
                 self.box._redraw()
-                self.app.set_status("标签盒已恢复自动排列")
+                self.app.set_status(T("标签盒已恢复自动排列"))
             except Exception:
                 pass
             self.destroy()
@@ -21655,7 +21660,7 @@ except Exception:
             try:
                 rows = self.store.tags_by_usage(limit=1000)
             except Exception as exc:
-                note_swallowed("标签盒：读「用得最多的标签」失败", exc)
+                note_swallowed(T("标签盒：读「用得最多的标签」失败"), exc)
             q = ""
             try:
                 q = (self.search_var.get() or "").strip().lower()
@@ -21793,7 +21798,7 @@ class QuickPreview:
         """开窗，并显示当前选中的那个文件。"""
         cur = self._current_path()
         if not cur:
-            self.app.set_status("先选中一个文件，再按空格快速预览")
+            self.app.set_status(T("先选中一个文件，再按空格快速预览"))
             return
         self.paths = self._build_sequence(cur)
         try:
@@ -21931,7 +21936,7 @@ class QuickPreview:
             self.pane = PreviewPane(win, app=self.app)
             self.pane.pack(fill="both", expand=True, padx=6, pady=2)
         except Exception as exc:
-            note_swallowed("快速预览：里面那块没建起来", exc)
+            note_swallowed(T("快速预览：里面那块没建起来"), exc)
             self.pane = None
 
         # ★ 键盘：绑在这个窗口上（主窗口的键不受影响）
@@ -22004,7 +22009,7 @@ class QuickPreview:
                     fn(factor)
             except Exception as _ex:
                 try:
-                    note_swallowed("快速预览：缩放失败", _ex, quiet=True)
+                    note_swallowed(T("快速预览：缩放失败"), _ex, quiet=True)
                 except Exception:
                     pass
             # ★ 吃掉事件 —— 别让它冒到主窗口去（免得主窗口也跟着动）
@@ -22092,14 +22097,14 @@ class QuickPreview:
             self.index += 1
             self._render()
         else:
-            self.app.set_status("已经是最后一个了")
+            self.app.set_status(T("已经是最后一个了"))
 
     def prev(self):
         if self.index - 1 >= 0:
             self.index -= 1
             self._render()
         else:
-            self.app.set_status("已经是第一个了")
+            self.app.set_status(T("已经是第一个了"))
 
     def _render(self):
         """把当前这个文件显示出来。"""
@@ -22118,7 +22123,7 @@ class QuickPreview:
             if self.pane is not None:
                 self.pane.show_path(p)
         except Exception as exc:
-            note_swallowed("快速预览：显示这个文件失败（%s）" % name, exc)
+            note_swallowed(T("快速预览：显示这个文件失败（{x}）", x=name), exc)
         # 顺手把列表也跟着选中 —— 这样关掉预览时，选中的就是刚看的那个
         try:
             self.app.file_list.selected_paths = {p}
@@ -22601,7 +22606,7 @@ def prune_orphan_dir_cache(store, root_path, dry_run=False):
         return _run()
     except Exception as exc:
         try:
-            note_swallowed("清理幽灵目录失败", exc)
+            note_swallowed(T("清理幽灵目录失败"), exc)
         except Exception:
             pass
         return 0, 0
@@ -22680,7 +22685,7 @@ def scan_index_roots(store, root_ids, cancel_flag=None, progress_cb=None,
                     store.update_index_root_stats(rid, fc2, dc2, err2)
                 except Exception as _e2:
                     try:
-                        note_swallowed("CloudDrive2 API：把统计结果写回索引根失败", _e2)
+                        note_swallowed(T("CloudDrive2 API：把统计结果写回索引根失败"), _e2)
                     except Exception:
                         pass
                 out.append((rid, path, dc2, fc2, err2))
@@ -22762,7 +22767,7 @@ def scan_index_roots(store, root_ids, cancel_flag=None, progress_cb=None,
                                 mtime = st.st_mtime
                             except OSError as _e:
                                 stat_skip += 1
-                                note_swallowed("索引扫描：有些文件读不到大小/时间（网盘文件常见，会记成问号）", _e)
+                                note_swallowed(T("索引扫描：有些文件读不到大小/时间（网盘文件常见，会记成问号）"), _e)
                             entries.append((e.name, False, size, mtime))
                             file_count += 1
                 ok = True
@@ -22819,7 +22824,7 @@ def scan_index_roots(store, root_ids, cancel_flag=None, progress_cb=None,
         try:
             store.update_index_root_stats(rid, file_count, dir_count, err_line)
         except Exception as _e:
-            note_swallowed("索引扫描：把统计结果写回索引根失败", _e)
+            note_swallowed(T("索引扫描：把统计结果写回索引根失败"), _e)
         out.append((rid, path, dir_count, file_count, err_line))
     return out
 
@@ -23679,7 +23684,7 @@ class IndexManagerDialog(tk.Toplevel):
                 " GROUP BY dir_path", dir_scope_args(prefix)).fetchall()
         except Exception as exc:
             try:
-                note_swallowed("索引接力：列待办目录失败，这次就全量扫", exc)
+                note_swallowed(T("索引接力：列待办目录失败，这次就全量扫"), exc)
             except Exception:
                 pass
             return set()
@@ -23716,7 +23721,7 @@ class IndexManagerDialog(tk.Toplevel):
                     out.add(child)          # 这个子目录还没有自己的缓存 → 要扫
         except Exception as exc:
             try:
-                note_swallowed("索引接力：找「从没扫过的子目录」失败", exc)
+                note_swallowed(T("索引接力：找「从没扫过的子目录」失败"), exc)
             except Exception:
                 pass
         return out
@@ -23734,7 +23739,7 @@ class IndexManagerDialog(tk.Toplevel):
             save_ui_setting("index_scan_task", t)
         except Exception as exc:
             try:
-                note_swallowed("索引任务：保存接力进度失败", exc)
+                note_swallowed(T("索引任务：保存接力进度失败"), exc)
             except Exception:
                 pass
 
@@ -23759,7 +23764,7 @@ class IndexManagerDialog(tk.Toplevel):
             self._queue.put(("task_hint", None))
         except Exception as exc:
             try:
-                note_swallowed("索引接力：保存进度失败", exc)
+                note_swallowed(T("索引接力：保存进度失败"), exc)
             except Exception:
                 pass
 
@@ -25067,7 +25072,7 @@ class FloatingBall:
             y = int(self.win.winfo_y()) - int(self.root.winfo_rooty())
             save_ui_setting("float_ball_pos", [x, y])
         except Exception as _e:
-            note_swallowed("记住悬浮球位置失败", _e)
+            note_swallowed(T("记住悬浮球位置失败"), _e)
 
     def _load_pos(self):
         """★ 读回上次的位置；**不在可见区域就拉回来**（免得球"不见了"）。"""
@@ -25201,7 +25206,7 @@ class FloatingBall:
             return True
         except Exception as exc:
             try:
-                note_swallowed("建悬浮球失败（会退回用菜单栏）", exc)
+                note_swallowed(T("建悬浮球失败（会退回用菜单栏）"), exc)
             except Exception:
                 pass
             return False
@@ -25406,7 +25411,7 @@ class FloatingBall:
                           font=(FONT, fs, BOLD),
                           justify="center")
         except Exception as _e:
-            note_swallowed("重画悬浮球失败", _e)
+            note_swallowed(T("重画悬浮球失败"), _e)
 
     # ---------------- 拖动 ----------------
     def _on_press(self, event):
@@ -25469,7 +25474,7 @@ class FloatingBall:
                     pass
                 self._menu_open = False
         except Exception as _e:
-            note_swallowed("悬浮球弹菜单失败", _e)
+            note_swallowed(T("悬浮球弹菜单失败"), _e)
 
     # ---------------- 右键：设置 ----------------
     # ------------------- ★ 菜单上色（左键右键统一）-------------------
@@ -25696,7 +25701,7 @@ class FloatingBall:
                 except Exception:
                     pass
         except Exception as _e:
-            note_swallowed("悬浮球右键菜单失败", _e)
+            note_swallowed(T("悬浮球右键菜单失败"), _e)
 
     def _skin_var(self):
         """★ 皮肤的单选变量（跟主程序那个共用，免得两边不同步）。"""
@@ -25718,7 +25723,7 @@ class FloatingBall:
             self.win.attributes("-alpha", self.alpha)
             save_ui_setting("float_ball_alpha", self.alpha)
         except Exception as _e:
-            note_swallowed("改悬浮球透明度失败", _e)
+            note_swallowed(T("改悬浮球透明度失败"), _e)
 
     # ======================================================================
     #  ★★★ 2026-10-08：**球的皮肤**（用户要求：跟主界面**完全分开**）
@@ -25746,7 +25751,7 @@ class FloatingBall:
             self._reposition()
             self._redraw()
         except Exception as _e:
-            note_swallowed("换悬浮球颜色失败", _e)
+            note_swallowed(T("换悬浮球颜色失败"), _e)
 
     def set_ball_shape(self, shape):
         """★ **换球的形状**（**只管形状，不动颜色**）。
@@ -25780,7 +25785,7 @@ class FloatingBall:
             self._reposition()
             self._redraw()
         except Exception as _e:
-            note_swallowed("换悬浮球形状失败", _e)
+            note_swallowed(T("换悬浮球形状失败"), _e)
 
     def _custom_ball_colors(self):
         """★ **自定义球的颜色**（底色 / 边框 / 文字色）。
@@ -25817,7 +25822,7 @@ class FloatingBall:
             self._reposition()
             self._redraw()
         except Exception as _e:
-            note_swallowed("自定义悬浮球颜色失败", _e)
+            note_swallowed(T("自定义悬浮球颜色失败"), _e)
 
     def _toggle_show(self, key):
         """★ 勾/去勾一个显示项（用户要的"各种组合"）。"""
@@ -25849,7 +25854,7 @@ class FloatingBall:
             self._reposition()
             self._redraw()
         except Exception as _e:
-            note_swallowed("切换换行显示失败", _e)
+            note_swallowed(T("切换换行显示失败"), _e)
 
     def _set_show(self, keys):
         """★ 设置显示项（顺序按 DISPLAY_ITEMS 排，看着整齐）。"""
@@ -25862,7 +25867,7 @@ class FloatingBall:
             self._tick_stats()
             self._tick_disk()
         except Exception as _e:
-            note_swallowed("改悬浮球显示内容失败", _e)
+            note_swallowed(T("改悬浮球显示内容失败"), _e)
 
     def _reset_pos(self):
         """★ 放回默认位置（文件列表右侧）。
@@ -25878,7 +25883,7 @@ class FloatingBall:
             self.win.geometry("+%d+%d" % (rx + x, ry + y))
             self._save_pos()
         except Exception as _e:
-            note_swallowed("悬浮球复位失败", _e)
+            note_swallowed(T("悬浮球复位失败"), _e)
 
     def hide(self):
         """★ 藏起球（菜单栏会被装回来 —— 保证"永远有入口"）。"""
@@ -26056,7 +26061,7 @@ class FileTaggerApp:
             if _healed:
                 print(f"[网盘路径自愈] 已修正 {_healed} 条旧挂载路径")
         except Exception as _e:
-            note_swallowed("启动时自动修复网盘路径失败", _e)
+            note_swallowed(T("启动时自动修复网盘路径失败"), _e)
 
         # ★ v25 补丁14：网盘浏览模式（默认「索引」= 不连网盘、秒开）
         try:
@@ -26129,7 +26134,7 @@ class FileTaggerApp:
         try:
             self._apply_background()
         except Exception as _e:
-            note_swallowed("铺背景图失败（界面照常）", _e)
+            note_swallowed(T("铺背景图失败（界面照常）"), _e)
         # ★★★ 2026-10-08 **加载插件**（用户要"配合插件入口"）★★★
         #   ★ 为什么放在 `_build_ui()` **之后**：
         #     插件注册的菜单要挂到已经建好的菜单上，
@@ -26143,7 +26148,7 @@ class FileTaggerApp:
                 # ★ 有插件 → 把它们的菜单**挂上去**（"问表要东西"）
                 self._attach_plugin_menus()
         except Exception as _e:
-            note_swallowed("加载插件失败（程序照常启动）", _e)
+            note_swallowed(T("加载插件失败（程序照常启动）"), _e)
         # ★★★ 2026-10-08 **建悬浮球**（用户要"菜单栏改成悬浮球"）★★★
         #   ★ 为什么放在 `_build_ui()` **之后**：
         #     球的默认位置要问"文件列表右边在哪儿" ——
@@ -26158,7 +26163,7 @@ class FileTaggerApp:
         try:
             self._ui_poll_job = self.root.after(60, self._ui_poll)
         except Exception as _e:
-            note_swallowed("启动后台线程信箱失败", _e)
+            note_swallowed(T("启动后台线程信箱失败"), _e)
         self.refresh_categories()
         self.refresh_tags()
         self.load_directory(self.current_dir)
@@ -26187,7 +26192,7 @@ class FileTaggerApp:
             self.root.after(3000, lambda: _bg_post(
                 self._run_selfcheck, False))
         except Exception as _e:
-            note_swallowed("安排启动自检失败", _e)
+            note_swallowed(T("安排启动自检失败"), _e)
 
     # ---------------- 菜单栏 ----------------
     def _build_menu(self):
@@ -26594,7 +26599,7 @@ class FileTaggerApp:
             self.root.bind("<KeyRelease-Alt_L>", self._on_alt_release, add="+")
             self.root.bind("<KeyRelease-Alt_R>", self._on_alt_release, add="+")
         except Exception as _e:
-            note_swallowed("装 Alt 唤出菜单失败", _e)
+            note_swallowed(T("装 Alt 唤出菜单失败"), _e)
         # ★ 建完先刷一次状态圆点，免得第一次打开菜单时看不到圆点
         try:
             self.root.after(300, self._refresh_menu_states)
@@ -26626,7 +26631,7 @@ class FileTaggerApp:
         try:
             self._toggle_menubar()
         except Exception as _e:
-            note_swallowed("Alt 唤出菜单栏失败", _e)
+            note_swallowed(T("Alt 唤出菜单栏失败"), _e)
 
     def _on_alt_toggle_menu(self, event=None):
         """★ 按 `Alt` 的同时**按了别的键** → 记一笔，松手时不切换菜单。
@@ -26656,7 +26661,7 @@ class FileTaggerApp:
                 self.root.config(menu="")
                 self._menu_hidden = True
         except Exception as _e:
-            note_swallowed("切换菜单栏显示失败", _e)
+            note_swallowed(T("切换菜单栏显示失败"), _e)
 
     # ======================================================================
     #  ★★★ 2026-10-08：**插件菜单**（用户要"配合插件入口"）
@@ -26694,7 +26699,7 @@ class FileTaggerApp:
                         continue        # 空的就不挂（免得点开一片空白）
                     self.menubar.add_cascade(label=str(label), menu=sub)
                 except Exception as _e:
-                    note_swallowed("挂插件菜单「%s」失败" % pname, _e)
+                    note_swallowed(T("挂插件菜单「{x}」失败", x=pname), _e)
             # ---- ①.5 ★ 插件可能注册了**自己的皮肤** → 把皮肤菜单重刷一遍 ----
             #   ★ 为什么需要（实测踩的）：
             #     皮肤菜单是**建菜单时**列一遍的，那会儿插件**还没加载**，
@@ -26732,9 +26737,9 @@ class FileTaggerApp:
                         target.add_separator()
                         target.add_command(label=str(ilabel), command=cmd)
                 except Exception as _e:
-                    note_swallowed("插插件菜单项「%s」失败" % pname, _e)
+                    note_swallowed(T("插插件菜单项「{x}」失败", x=pname), _e)
         except Exception as _e:
-            note_swallowed("挂插件菜单失败", _e)
+            note_swallowed(T("挂插件菜单失败"), _e)
 
     # ======================================================================
     #  ★★★ 2026-10-08：**皮肤菜单"每次打开时重建"**（用户要"配合插件入口"）
@@ -26796,7 +26801,7 @@ class FileTaggerApp:
             os.makedirs(d, exist_ok=True)
             os.startfile(d)          # ★ Windows 打开文件夹
         except Exception as _e:
-            note_swallowed("打开语言文件夹失败", _e)
+            note_swallowed(T("打开语言文件夹失败"), _e)
 
     def set_language_now(self, code):
         """★ **换语言**（存设置 + 提示重启 + 给"现在就重启"）。
@@ -26828,7 +26833,7 @@ class FileTaggerApp:
             if ok:
                 self._restart_app()
         except Exception as _e:
-            note_swallowed("换语言失败", _e)
+            note_swallowed(T("换语言失败"), _e)
 
     def _restart_app(self):
         """★ **重启程序**（用户不用自己去关开）。
@@ -26851,7 +26856,7 @@ class FileTaggerApp:
                 args = [sys.executable] + sys.argv
             subprocess.Popen(args, cwd=os.getcwd(), close_fds=True)
         except Exception as _e:
-            note_swallowed("重启失败（请手动关掉再打开）", _e)
+            note_swallowed(T("重启失败（请手动关掉再打开）"), _e)
             return
         # ★ 新进程起来了 → 关掉自己
         try:
@@ -27009,7 +27014,7 @@ class FileTaggerApp:
                 pass
             self._apply_panel_blend()
         except Exception as _e:
-            note_swallowed("铺背景图失败", _e)
+            note_swallowed(T("铺背景图失败"), _e)
 
     def _apply_panel_blend(self):
         """★★ **面板色"看着半透明"** —— 这一步不做，背景图基本看不见。
@@ -27062,7 +27067,7 @@ class FileTaggerApp:
             # ★ 存起来，换皮肤时恢复
             self._blended_saved = saved
         except Exception as _e:
-            note_swallowed("调和面板色失败（背景图会看不太出来）", _e)
+            note_swallowed(T("调和面板色失败（背景图会看不太出来）"), _e)
 
     def _restore_panel_colors(self):
         """★ 把上次"调和过的面板色"**恢复成原始色**。
@@ -27131,7 +27136,7 @@ class FileTaggerApp:
                 "★ 想调「透不透」？去「设置 → 背景图」里改。" % path,
                 parent=self.root)
         except Exception as _e:
-            note_swallowed("选背景图失败", _e)
+            note_swallowed(T("选背景图失败"), _e)
 
     def set_background_image(self, path, blur=None, mode=None, panel_alpha=None):
         """★ **设置背景图**（用户手动选 / 皮肤自带，都走这里）。
@@ -27168,7 +27173,7 @@ class FileTaggerApp:
             self._apply_background()
             self._refresh_all_panels()
         except Exception as _e:
-            note_swallowed("保存背景图设置失败", _e)
+            note_swallowed(T("保存背景图设置失败"), _e)
 
     def clear_background(self):
         """★ 去掉背景图（恢复原来的实色界面）。"""
@@ -27181,7 +27186,7 @@ class FileTaggerApp:
             self._apply_background()
             self._refresh_all_panels()
         except Exception as _e:
-            note_swallowed("去掉背景图失败", _e)
+            note_swallowed(T("去掉背景图失败"), _e)
 
     def _bg_cur(self):
         """★ 拿"当前背景设置"（没有就返回一份默认的）。"""
@@ -27208,7 +27213,7 @@ class FileTaggerApp:
             self.set_background_image(c["background_image"],
                                       panel_alpha=float(v))
         except Exception as _e:
-            note_swallowed("调背景透明度失败", _e)
+            note_swallowed(T("调背景透明度失败"), _e)
 
     def set_bg_blur(self, v):
         """★ 改"模糊程度"（0=不模糊；14 左右像毛玻璃）。"""
@@ -27220,7 +27225,7 @@ class FileTaggerApp:
                 return
             self.set_background_image(c["background_image"], blur=float(v))
         except Exception as _e:
-            note_swallowed("调背景模糊失败", _e)
+            note_swallowed(T("调背景模糊失败"), _e)
 
     def set_bg_mode(self, m):
         """★ 改"怎么摆"（cover / contain / tile / center）。"""
@@ -27232,7 +27237,7 @@ class FileTaggerApp:
                 return
             self.set_background_image(c["background_image"], mode=str(m))
         except Exception as _e:
-            note_swallowed("调背景摆放失败", _e)
+            note_swallowed(T("调背景摆放失败"), _e)
 
     def _refresh_all_panels(self):
         """★ 面板色变了之后，**把已经建好的控件也刷一遍**。
@@ -27249,7 +27254,7 @@ class FileTaggerApp:
         try:
             apply_theme(self.root, THEME_NAME)
         except Exception as _e:
-            note_swallowed("重刷界面颜色失败", _e)
+            note_swallowed(T("重刷界面颜色失败"), _e)
         try:
             self._retheme_custom_parts()
         except Exception:
@@ -27266,7 +27271,7 @@ class FileTaggerApp:
         try:
             apply_theme(self.root, THEME_NAME)
         except Exception as _e:
-            note_swallowed("重刷界面颜色失败", _e)
+            note_swallowed(T("重刷界面颜色失败"), _e)
         try:
             self._retheme_custom_parts()
         except Exception:
@@ -27313,7 +27318,7 @@ class FileTaggerApp:
         except Exception as _e:
             ball = None
             try:
-                note_swallowed("建悬浮球失败", _e)
+                note_swallowed(T("建悬浮球失败"), _e)
             except Exception:
                 pass
         # ★ 兜底：球没建成 → 菜单栏装回来
@@ -27357,16 +27362,16 @@ class FileTaggerApp:
             if b is not None and b.win is not None:
                 b.hide()
                 self.floating_ball = None
-                self.log_output("已收走悬浮球（菜单栏还在「设置 → 显示菜单栏」里）")
+                self.log_output(T("已收走悬浮球（菜单栏还在「设置 → 显示菜单栏」里）"))
             else:
                 b = FloatingBall(self)
                 if b.build():
                     self.floating_ball = b
-                    self.log_output("悬浮球已叫回来")
+                    self.log_output(T("悬浮球已叫回来"))
                 else:
-                    self.log_output("★ 悬浮球没建起来（详情见「🔔 问题」面板）")
+                    self.log_output(T("★ 悬浮球没建起来（详情见「🔔 问题」面板）"))
         except Exception as _e:
-            note_swallowed("切换悬浮球失败", _e)
+            note_swallowed(T("切换悬浮球失败"), _e)
 
     # ======================================================================
     #  ★★★ 2026-10-08：**「设置」里那两个"球的皮肤"入口**
@@ -27386,12 +27391,12 @@ class FileTaggerApp:
             b = getattr(self, "floating_ball", None)
             if b is not None:
                 b.set_ball_style(name)
-                self.log_output("悬浮球皮肤已换成：%s" % name)
+                self.log_output(T("悬浮球皮肤已换成：{x}", x=name))
             else:
                 self.log_output("悬浮球皮肤已记住（%s）—— 下次叫出球时生效"
                                 % name)
         except Exception as _e:
-            note_swallowed("换悬浮球皮肤失败", _e)
+            note_swallowed(T("换悬浮球皮肤失败"), _e)
 
     def _set_ball_shape_from_menu(self, shape):
         """★ （设置菜单）换球的形状 —— 同上，球不在也能设。"""
@@ -27399,7 +27404,7 @@ class FileTaggerApp:
             b = getattr(self, "floating_ball", None)
             if b is not None:
                 b.set_ball_shape(shape)
-                self.log_output("悬浮球形状已换成：%s" % shape)
+                self.log_output(T("悬浮球形状已换成：{x}", x=shape))
             else:
                 # ★ 球不在 → 记在"球皮肤"里（下次建球时读出来）
                 cur = ball_style_get(load_ui_setting("ball_style", "default"))
@@ -27410,7 +27415,7 @@ class FileTaggerApp:
                 self.log_output("悬浮球形状已记住（%s）—— 下次叫出球时生效"
                                 % shape)
         except Exception as _e:
-            note_swallowed("换悬浮球形状失败", _e)
+            note_swallowed(T("换悬浮球形状失败"), _e)
 
     # ======================================================================
     #  ★★ 2026-10-07：**菜单项的"状态圆点"机制**
@@ -27732,9 +27737,9 @@ class FileTaggerApp:
             try:
                 self.root.clipboard_clear()
                 self.root.clipboard_append(str(_this_text))
-                self.set_status("本次记录已复制到剪贴板")
+                self.set_status(T("本次记录已复制到剪贴板"))
             except Exception as _e:
-                note_swallowed("复制本次记录失败", _e, quiet=True)
+                note_swallowed(T("复制本次记录失败"), _e, quiet=True)
 
         def _save_this():
             try:
@@ -27745,9 +27750,9 @@ class FileTaggerApp:
                     return
                 with open(p, "w", encoding="utf-8") as f:
                     f.write(str(_this_text))
-                self.set_status("已保存到：%s" % p)
+                self.set_status(T("已保存到：{x}", x=p))
             except Exception as _e:
-                note_swallowed("保存本次记录失败", _e)
+                note_swallowed(T("保存本次记录失败"), _e)
 
         def _open_file():
             try:
@@ -27879,7 +27884,7 @@ class FileTaggerApp:
             except Exception:
                 pass
         except Exception as _e:
-            note_swallowed("打开「关于」失败", _e)
+            note_swallowed(T("打开「关于」失败"), _e)
             # 兜底：实在画不出来就退回系统弹窗（至少能看到信息）
             try:
                 messagebox.showinfo("关于", "文件标签管理器 v26", parent=self.root)
@@ -27962,7 +27967,7 @@ class FileTaggerApp:
         try:
             self._install_error_spy()
         except Exception as _e:
-            note_swallowed("装「出错必留痕」保险失败", _e, quiet=True)
+            note_swallowed(T("装「出错必留痕」保险失败"), _e, quiet=True)
 
         # 状态栏
         status_bar = ttk.Frame(self.root)
@@ -28102,7 +28107,7 @@ class FileTaggerApp:
         #   它是"补救"用的，平时用不着，但手一抖时得**一眼找到**。
         #   ★ 放最左而不是最右：用户说"在 C:\Users\someone 共 47 项 的左边"。
         self._undo_btn = _mk_btn(
-            status_bar, "undo", "↶ 撤销",
+            status_bar, "undo", T("↶ 撤销"),
             "撤销上一步（Ctrl+Z）／没东西可撤时是灰的",
             self.undo_do, "undo")
         self._undo_btn.configure(state="disabled")
@@ -28122,7 +28127,7 @@ class FileTaggerApp:
 
         # C 组：问题（最右）
         self._problem_btn = _mk_btn(
-            status_bar, "problem", "🔔 问题 0",
+            status_bar, "problem", T("🔔 问题 0"),
             "打开「问题」面板（里面还有 输出 / 进度 两页）",
             lambda: self._toggle_log_panel("problems"), "problem")
         self._problem_btn.pack(side="right", padx=(_GAP_OUT, 10))
@@ -28140,26 +28145,26 @@ class FileTaggerApp:
 
         # B 组：顶部
         self._topbar_btn = _mk_btn(
-            status_bar, "top", "▲ 顶部",
+            status_bar, "top", T("▲ 顶部"),
             "显示 / 隐藏顶部工具栏",
             self.toggle_top_bar, "layout")
         self._topbar_btn.pack(side="right", padx=(_GAP_IN, _GAP_OUT))
         # B 组：预览
         self._preview_btn = _mk_btn(
-            status_bar, "preview", "📄 预览 ▲",
+            status_bar, "preview", T("📄 预览 ▲"),
             "显示 / 隐藏右侧预览窗格",
             self.toggle_preview, "layout")
         self._preview_btn.pack(side="right", padx=(_GAP_IN, 0))
 
         # A 组：标签条
         self._tagbar_btn = _mk_btn(
-            status_bar, "tagbar", "🏷 标签条 ▲",
+            status_bar, "tagbar", T("🏷 标签条 ▲"),
             "显示 / 隐藏标签条",
             self.toggle_tagbar, "tag")
         self._tagbar_btn.pack(side="right", padx=(_GAP_IN, _GAP_OUT))
         # A 组：标签库
         self._taglib_btn = _mk_btn(
-            status_bar, "taglib", "🔖 标签库 ▲",
+            status_bar, "taglib", T("🔖 标签库 ▲"),
             "显示 / 隐藏右侧「标签库（星图缩略图）」",
             self.toggle_taglib, "tag")
         self._taglib_btn.pack(side="right", padx=(_GAP_IN, 0))
@@ -28196,7 +28201,7 @@ class FileTaggerApp:
         try:
             self._undo_init()
         except Exception as _e:
-            note_swallowed("初始化撤销记录失败（本次开程序撤不了上次的事）", _e,
+            note_swallowed(T("初始化撤销记录失败（本次开程序撤不了上次的事）"), _e,
                            quiet=True)
         # ★★ 2026-10-06：把「快速预览」准备好（空格键用它）
         self._quick_preview_init()
@@ -28206,7 +28211,7 @@ class FileTaggerApp:
         try:
             _usage_init(str(Path(DB_PATH).parent / ".file_tagger_usage.jsonl"))
         except Exception as _e:
-            note_swallowed("初始化用法记录失败（这次不记日志）", _e, quiet=True)
+            note_swallowed(T("初始化用法记录失败（这次不记日志）"), _e, quiet=True)
         self.root.after(200, self._heartbeat_tick)
         threading.Thread(target=self._stuck_watchdog, daemon=True).start()
 
@@ -28257,7 +28262,7 @@ class FileTaggerApp:
             self.paned.bind("<Motion>", self._on_paned_motion, add="+")
             self.paned.bind("<Leave>", self._on_paned_leave, add="+")
         except Exception as _e:
-            note_swallowed("安装分栏条鼠标提示失败", _e)
+            note_swallowed(T("安装分栏条鼠标提示失败"), _e)
 
         # ★ 四块各自加一圈淡边，一眼能看出「这里是一块」
         self.sidebar = CategorySidebar(self.paned, self)
@@ -28292,16 +28297,16 @@ class FileTaggerApp:
             self._refresh_places()
             self._update_nav_buttons()
         except Exception as _e:
-            note_swallowed("初始化导航栏失败", _e)
+            note_swallowed(T("初始化导航栏失败"), _e)
         try:
             self._setup_dnd()
         except Exception as _e:
-            note_swallowed("初始化拖放失败", _e)
+            note_swallowed(T("初始化拖放失败"), _e)
         # ★ v25 补丁26：标签盒（默认隐藏，点状态栏「🗃 标签盒」才出来）
         try:
             self._build_tagbox()
         except Exception as _e:
-            note_swallowed("初始化标签盒失败", _e)
+            note_swallowed(T("初始化标签盒失败"), _e)
         # ★ v25 补丁27：鼠标悬停预览（停住 0.6 秒弹小窗，移开就没）
         try:
             self.hover = HoverPreview(self)
@@ -28312,7 +28317,7 @@ class FileTaggerApp:
                 "<Button-1>",
                 lambda e: (self.hover.on_leave(), None)[1], add="+")
         except Exception as _e:
-            note_swallowed("初始化悬停预览失败", _e)
+            note_swallowed(T("初始化悬停预览失败"), _e)
 
         # 按上次的记忆决定预览窗格 / 标签库 一开始是开还是关（默认：预览关、标签库开）
         # ★★ 2026-10-03：顺便把**上次拉好的各分区宽度**读出来
@@ -28366,9 +28371,9 @@ class FileTaggerApp:
         #   不能用 winfo_ismapped()：这时候窗口还没真正显示出来）
         try:
             self._preview_btn.config(
-                text=T("📄 预览 ▼") if self._preview_visible else "📄 预览 ▲")
+                text=T("📄 预览 ▼") if self._preview_visible else T("📄 预览 ▲"))
             self._taglib_btn.config(
-                text=T("🔖 标签库 ▼") if self._taglib_visible else "🔖 标签库 ▲")
+                text=T("🔖 标签库 ▼") if self._taglib_visible else T("🔖 标签库 ▲"))
         except Exception:
             pass
 
@@ -28386,7 +28391,7 @@ class FileTaggerApp:
         try:
             _style_all_widgets(self.root, THEME_NAME)
         except Exception as _e:
-            note_swallowed("给界面套皮肤失败（会用 Tk 默认外观）", _e)
+            note_swallowed(T("给界面套皮肤失败（会用 Tk 默认外观）"), _e)
         # ★★★ 2026-10-07 **修「状态栏那排按钮的彩色时有时无」**（用户报）★★★
         #   用户原话：「撤销 / 标签盒 / 标签库 / 标签条 / 预览 / 顶部 / 网盘
         #   **是彩色的，然后点了几下就又不彩了**，问题什么的也又变白了」。
@@ -28413,7 +28418,7 @@ class FileTaggerApp:
         try:
             self._make_tone_styles()
         except Exception as _e:
-            note_swallowed("状态栏按钮分组底色注册失败", _e, quiet=True)
+            note_swallowed(T("状态栏按钮分组底色注册失败"), _e, quiet=True)
         # ★★ 2026-10-06：**把标题栏 / 菜单栏染深**。
         #   ★★ 这里踩过一个坑，写清楚：一开始就在这儿直接调，**没生效**
         #      （截图看标题栏还是白的）。原因是：
@@ -28431,7 +28436,7 @@ class FileTaggerApp:
             self.root.after(0, lambda d=_dark_now: _set_native_dark(
                 self.root, d))
         except Exception as _e:
-            note_swallowed("标题栏/菜单栏没能染成深色（老系统上正常）", _e,
+            note_swallowed(T("标题栏/菜单栏没能染成深色（老系统上正常）"), _e,
                            quiet=True)
 
     # ---------- ★★ 2026-10-06：皮肤（白天 / 夜间） ----------
@@ -28450,7 +28455,7 @@ class FileTaggerApp:
         try:
             if not theme_has(name):
                 name = "light"
-            self.set_status("正在换皮肤…")
+            self.set_status(T("正在换皮肤…"))
             apply_theme(self.root, name)
             # ★ 换完皮肤后，把「靠自己重画」的那几块重新画一遍 ——
             #   它们不是普通控件，颜色是代码画上去的，扫控件扫不到。
@@ -28458,7 +28463,7 @@ class FileTaggerApp:
                 try:
                     fn()
                 except Exception as _e:
-                    note_swallowed("换皮肤：重画自定义区块失败", _e, quiet=True)
+                    note_swallowed(T("换皮肤：重画自定义区块失败"), _e, quiet=True)
             try:
                 if hasattr(self, "theme_var"):
                     self.theme_var.set(name)
@@ -28468,7 +28473,7 @@ class FileTaggerApp:
                 try:
                     save_ui_setting("theme", name)
                 except Exception as _e:
-                    note_swallowed("记住皮肤设置失败（下次打开可能变回白天）", _e,
+                    note_swallowed(T("记住皮肤设置失败（下次打开可能变回白天）"), _e,
                                    level="warn")
             self.set_status("皮肤已切换：%s"
                             % ("夜间 🌙（晚上不刺眼）" if name == "dark"
@@ -28480,7 +28485,7 @@ class FileTaggerApp:
                 pass
             return True
         except Exception as _e:
-            note_swallowed("换皮肤失败", _e)
+            note_swallowed(T("换皮肤失败"), _e)
             return False
 
     def toggle_theme(self):
@@ -28635,7 +28640,7 @@ class FileTaggerApp:
             if lf is not None and hasattr(lf, "_redraw"):
                 lf._redraw()
         except Exception as _e:
-            note_swallowed("换皮肤：重画文件列表失败", _e, quiet=True)
+            note_swallowed(T("换皮肤：重画文件列表失败"), _e, quiet=True)
         # 左侧分类库的每条（名字、图标底色是画上去的）
         try:
             sb = getattr(self, "sidebar", None)
@@ -28650,7 +28655,7 @@ class FileTaggerApp:
                 if hasattr(pv, "_repaint_theme"):
                     pv._repaint_theme()
         except Exception as _e:
-            note_swallowed("换皮肤：重画预览区失败", _e, quiet=True)
+            note_swallowed(T("换皮肤：重画预览区失败"), _e, quiet=True)
         # 标签条（胶囊的底色是按标签颜色算的，得重刷）
         try:
             self._restyle_tagbar()
@@ -28714,7 +28719,7 @@ class FileTaggerApp:
                     pass
             except Exception as _e:
                 try:
-                    note_swallowed("换皮肤：刷统计标签失败（%s）" % nm, _e,
+                    note_swallowed(T("换皮肤：刷统计标签失败（{x}）", x=nm), _e,
                                    quiet=True)
                 except Exception:
                     pass
@@ -28973,7 +28978,7 @@ class FileTaggerApp:
                 pass
             save_ui_setting("pane_sizes", data)
         except Exception as _e:
-            note_swallowed("记住分栏大小失败", _e)
+            note_swallowed(T("记住分栏大小失败"), _e)
 
     def _apply_saved_pane_sizes(self):
         """把上次记住的各分区宽度套回去。返回 True 表示真的套了。"""
@@ -29005,7 +29010,7 @@ class FileTaggerApp:
                 pw.sashpos(i, int(min(x, total - 8)))
             return True
         except Exception as _e:
-            note_swallowed("恢复分栏大小失败（按默认排）", _e)
+            note_swallowed(T("恢复分栏大小失败（按默认排）"), _e)
             return False
 
     def _auto_sash_sidebar(self, force=False):
@@ -29056,7 +29061,7 @@ class FileTaggerApp:
         #   导致右侧标签库显示得巨大 —— 直接跳过。
         if not _sidebar_should_show():
             return
-        names = ["全部文件"]
+        names = [T("全部文件")]
         try:
             for c in self.store.all_categories():
                 n = (c.get("name") or "").strip()
@@ -29304,7 +29309,7 @@ class FileTaggerApp:
                     self.root.after(60, self._restore_pane_widths)
                 except Exception:
                     pass
-                self.set_status("预览窗格：已隐藏")
+                self.set_status(T("预览窗格：已隐藏"))
             else:
                 # ★ v25 补丁41：这里原来是 paned.insert(idx, ...) 按序号硬塞。
                 #   实测 ttk.PanedWindow 的 insert 索引**不能超过当前面板数**，
@@ -29316,7 +29321,7 @@ class FileTaggerApp:
                 self._preview_visible = True
                 self._reinsert_tag_frame()
                 self._preview_btn.config(text=T("📄 预览 ▼"))
-                self.set_status("预览窗格：已显示（选中文件即可预览，拖分隔线调宽度）")
+                self.set_status(T("预览窗格：已显示（选中文件即可预览，拖分隔线调宽度）"))
                 # ★ 跟分类库一样：**等 Tk 把布局算完再摆宽度**，并补一次
                 #   （踩过：`paned.add()` 之后立刻 `sashpos()` 会被夹成 0）
                 try:
@@ -29338,7 +29343,7 @@ class FileTaggerApp:
                     pass
             save_ui_setting("preview_visible", self._preview_visible)
         except Exception as _e:
-            note_swallowed("切换预览窗格失败", _e)
+            note_swallowed(T("切换预览窗格失败"), _e)
 
     def toggle_taglib(self):
         """★ v25 补丁8：显示 / 隐藏右侧的「标签库（星图缩略图）」整列。
@@ -29382,7 +29387,7 @@ class FileTaggerApp:
                     self.root.after(60, self._restore_pane_widths)
                 except Exception:
                     pass
-                self.set_status("标签库：已隐藏")
+                self.set_status(T("标签库：已隐藏"))
             else:
                 # ★ v25 补丁41：**这里原来是 self.paned.add(...)，
                 #   那是「追加到最后一位」—— 但标签库本该排在
@@ -29404,7 +29409,7 @@ class FileTaggerApp:
                 self._taglib_visible = True
                 self._reinsert_tag_frame()
                 self._taglib_btn.config(text=T("🔖 标签库 ▼"))
-                self.set_status("标签库：已显示")
+                self.set_status(T("标签库：已显示"))
                 # ★ 等 Tk 算完布局再摆宽度（理由同 toggle_preview）
                 try:
                     self.root.update_idletasks()
@@ -29426,7 +29431,7 @@ class FileTaggerApp:
             except Exception:
                 pass
         except Exception as _e:
-            note_swallowed("切换标签库显示失败", _e)
+            note_swallowed(T("切换标签库显示失败"), _e)
 
     def _reinsert_tag_frame(self):
         """★ v25 补丁41：把右侧面板按正确顺序摆好。
@@ -29488,7 +29493,7 @@ class FileTaggerApp:
                 weight = 5 if w is self.list_frame else 0
                 self.paned.add(w, weight=weight)
             except Exception as _e:
-                note_swallowed("重新排列右侧面板失败", _e)
+                note_swallowed(T("重新排列右侧面板失败"), _e)
 
     def _safe_list_title(self, text):
         """★ 补丁37：标题里**绝不能以省略号结尾**。
@@ -29606,7 +29611,7 @@ class FileTaggerApp:
         je.bind("<Return>", lambda ev: self._page_jump())
         ttk.Button(nav, text=T("跳转"), width=6,
                    command=self._page_jump).pack(side="left")
-        ttk.Label(nav, text=f"（每页 {FILE_PAGE_SIZE} 项）",
+        ttk.Label(nav, text=T("（每页 {n} 项）", n=FILE_PAGE_SIZE),
                   foreground=theme_get("fg_dim")).pack(side="left", padx=8)
 
         # ★ 两个独立刷新键
@@ -29657,7 +29662,7 @@ class FileTaggerApp:
         try:
             self.file_list.on_ui_call = self._ui_threadsafe
         except Exception as _e:
-            note_swallowed("把后台信箱交给文件列表失败", _e)
+            note_swallowed(T("把后台信箱交给文件列表失败"), _e)
         self._recursive_cache = None
         self._recursive_active = False
         # ★ v25：作废「迟到的」目录树扫描结果（清搜索/切视图时 +1）
@@ -29774,9 +29779,9 @@ class FileTaggerApp:
         try:
             cur = (se.get() or "").strip()
             if cur:
-                self.set_status("搜索框已聚焦，当前搜索：%s" % cur)
+                self.set_status(T("搜索框已聚焦，当前搜索：{x}", x=cur))
             else:
-                self.set_status("搜索框已聚焦，输入关键字即可搜索")
+                self.set_status(T("搜索框已聚焦，输入关键字即可搜索"))
         except Exception:
             pass
 
@@ -29787,7 +29792,7 @@ class FileTaggerApp:
             self.quick_preview = QuickPreview(self)
         except Exception as _e:
             self.quick_preview = None
-            note_swallowed("快速预览没建起来（空格键会没反应）", _e, quiet=True)
+            note_swallowed(T("快速预览没建起来（空格键会没反应）"), _e, quiet=True)
 
     def toggle_quick_preview(self):
         """菜单 / 空格键都走这里。
@@ -29800,7 +29805,7 @@ class FileTaggerApp:
                并且它现在**带状态圆点**（绿=开着 / 红=关着）。
             ② **没选中文件时点它，什么都不发生** ——
                `QuickPreview.open()` 里只有一句
-               `set_status("先选中一个文件……")`，
+               `set_status(T("先选中一个文件……"))`，
                而状态栏那行字很小、很容易没注意 →
                **用户以为"点了没反应、只能开"**。
                → 现在改成**弹一个明确的提示框**，告诉他要先选文件。
@@ -29830,14 +29835,14 @@ class FileTaggerApp:
                     "（也可以直接按空格键 —— 一样要先选中文件）",
                     parent=self.root)
                 try:
-                    self.set_status("快速预览：先在列表里点一个文件")
+                    self.set_status(T("快速预览：先在列表里点一个文件"))
                 except Exception:
                     pass
                 return
         try:
             qp.toggle()
         except Exception as _e:
-            note_swallowed("快速预览开关失败", _e)
+            note_swallowed(T("快速预览开关失败"), _e)
             messagebox.showwarning("快速预览", "打不开预览窗：%s" % _e,
                                    parent=self.root)
         # ★ 开关完刷一下菜单圆点（让"绿/红"立刻反映真实状态）
@@ -29878,7 +29883,7 @@ class FileTaggerApp:
             self._update_tagbox_btn()
         except Exception as exc:
             try:
-                note_swallowed("标签盒：创建失败", exc)
+                note_swallowed(T("标签盒：创建失败"), exc)
             except Exception:
                 pass
 
@@ -30122,7 +30127,7 @@ class FileTaggerApp:
             save_ui_setting("cache_incognito", bool(inc_var.get()))
             save_ui_setting("cache_ttl_hours", ttl_v)
             save_ui_setting("cache_max_mb", mb_v)
-            self.set_status("缓存设置已保存")
+            self.set_status(T("缓存设置已保存"))
             messagebox.showinfo(
                 "保存好了",
                 "设置已经存下来了。\n\n"
@@ -30340,7 +30345,7 @@ class FileTaggerApp:
                     n_ok += 1
                 except Exception as exc:
                     try:
-                        note_swallowed("快捷键：绑定 %s（%s）失败" % (key, label),
+                        note_swallowed(T("快捷键：绑定 {x}（{y}）失败", x=key, y=label),
                                        exc)
                     except Exception:
                         pass
@@ -30365,7 +30370,7 @@ class FileTaggerApp:
                 pass
         if not first:
             try:
-                self.log_output("快捷键已重新绑定（共 %d 个按键）" % n_ok)
+                self.log_output(T("快捷键已重新绑定（共 {x} 个按键）", x=n_ok))
             except Exception:
                 pass
         return n_ok
@@ -30505,7 +30510,7 @@ class FileTaggerApp:
                    command=lambda: self.tag_thumb.zoom_center(1.15)).pack(side="left")
         ttk.Button(zr, text="🔍-", width=4,
                    command=lambda: self.tag_thumb.zoom_center(1 / 1.15)).pack(side="left", padx=2)
-        ttk.Label(zr, text="Ctrl+滚轮缩放 / 空格+拖动平移",
+        ttk.Label(zr, text=T("Ctrl+滚轮缩放 / 空格+拖动平移"),
                   foreground=theme_get("fg_dim")).pack(side="left", padx=6)
 
         r2 = ttk.Frame(parent)
@@ -30859,11 +30864,11 @@ class FileTaggerApp:
             vis = not getattr(self.file_list, "tagbar_visible", False)
             self.file_list.set_tagbar_visible(vis)
             self._tagbar_btn.config(
-                text=T("🏷 标签条 ▼") if vis else "🏷 标签条 ▲")
-            self.set_status("标签条：已显示" if vis
+                text=T("🏷 标签条 ▼") if vis else T("🏷 标签条 ▲"))
+            self.set_status(T("标签条：已显示") if vis
                             else "标签条：已隐藏（点右下角「🏷 标签条」再看）")
         except Exception as _e:
-            note_swallowed("切换标签条显示失败", _e)
+            note_swallowed(T("切换标签条显示失败"), _e)
 
     def _pack_tagbar(self, visible):
         """★ v25 补丁7：把标签条当成「整条底部面板」显示 / 收起。
@@ -30882,7 +30887,7 @@ class FileTaggerApp:
             else:
                 tb.pack_forget()
         except Exception as _e:
-            note_swallowed("显示/隐藏底部标签条失败", _e)
+            note_swallowed(T("显示/隐藏底部标签条失败"), _e)
 
     # ---------------- ★ 日志面板 ----------------
     def _build_log_panel(self):
@@ -31025,7 +31030,7 @@ class FileTaggerApp:
             content = widget.get("1.0", "end")
             self.root.clipboard_clear()
             self.root.clipboard_append(content)
-            self.set_status("已复制到剪贴板")
+            self.set_status(T("已复制到剪贴板"))
         except Exception:
             pass
 
@@ -31111,7 +31116,7 @@ class FileTaggerApp:
                 try:
                     fn(*a)
                 except Exception as _e:
-                    note_swallowed("后台线程交回主线程的活儿失败了", _e)
+                    note_swallowed(T("后台线程交回主线程的活儿失败了"), _e)
         except Exception:
             pass
         # ★ 顺手把「预览专用信箱」也排一遍（见上面说明）
@@ -31135,7 +31140,7 @@ class FileTaggerApp:
         except Exception as exc:
             # ★★ 2026-10-03：之前 except: pass，_ui_threadsafe 失败就静默丢日志。
             #   改成至少记一笔 warn，方便排查「为什么某段日志没出现」。
-            note_swallowed("log_output：回主线程写「输出」面板失败", exc,
+            note_swallowed(T("log_output：回主线程写「输出」面板失败"), exc,
                            level="warn")
 
     def log_progress(self, text):
@@ -31146,7 +31151,7 @@ class FileTaggerApp:
         try:
             self._ui_threadsafe(self._append_to_text, self._text_progress, line)
         except Exception as exc:
-            note_swallowed("log_progress：回主线程写「进度」面板失败", exc,
+            note_swallowed(T("log_progress：回主线程写「进度」面板失败"), exc,
                            level="warn")
 
     def log_problem(self, text, level="warn"):
@@ -31202,7 +31207,7 @@ class FileTaggerApp:
             else:
                 self._ui_threadsafe(self._update_problem_badge)
         except Exception as exc:
-            note_swallowed("log_problem：回主线程写「问题」面板失败", exc,
+            note_swallowed(T("log_problem：回主线程写「问题」面板失败"), exc,
                            level="warn")
         try:
             self.set_status(f"⚠ {text}")
@@ -31217,7 +31222,7 @@ class FileTaggerApp:
         """
         try:
             vm = str(getattr(self, "view_mode", "") or "")
-            m = {"dir": "文件夹", "cat": "分类", "all": "全部文件"}
+            m = {"dir": "文件夹", "cat": "分类", "all": T("全部文件")}
             base = m.get(vm, vm or "未知")
             if getattr(self, "net_browse_mode", "") == "real":
                 base += "+网盘实时"
@@ -31257,7 +31262,7 @@ class FileTaggerApp:
         try:
             n = self._problem_count
             if n > 0:
-                self._problem_btn.config(text=f"🔔 问题 {n}")
+                self._problem_btn.config(text=T("🔔 问题 {n}", n=n))
             else:
                 self._problem_btn.config(text=T("🔔 问题 0"))
         except Exception:
@@ -31404,7 +31409,7 @@ class FileTaggerApp:
                 try:
                     msg = _cache_clean_old()
                     if msg and "不用清" not in msg and "很干净" not in msg:
-                        self.log_problem("缓存清理：" + msg, level="info")
+                        self.log_problem(T("缓存清理：") + msg, level="info")
                 except Exception:
                     pass
 
@@ -31476,9 +31481,9 @@ class FileTaggerApp:
                 try:
                     self.root.clipboard_clear()
                     self.root.clipboard_append(str(text))
-                    self.set_status("体检报告已复制到剪贴板")
+                    self.set_status(T("体检报告已复制到剪贴板"))
                 except Exception as _e:
-                    note_swallowed("复制体检报告失败", _e, quiet=True)
+                    note_swallowed(T("复制体检报告失败"), _e, quiet=True)
 
             def _save():
                 try:
@@ -31492,7 +31497,7 @@ class FileTaggerApp:
                         f.write(str(text))
                     self.set_status(f"已保存：{fn}")
                 except Exception as _e:
-                    note_swallowed("保存体检报告失败", _e)
+                    note_swallowed(T("保存体检报告失败"), _e)
 
             ttk.Button(btns, text=T("复制到剪贴板"), command=_copy).pack(side="left")
             ttk.Button(btns, text=T("另存为文件…"), command=_save).pack(side="left", padx=6)
@@ -31503,7 +31508,7 @@ class FileTaggerApp:
             except Exception:
                 pass
         except Exception as _e:
-            note_swallowed("打开体检报告窗口失败", _e)
+            note_swallowed(T("打开体检报告窗口失败"), _e)
 
     def dump_swallowed_report(self):
         """把「哪些地方在偷偷出错」整理成人话，供排查用。
@@ -31787,7 +31792,7 @@ class FileTaggerApp:
                     pass
         except Exception as exc:
             try:
-                note_swallowed("切换分类库显示失败", exc)
+                note_swallowed(T("切换分类库显示失败"), exc)
             except Exception:
                 print(exc)
 
@@ -31865,18 +31870,18 @@ class FileTaggerApp:
                 self._top_bar2.pack_forget()
                 self._top_bar_visible = False
                 self._topbar_btn.config(text=T("▼ 顶部"))
-                self.set_status("顶部工具栏：已隐藏")
+                self.set_status(T("顶部工具栏：已隐藏"))
             else:
                 # ★ 显示：必须钉回 paned 上面（理由见上面 docstring）
                 self._top_bar2.pack(fill="x", before=self.paned)
                 self._top_bar.pack(fill="x", before=self._top_bar2)
                 self._top_bar_visible = True
                 self._topbar_btn.config(text=T("▲ 顶部"))
-                self.set_status("顶部工具栏：已显示")
+                self.set_status(T("顶部工具栏：已显示"))
             save_ui_setting("top_bar_visible", self._top_bar_visible)
         except Exception as exc:
             try:
-                note_swallowed("切换顶部工具栏显示失败", exc)
+                note_swallowed(T("切换顶部工具栏显示失败"), exc)
             except Exception:
                 print(exc)
 
@@ -31908,7 +31913,7 @@ class FileTaggerApp:
                 if isinstance(data, list):
                     self._undo_stack = data[-UNDO_MAX:]
         except Exception as _e:
-            note_swallowed("读撤销记录失败（这次开程序撤不了上次的事）", _e,
+            note_swallowed(T("读撤销记录失败（这次开程序撤不了上次的事）"), _e,
                            quiet=True)
         self._undo_save_soon()
 
@@ -31961,13 +31966,13 @@ class FileTaggerApp:
             self._undo_save_soon()
             self._undo_update_btn()
         except Exception as _e:
-            note_swallowed("记撤销记录失败（这一步撤不了）", _e, quiet=True)
+            note_swallowed(T("记撤销记录失败（这一步撤不了）"), _e, quiet=True)
 
     def undo_do(self):
         """★ 按 Ctrl+Z：把最后一条反着执行一遍。**要告诉用户撤了什么。**"""
         try:
             if not self._undo_stack:
-                self.set_status("没有可以撤销的操作了")
+                self.set_status(T("没有可以撤销的操作了"))
                 return
             rec = self._undo_stack[-1]
         except Exception:
@@ -31983,7 +31988,7 @@ class FileTaggerApp:
             else:
                 ok, msg, failed = res[0], res[1], []
         except Exception as _e:
-            note_swallowed("撤销失败", _e)
+            note_swallowed(T("撤销失败"), _e)
             messagebox.showwarning("撤销没成功",
                                    "这一步没能撤销：\n\n%s" % _e,
                                    parent=self.root)
@@ -31999,8 +32004,8 @@ class FileTaggerApp:
                 "这一步撤不回来了。\n\n%s\n\n"
                 "（已经把它从「可撤销」列表里去掉，免得每次按都失败）" % msg,
                 parent=self.root)
-            self.set_status("撤销失败：%s" % msg)
-            self.log_problem("撤销失败：%s（%s）" % (label, msg), level="warn")
+            self.set_status(T("撤销失败：{x}", x=msg))
+            self.log_problem(T("撤销失败：{x}（{y}）", x=label, y=msg), level="warn")
             return
         # ★★ 2026-10-07 新增：**半成功必须当面说清楚**。
         #   背景（错题本 #14 / 待清算第 2 条）：用户报「撤销：本地正常，网盘不行」。
@@ -32034,7 +32039,7 @@ class FileTaggerApp:
             self._undo_stack.pop()
             self._undo_save_soon()
             self._undo_update_btn()
-            self.set_status("已撤销（部分）：%s" % msg)
+            self.set_status(T("已撤销（部分）：{x}", x=msg))
             return
         # 成功：从「可撤销」挪到「可重做」
         self._undo_stack.pop()
@@ -32042,11 +32047,11 @@ class FileTaggerApp:
         self._undo_save_soon()
         self._undo_update_btn()
         if msg:
-            self.set_status("已撤销：%s（%s）" % (label, msg))
+            self.set_status(T("已撤销：{x}（{y}）", x=label, y=msg))
         else:
-            self.set_status("已撤销：%s" % label)
+            self.set_status(T("已撤销：{x}", x=label))
         try:
-            self.log_output("↶ 已撤销：%s" % label)
+            self.log_output(T("↶ 已撤销：{x}", x=label))
         except Exception:
             pass
 
@@ -32186,8 +32191,8 @@ class FileTaggerApp:
         except Exception as exc:
             messagebox.showerror("新建失败", str(exc), parent=self.root)
             return
-        self.log_output("新建文件夹：%s" % newp)
-        self.set_status("已新建文件夹：%s" % name)
+        self.log_output(T("新建文件夹：{x}", x=newp))
+        self.set_status(T("已新建文件夹：{x}", x=name))
         self.refresh_current_dir()
 
     def _do_rename(self, path=None):
@@ -32241,12 +32246,12 @@ class FileTaggerApp:
             else:
                 n = 1 if self.store.move_file_path(path, new_path) else 0
         except Exception as exc:
-            self.log_problem("改名成功了，但数据库里的路径没同步好：%s" % exc,
+            self.log_problem(T("改名成功了，但数据库里的路径没同步好：{x}", x=exc),
                              level="error")
-        self.log_output("已改名：%s → %s（数据库同步 %d 条）" % (old_name, new_name, n))
+        self.log_output(T("已改名：{x} → {y}（数据库同步 {z} 条）", x=old_name, y=new_name, z=n))
         # ★★ 2026-10-06：记一笔撤销（记「新名 → 旧名」，撤销时改回去）
         self.undo_record("rename", [(new_path, path)])
-        self.set_status("已改名：%s → %s" % (old_name, new_name))
+        self.set_status(T("已改名：{x} → {y}", x=old_name, y=new_name))
         self.file_list.selected_paths = {new_path}
         self.refresh_current_dir()
         self.refresh_rows_tags()
@@ -32321,14 +32326,14 @@ class FileTaggerApp:
             try:
                 self.store.forget_path(p)
             except Exception as _e:
-                note_swallowed("删除后清理数据库记录失败", _e)
+                note_swallowed(T("删除后清理数据库记录失败"), _e)
             # 文件夹的话，把它下面的记录和缓存也清掉
             if os.path.isdir(os.path.dirname(p)) and "." not in os.path.basename(p):
                 try:
                     self.store.clear_dir_cache_under(p)
                 except Exception:
                     pass
-        self.log_output("已删到回收站：%d 项" % ok)
+        self.log_output(T("已删到回收站：{x} 项", x=ok))
         # ★★ 2026-10-06：记一笔撤销（**整批算一条** —— 按一次 Ctrl+Z 全回来）
         if _done_paths:
             self.undo_record("delete", _done_paths)
@@ -32437,7 +32442,7 @@ class FileTaggerApp:
                 # ★★ 2026-10-03：worker 尾部 _ui_threadsafe 失败时，
                 #   之前 except: pass 默默丢弃，主线程永远不知道活儿没干。
                 #   现在至少留一笔 warn，方便排查。
-                note_swallowed("worker(_paste_done)：回主线程通知失败",
+                note_swallowed(T("worker(_paste_done)：回主线程通知失败"),
                                exc, level="warn")
 
         threading.Thread(target=worker, daemon=True).start()
@@ -32454,7 +32459,7 @@ class FileTaggerApp:
                     else:
                         self.store.move_file_path(src, dst)
                 except Exception as _e:
-                    note_swallowed("剪切粘贴后同步数据库路径失败", _e)
+                    note_swallowed(T("剪切粘贴后同步数据库路径失败"), _e)
                 try:
                     self.store.clear_dir_cache_under(os.path.dirname(str(src)))
                 except Exception:
@@ -32463,7 +32468,7 @@ class FileTaggerApp:
         self._clip = None
         n = len(done)
         word = "移动" if cut else "复制"
-        self.log_output("完成：%s %d 项 → %s" % (word, n, target))
+        self.log_output(T("完成：{x} {y} 项 → {z}", x=word, y=n, z=target))
         self.set_status("已%s %d 项 → %s%s"
                         % (word, n, os.path.basename(target.rstrip("\\")) or target,
                            "" if not errs else "（%d 项失败）" % len(errs)))
@@ -32478,7 +32483,7 @@ class FileTaggerApp:
             else:
                 self.refresh_current_dir()
         except Exception as _e:
-            note_swallowed("粘贴后刷新界面失败", _e)
+            note_swallowed(T("粘贴后刷新界面失败"), _e)
         try:
             self.refresh_rows_tags()
         except Exception:
@@ -32517,7 +32522,7 @@ class FileTaggerApp:
             except Exception:
                 continue
         if not srcs:
-            self.set_status("没有可移动的东西（可能本来就在那个文件夹里）")
+            self.set_status(T("没有可移动的东西（可能本来就在那个文件夹里）"))
             return
         names = "、".join(os.path.basename(str(p).rstrip("\\")) for p in srcs[:4])
         if len(srcs) > 4:
@@ -32529,7 +32534,7 @@ class FileTaggerApp:
                 "标签会跟着一起走，不会丢。\n\n确定移动吗？"
                 % (len(srcs), tgt, names),
                 parent=self.root):
-            self.set_status("已取消移动")
+            self.set_status(T("已取消移动"))
             return
         self.begin_activity("正在移动 %d 项…" % len(srcs))
         self.log_output("拖动移动：%d 项 → %s" % (len(srcs), tgt))
@@ -32548,7 +32553,7 @@ class FileTaggerApp:
             try:
                 self._ui_threadsafe(self._drag_move_done, tgt, done, errs)
             except Exception as exc:
-                note_swallowed("worker(_drag_move_done)：回主线程通知失败",
+                note_swallowed(T("worker(_drag_move_done)：回主线程通知失败"),
                                exc, level="warn")
 
         threading.Thread(target=worker, daemon=True).start()
@@ -32566,13 +32571,13 @@ class FileTaggerApp:
                 else:
                     self.store.move_file_path(src, dst)
             except Exception as _e:
-                note_swallowed("拖动移动后同步数据库路径失败", _e)
+                note_swallowed(T("拖动移动后同步数据库路径失败"), _e)
             try:
                 self.store.clear_dir_cache_under(os.path.dirname(str(src)))
             except Exception:
                 pass
         n = len(done)
-        self.log_output("拖动移动完成：%d 项 → %s" % (n, target))
+        self.log_output(T("拖动移动完成：{x} 项 → {y}", x=n, y=target))
         self.set_status("已移动 %d 项 → %s%s" % (
             n, os.path.basename(target.rstrip("\\")) or target,
             "" if not errs else "（%d 项失败）" % len(errs)))
@@ -32587,7 +32592,7 @@ class FileTaggerApp:
             else:
                 self.refresh_current_dir()
         except Exception as _e:
-            note_swallowed("移动后刷新界面失败", _e)
+            note_swallowed(T("移动后刷新界面失败"), _e)
         try:
             self.refresh_rows_tags()
         except Exception:
@@ -32718,12 +32723,12 @@ class FileTaggerApp:
                 self.set_status("网盘浏览：索引显示（不连网盘，秒开）"
                                 "—— 想读真实目录再点一下这个按钮")
             else:
-                self.set_status("网盘浏览：真实目录（会连网盘，慢但最新）")
+                self.set_status(T("网盘浏览：真实目录（会连网盘，慢但最新）"))
             # 就地重新载入当前目录，立刻生效
             if self.view_mode == "dir" and self.current_dir:
                 self.load_directory(str(self.current_dir))
         except Exception as _e:
-            note_swallowed("切换网盘浏览模式失败", _e)
+            note_swallowed(T("切换网盘浏览模式失败"), _e)
 
     def _update_net_btn(self):
         try:
@@ -32740,7 +32745,7 @@ class FileTaggerApp:
                 self._net_btn.config(text=txt, width=4)
             else:
                 self._net_btn.config(
-                    text=("🧭 网盘:索引" if idx else "🧭 网盘:真实"), width=0)
+                    text=T("🧭 网盘:索引") if idx else T("🧭 网盘:真实"), width=0)
         except Exception:
             pass
 
@@ -32791,7 +32796,7 @@ class FileTaggerApp:
             self._drive_cbo.configure(values=self._drives())
             self._place_cbo.configure(values=vals[:40])
         except Exception as _e:
-            note_swallowed("刷新「常用位置」下拉失败", _e)
+            note_swallowed(T("刷新「常用位置」下拉失败"), _e)
 
     def _on_drive_pick(self, event=None):
         d = (self._drive_var.get() or "").strip()
@@ -32814,12 +32819,12 @@ class FileTaggerApp:
         except Exception:
             bookmarks = []
         if cur in bookmarks:
-            self.set_status("这个文件夹已经在「常用位置」里了")
+            self.set_status(T("这个文件夹已经在「常用位置」里了"))
             return
         bookmarks.append(cur)
         save_ui_setting("nav_bookmarks", bookmarks[:30])
         self._refresh_places()
-        self.set_status("已加入「常用位置」：%s" % cur)
+        self.set_status(T("已加入「常用位置」：{x}", x=cur))
 
     # ---------------- ★ v25 补丁13：拖放（从资源管理器拖进来）----------------
     def _setup_dnd(self):
@@ -32839,10 +32844,10 @@ class FileTaggerApp:
                 cv.drag_source_register(1, DND_FILES)
                 cv.dnd_bind("<<DragInitCmd>>", self._on_drag_out)
             except Exception as _e:
-                note_swallowed("注册「拖出去」失败（拖进来仍可用）", _e)
-            self.log_output("拖放已就绪：可以把文件从资源管理器拖进列表（复制到当前文件夹）")
+                note_swallowed(T("注册「拖出去」失败（拖进来仍可用）"), _e)
+            self.log_output(T("拖放已就绪：可以把文件从资源管理器拖进列表（复制到当前文件夹）"))
         except Exception as _e:
-            note_swallowed("注册拖放失败", _e)
+            note_swallowed(T("注册拖放失败"), _e)
 
     def _on_drag_out(self, event):
         """把选中的文件拖出去（拖到资源管理器 = 系统当成复制）。
@@ -32924,7 +32929,7 @@ class FileTaggerApp:
             try:
                 self._ui_threadsafe(self._drop_done, target, done, errs)
             except Exception as exc:
-                note_swallowed("worker(_drop_done)：回主线程通知失败",
+                note_swallowed(T("worker(_drop_done)：回主线程通知失败"),
                                exc, level="warn")
 
         threading.Thread(target=worker, daemon=True).start()
@@ -32943,7 +32948,7 @@ class FileTaggerApp:
         try:
             self.load_directory(target)
         except Exception as _e:
-            note_swallowed("拖放后刷新界面失败", _e)
+            note_swallowed(T("拖放后刷新界面失败"), _e)
 
     def choose_dir(self):
         chosen = filedialog.askdirectory(initialdir=str(self.current_dir))
@@ -32984,13 +32989,14 @@ class FileTaggerApp:
             self._stats_cache = (total, untagged, mid_only)
             self._stats_cache_key = key
         if self.stats_filter == "untagged":
-            self.stat_total_lbl.config(text=f"共 {total}    【仅显示未打标签】")
+            self.stat_total_lbl.config(text=T("共 {n}    【仅显示未打标签】", n=total))
         elif self.stats_filter == "mid_only":
-            self.stat_total_lbl.config(text=f"共 {total}    【仅显示仅中间标签】")
+            self.stat_total_lbl.config(
+            text=T("共 {n}    【仅显示仅中间标签】", n=total))
         else:
-            self.stat_total_lbl.config(text=f"共 {total}")
+            self.stat_total_lbl.config(text=T("共 {n} 项", n=total))
         self.stat_untagged_lbl.config(
-            text=f"未打标签 {untagged}" if untagged else "")
+            text=T("未打标签 {n}", n=untagged) if untagged else "")
         self.stat_mid_lbl.config(
             text=f"仅中间标签 {mid_only}" if mid_only else "")
 
@@ -33054,17 +33060,20 @@ class FileTaggerApp:
                 self._page = 0
                 self._load_current_page()
                 self.log_output(
-                    f"这个网盘目录现在读不到（网盘里可能已经删掉了 / 网盘一时"
-                    f"没醒）：{path}  · 已跳过，不算错误。"
-                    f"想看真实目录：点右下角「🧭 网盘:索引」切成「真实」。")
+                    T("这个网盘目录现在读不到（网盘里可能已经删掉了 / "
+                      "网盘一时没醒）：{p}  · 已跳过，不算错误。",
+                      p=path))
+                self.log_output(
+                    T("想看真实目录：点右下角「🧭 网盘:索引」切成「真实」。"))
                 self.set_status(
-                    f"{path}    目录读不到（可能已删除）—— 没连网盘，已跳过")
+                    T("{p}    目录读不到（可能已删除）—— 没连网盘，已跳过", p=path))
                 return
         elif not path.is_dir():
             if remote:
                 self.log_output(
-                    f"这个网盘目录现在读不到（网盘里可能已经删掉了 / 网盘一时"
-                    f"没醒）：{path}  · 已跳过，不算错误")
+                    T("这个网盘目录现在读不到（网盘里可能已经删掉了 / "
+                      "网盘一时没醒）：{p}  · 已跳过，不算错误。",
+                      p=path))
                 self.set_status(f"{path}    目录读不到（可能已删除），已跳过")
                 return
             messagebox.showwarning("路径无效", f"不是有效的文件夹：\n{path}")
@@ -33113,12 +33122,14 @@ class FileTaggerApp:
             scanned_at = self.store.get_dir_scan_time(dir_key)
             if remote and net_mode == "index":
                 self.set_status(
-                    f"{dir_key}    共 {len(cached)} 项  ·  索引显示"
-                    f"（缓存于 {scanned_at}；要看真实目录点右下角 🧭）")
+                    T("{k}    共 {n} 项  ·  索引显示"
+                      "（缓存于 {t}；要看真实目录点右下角 🧭）",
+                      k=dir_key, n=len(cached), t=scanned_at))
             else:
                 self.set_status(
-                    f"{dir_key}    共 {len(cached)} 项  ·  "
-                    f"缓存于 {scanned_at}，后台比对中…")
+                    T("{k}    共 {n} 项  ·  "
+                      "缓存于 {t}，后台比对中…",
+                      k=dir_key, n=len(cached), t=scanned_at))
         elif remote and net_mode == "index":
             # 网盘 + 索引模式 + 索引里没有这个目录 → 不连网盘，给个提示
             self.list_title.config(text=T("文件（索引里没有这个目录）"))
@@ -33151,7 +33162,7 @@ class FileTaggerApp:
             }
             self._page = 0
             self._load_current_page()
-            self.set_status(f"{dir_key}    首次扫描目录…")
+            self.set_status(T("{k}    首次扫描目录…", k=dir_key))
 
         # 延迟启动后台扫描（用户切走就不扫）
         # ★ v25 补丁14：网盘 + 索引模式下**不去连网盘**（这就是以前卡的原因）
@@ -33243,7 +33254,7 @@ class FileTaggerApp:
                 except Exception:
                     pass
                 try:
-                    self.log_output("上一次目录扫描的「回话」丢了，已自动重来一次。")
+                    self.log_output(T("上一次目录扫描的「回话」丢了，已自动重来一次。"))
                 except Exception:
                     pass
             else:
@@ -33253,7 +33264,8 @@ class FileTaggerApp:
             return
         self._bg_scan_pending_dir = None
         self._bg_scan_running_dir = d
-        self.begin_activity(f"扫描目录：{os.path.basename(d) or d}")
+        self.begin_activity(T("扫描目录：{x}",
+                                   x=os.path.basename(d) or d))
         self.log_output(f"后台扫描目录：{d}")
         self._bg_scan_thread = threading.Thread(
             target=self._bg_scan_worker, args=(d,), daemon=True)
@@ -33321,7 +33333,8 @@ class FileTaggerApp:
         self.end_activity()
         plain_dir_view = self._dir_view_is_plain(dir_key)
         if err is None:
-            self.log_output(f"扫描完成：{dir_key}  共 {len(entries)} 项")
+            self.log_output(T("扫描完成：{k}  共 {n} 项",
+                              k=dir_key, n=len(entries)))
             try:
                 self.store.save_dir_entries(dir_key, entries)
             except Exception as exc:
@@ -33329,7 +33342,8 @@ class FileTaggerApp:
             if plain_dir_view:
                 self._apply_dir_entries(dir_key, entries)
                 self.set_status(
-                    f"{dir_key}    共 {len(entries)} 项（已刷新）")
+                    T("{k}    共 {n} 项（已刷新）",
+                      k=dir_key, n=len(entries)))
         else:
             # ★ v25 补丁18：目录读不到时别再当「错误」刷屏。
             #   网盘里删除过的目录、空目录、一时读不到的目录，以前每点开
@@ -33519,8 +33533,8 @@ class FileTaggerApp:
         # ★ v25：作废还在跑的「含子目录搜索」
         self._cancel_recursive_scan(invalidate_cache=True)
         self._search_return_state = None
-        self.list_title.config(text=T("全部文件"))
-        self.path_var.set("全部文件")
+        self.list_title.config(text=T(T("全部文件")))
+        self.path_var.set(T("全部文件"))
         self.list_info.config(text="")
         self._clear_stats_filter()
         self._reset_category_hidden_tags()
@@ -33550,7 +33564,7 @@ class FileTaggerApp:
         try:
             self.load_directory(str(path))
         except Exception as _e:
-            note_swallowed("从文件目录树跳转失败", _e)
+            note_swallowed(T("从文件目录树跳转失败"), _e)
 
     def show_category(self, cid):
         cats = {c["id"]: c for c in self.store.all_categories()}
@@ -33603,7 +33617,7 @@ class FileTaggerApp:
         try:
             self.sidebar.set_categories(self.store.all_categories())
         except Exception as _e:
-            note_swallowed("左侧分类库列表显示失败", _e)
+            note_swallowed(T("左侧分类库列表显示失败"), _e)
         # ★ 顺手根据分类名长度重新调整左侧宽度
         try:
             self._auto_sash_sidebar()
@@ -33622,7 +33636,7 @@ class FileTaggerApp:
         self._last_cat_refresh_ts = time.time()
         self._cat_refresh_running = True
         self.begin_activity("统计分类中…")
-        self.log_output("开始后台统计分类计数")
+        self.log_output(T("开始后台统计分类计数"))
 
         def worker():
             # ★★ v26（2026-10-01）：**后台线程自己开一条数据库连接。**
@@ -33633,7 +33647,7 @@ class FileTaggerApp:
             try:
                 side = self.store.open_side_connection()
             except Exception as _e:
-                note_swallowed("后台统计分类：开独立连接失败（会用公用连接，可能稍卡）", _e)
+                note_swallowed(T("后台统计分类：开独立连接失败（会用公用连接，可能稍卡）"), _e)
             conn = side if side is not None else self.store.conn
             try:
                 cats = self.store.all_categories()
@@ -33672,7 +33686,7 @@ class FileTaggerApp:
             try:
                 self._ui_threadsafe(self._on_cat_counts_ready)
             except Exception as exc:
-                note_swallowed("worker(_on_cat_counts_ready)：回主线程通知失败",
+                note_swallowed(T("worker(_on_cat_counts_ready)：回主线程通知失败"),
                                exc, level="warn")
 
         threading.Thread(target=worker, daemon=True).start()
@@ -33684,7 +33698,7 @@ class FileTaggerApp:
         try:
             self.sidebar.set_categories(self.store.all_categories())
         except Exception as _e:
-            note_swallowed("分类库刷新后显示失败", _e)
+            note_swallowed(T("分类库刷新后显示失败"), _e)
 
     def new_category(self):
         dlg = CategoryDialog(self.root, "新建分类")
@@ -33853,7 +33867,8 @@ class FileTaggerApp:
                 self.page_info_lbl.config(text=T("共 0 项"))
             else:
                 self.page_info_lbl.config(
-                    text=f"第 {page_disp} / {n_pages} 页    共 {total} 项")
+                    text=T("第 {a} / {b} 页    共 {c} 项",
+                                                  a=page_disp, b=n_pages, c=total))
             if self._page <= 0:
                 self.page_prev_btn.state(["disabled"])
             else:
@@ -33916,16 +33931,16 @@ class FileTaggerApp:
     def _on_tag_scope_changed(self, scope):
         if scope == "view":
             self._start_tag_scope_scan()
-            self.set_status("标签条作用范围：整个视图（正在统计标签…）")
+            self.set_status(T("标签条作用范围：整个视图（正在统计标签…）"))
         else:
             try:
                 self.file_list.set_tag_scope_stats(None)
             except Exception:
                 pass
             if self._restore_tag_filter_view():
-                self.set_status("标签条作用范围：当前页（已还原视图）")
+                self.set_status(T("标签条作用范围：当前页（已还原视图）"))
             else:
-                self.set_status("标签条作用范围：当前页")
+                self.set_status(T("标签条作用范围：当前页"))
 
     def _on_tag_filter_view(self):
         """FileList 在「整个视图」范围下点了标签 → 重建文件列表。"""
@@ -33963,7 +33978,7 @@ class FileTaggerApp:
                 self._ui_threadsafe(self._tag_scope_scan_done,
                                     key, paths, tag_map, err)
             except Exception as exc:
-                note_swallowed("worker(_tag_scope_scan_done)：回主线程通知失败",
+                note_swallowed(T("worker(_tag_scope_scan_done)：回主线程通知失败"),
                                exc, level="warn")
 
         threading.Thread(target=worker, daemon=True).start()
@@ -33991,7 +34006,7 @@ class FileTaggerApp:
         try:
             self.file_list.set_tag_scope_stats(stats)
         except Exception as _e:
-            note_swallowed("标签条的数量统计没刷新", _e)
+            note_swallowed(T("标签条的数量统计没刷新"), _e)
         self.set_status(
             f"标签条作用范围：整个视图（{len(paths)} 个文件 / {len(stats)} 个标签）")
         if self.file_list.tag_scope == "view" and self.file_list.filter_tag_ids:
@@ -34156,7 +34171,7 @@ class FileTaggerApp:
                 self._ui_threadsafe(self._on_manual_retag_done,
                                     changed_all, total)
             except Exception as exc:
-                note_swallowed("worker(_on_manual_retag_done)：回主线程通知失败",
+                note_swallowed(T("worker(_on_manual_retag_done)：回主线程通知失败"),
                                exc, level="warn")
                 
         threading.Thread(target=worker, daemon=True).start()
@@ -34185,7 +34200,7 @@ class FileTaggerApp:
                                 (r["new"], r["id"]))
                     done.append("索引根改名：%s  →  %s" % (r["path"], r["new"]))
             except Exception as _e:
-                note_swallowed("修复网盘路径：处理索引根目录失败", _e)
+                note_swallowed(T("修复网盘路径：处理索引根目录失败"), _e)
         return done
 
     def _do_heal_net_paths(self):
@@ -34275,7 +34290,7 @@ class FileTaggerApp:
             try:
                 root_done = self._apply_net_root_fixes(roots)
             except Exception as _e:
-                note_swallowed("修复网盘路径：处理索引根目录失败", _e)
+                note_swallowed(T("修复网盘路径：处理索引根目录失败"), _e)
         self.end_activity()
 
         rep = getattr(self.store, "last_net_report", {}) or {}
@@ -34320,7 +34335,7 @@ class FileTaggerApp:
                 "现在双击这些网盘文件应该能正常打开了。%s" % (n, extra),
                 parent=self.root)
         else:
-            self.set_status("修复网盘路径：没有需要修的")
+            self.set_status(T("修复网盘路径：没有需要修的"))
             messagebox.showinfo(
                 "修复网盘路径",
                 "没有需要修复的记录（可能刚才那次已经改过了）。",
@@ -34499,7 +34514,7 @@ class FileTaggerApp:
         """
         if getattr(self, "_selfcheck_running", False):
             if manual:
-                self.set_status("自检正在跑，稍等一下…")
+                self.set_status(T("自检正在跑，稍等一下…"))
             return
         # ★ 2026-10-03：已经在关窗了就不要再起自检线程
         if APP_CLOSING or getattr(self, "_closing", False):
@@ -34507,7 +34522,7 @@ class FileTaggerApp:
         self._selfcheck_running = True
         if manual:
             self.begin_activity("自检中…")
-            self.log_output("开始自检（孤立标签 / 重复路径 / 坏指针 / 网盘与索引盘）")
+            self.log_output(T("开始自检（孤立标签 / 重复路径 / 坏指针 / 网盘与索引盘）"))
 
         def worker():
             try:
@@ -34518,7 +34533,7 @@ class FileTaggerApp:
             try:
                 self._ui_threadsafe(self._on_selfcheck_done, res, manual)
             except Exception as exc:
-                note_swallowed("worker(_on_selfcheck_done)：回主线程通知失败",
+                note_swallowed(T("worker(_on_selfcheck_done)：回主线程通知失败"),
                                exc, level="warn")
 
         # ★ 2026-10-03：把这条线程记下来 —— 关窗时要等它收工
@@ -34527,7 +34542,7 @@ class FileTaggerApp:
             self._selfcheck_thread = threading.Thread(target=worker, daemon=True)
             self._selfcheck_thread.start()
         except Exception as _e:
-            note_swallowed("起自检线程失败", _e)
+            note_swallowed(T("起自检线程失败"), _e)
 
     def _on_selfcheck_done(self, res, manual):
         self._selfcheck_running = False
@@ -34537,10 +34552,10 @@ class FileTaggerApp:
         problems = res.get("problems") or []
         infos = res.get("info") or []
         for level, text in problems:
-            self.log_problem("【自检】" + text, level=level)
+            self.log_problem(T("【自检】") + text, level=level)
         if manual:
             for t in infos:
-                self.log_output("【自检】" + t)
+                self.log_output(T("【自检】") + t)
             self.log_output("自检完成：用时 %.1f 秒，发现 %d 个要留意的地方"
                             % (secs, len(problems)))
             head = ("自检完成 ✓ 没发现问题" if not problems
@@ -34557,7 +34572,7 @@ class FileTaggerApp:
             if problems:
                 self.log_output("启动自检：发现 %d 个要留意的地方（见上）" % len(problems))
             else:
-                self.log_output("启动自检通过 ✓（用时 %.1f 秒）" % secs)
+                self.log_output(T("启动自检通过 ✓（用时 {x} 秒）", x=secs))
 
     # ---------- ★ 修复重复文件记录（老版本 UNC 路径大小写遗留问题）----------
     def _do_merge_duplicate_paths(self):
@@ -34609,7 +34624,7 @@ class FileTaggerApp:
             try:
                 self._ui_threadsafe(self._on_merge_duplicates_done, st)
             except Exception as exc:
-                note_swallowed("worker(_on_merge_duplicates_done)：回主线程通知失败",
+                note_swallowed(T("worker(_on_merge_duplicates_done)：回主线程通知失败"),
                                exc, level="warn")
 
         threading.Thread(target=worker, daemon=True).start()
@@ -34773,7 +34788,7 @@ class FileTaggerApp:
         if ids:
             self.file_list.set_tag_filter(ids, st.get("filter_match_all"))
             self._invalidate_tag_scope()
-        self.set_status("已退出搜索，回到原来的视图")
+        self.set_status(T("已退出搜索，回到原来的视图"))
         return True
 
     def _on_global_search(self, keyword):
@@ -34898,7 +34913,7 @@ class FileTaggerApp:
                 self._ui_threadsafe(self._on_recursive_scan_done,
                                     token, key, rows, keyword, truncated)
             except Exception as exc:
-                note_swallowed("worker(_on_recursive_scan_done)：回主线程通知失败",
+                note_swallowed(T("worker(_on_recursive_scan_done)：回主线程通知失败"),
                                exc, level="warn")
 
         threading.Thread(target=worker, daemon=True).start()
@@ -34907,7 +34922,7 @@ class FileTaggerApp:
                                 truncated=False):
         """目录树扫完了。token 对不上 → 这轮已经作废（清空了搜索 / 换了视图）。"""
         if token != self._recursive_token or not self._recursive_active:
-            self.log_output("含子目录搜索：这轮扫描已作废，结果丢掉")
+            self.log_output(T("含子目录搜索：这轮扫描已作废，结果丢掉"))
             return
         self.end_activity()
         self._recursive_cache = {"key": key, "paths": paths,
@@ -34953,7 +34968,7 @@ class FileTaggerApp:
         try:
             self.store.clear_dir_cache(str(self.current_dir))
         except Exception as _e:
-            note_swallowed("重扫当前目录前清缓存失败（可能扫的还是旧结果）", _e)
+            note_swallowed(T("重扫当前目录前清缓存失败（可能扫的还是旧结果）"), _e)
         self.load_directory(self.current_dir)
         self.set_status(f"{self.current_dir}    已清缓存并重扫")
 
@@ -34965,7 +34980,7 @@ class FileTaggerApp:
             return
         try:
             self.store.clear_dir_cache()
-            self.set_status("已清除全部目录缓存")
+            self.set_status(T("已清除全部目录缓存"))
         except Exception as exc:
             messagebox.showerror("错误", str(exc), parent=self.root)
 
@@ -34990,7 +35005,7 @@ class FileTaggerApp:
             else:
                 pv.clear()
         except Exception as _e:
-            note_swallowed("更新预览窗格失败", _e)
+            note_swallowed(T("更新预览窗格失败"), _e)
 
     def on_file_double(self, path, is_dir):
         if not path:
@@ -35022,7 +35037,7 @@ class FileTaggerApp:
             try:
                 self._popup_blank_menu(event)
             except Exception as _e:
-                note_swallowed("空白处右键菜单失败", _e, quiet=True)
+                note_swallowed(T("空白处右键菜单失败"), _e, quiet=True)
             return
         self._rebuild_cat_submenu()
         try:
@@ -35164,7 +35179,7 @@ class FileTaggerApp:
             if self.file_list.on_select:
                 self.file_list.on_select()
         except Exception as _e:
-            note_swallowed("全选失败", _e, quiet=True)
+            note_swallowed(T("全选失败"), _e, quiet=True)
 
     def _open_in_explorer(self, path=None):
         """在 Windows 资源管理器里打开某个目录。"""
@@ -35175,7 +35190,7 @@ class FileTaggerApp:
             import subprocess
             subprocess.Popen(["explorer", str(target)])
         except Exception as _e:
-            note_swallowed("在资源管理器里打开失败", _e)
+            note_swallowed(T("在资源管理器里打开失败"), _e)
 
     def _current_dir(self):
         """★★ 问出"现在在哪个目录" —— **唯一来源**，别处不要自己猜。
@@ -35241,13 +35256,13 @@ class FileTaggerApp:
                                        parent=self.root)
                 return
             os.makedirs(target, exist_ok=False)
-            self.log_output("已新建文件夹：%s" % target)
+            self.log_output(T("已新建文件夹：{x}", x=target))
             try:
                 self.refresh_all()
             except Exception:
                 pass
         except Exception as _e:
-            note_swallowed("新建文件夹失败", _e)
+            note_swallowed(T("新建文件夹失败"), _e)
             try:
                 messagebox.showerror("新建文件夹", "建不了：%s" % _e,
                                      parent=self.root)
@@ -35280,13 +35295,13 @@ class FileTaggerApp:
                 return
             with open(target, "x", encoding="utf-8"):
                 pass
-            self.log_output("已新建文件：%s" % target)
+            self.log_output(T("已新建文件：{x}", x=target))
             try:
                 self.refresh_all()
             except Exception:
                 pass
         except Exception as _e:
-            note_swallowed("新建文件失败", _e)
+            note_swallowed(T("新建文件失败"), _e)
             try:
                 messagebox.showerror("新建文件", "建不了：%s" % _e,
                                      parent=self.root)
@@ -35432,7 +35447,7 @@ class FileTaggerApp:
                         if _nm:
                             _hit.append((p, _nm))
             except Exception as exc:
-                note_swallowed("去除标签失败：%s" % p, exc)
+                note_swallowed(T("去除标签失败：{x}", x=p), exc)
         # 删完之后重新同步一下继承标签（父级还在的话该补回来）
         try:
             for p in paths:
@@ -35440,7 +35455,7 @@ class FileTaggerApp:
                 if fid is not None:
                     self.store.resync_file(fid)
         except Exception as exc:
-            note_swallowed("去除标签后同步失败", exc)
+            note_swallowed(T("去除标签后同步失败"), exc)
         self.refresh_tags()
         self.refresh_rows_tags()
         if _hit:
@@ -35496,7 +35511,7 @@ class FileTaggerApp:
                 box.add_tag(tid, name)
                 added += 1
             except Exception as exc:
-                note_swallowed("把标签放进标签盒失败", exc)
+                note_swallowed(T("把标签放进标签盒失败"), exc)
         try:
             box.deiconify()
             box.lift()
@@ -35525,7 +35540,7 @@ class FileTaggerApp:
         except Exception:
             return
         if not (left <= x_root <= right and top <= y_root <= bottom):
-            self.set_status("把标签拖到文件列表上才能打标签")
+            self.set_status(T("把标签拖到文件列表上才能打标签"))
             return
         paths = list(self.file_list.get_selection() or [])
         if not paths:
@@ -35539,7 +35554,7 @@ class FileTaggerApp:
                     ok += 1
                     _hit.append((p, nm))
                 except Exception as exc:
-                    note_swallowed("批量打标签失败", exc)
+                    note_swallowed(T("批量打标签失败"), exc)
         self.refresh_tags()
         self.refresh_rows_tags()
         if _hit:
@@ -35708,7 +35723,7 @@ class FileTaggerApp:
                 f"  移除关联：{removed} 条",
                 parent=self.root)
         else:
-            self.set_status("同步完成：所有文件都是最新的，无需改动")
+            self.set_status(T("同步完成：所有文件都是最新的，无需改动"))
             messagebox.showinfo("同步完成", "所有文件的标签链都是最新的。",
                                 parent=self.root)
 
@@ -35875,7 +35890,7 @@ class FileTaggerApp:
                 f"C 盘只剩一个几十字节的引导文件：\n{BOOTSTRAP_SETTINGS_PATH}\n\n"
                 "（它只记录数据目录的位置，改不了、也不用管）",
                 parent=self.root)
-            self.set_status("设置文件已迁移到数据目录")
+            self.set_status(T("设置文件已迁移到数据目录"))
         else:
             messagebox.showinfo("提示", msg, parent=self.root)
 
@@ -36049,7 +36064,7 @@ class FileTaggerApp:
             try:
                 self._ui_threadsafe(self._on_current_view_scan_done)
             except Exception as exc:
-                note_swallowed("worker(_on_current_view_scan_done)：回主线程通知失败",
+                note_swallowed(T("worker(_on_current_view_scan_done)：回主线程通知失败"),
                                exc, level="warn")
 
         threading.Thread(target=worker, daemon=True).start()
@@ -36060,7 +36075,7 @@ class FileTaggerApp:
             self.refresh_tags()
             self.refresh_rows_tags()
             self.refresh_categories()
-            self.set_status("当前列表已重新打标签")
+            self.set_status(T("当前列表已重新打标签"))
         except Exception as exc:
             # ★★ 2026-10-03：原来这里只 print，错误完全不会显示给用户，
             #   连日志面板都不进。改成走 log_problem，至少能在「🔔 问题」面板看见。
@@ -36075,7 +36090,7 @@ class FileTaggerApp:
         """手动把文件名规则应用到所有已记录的文件。"""
         n = len(self.store.get_auto_name_rule_tag_ids())
         if n == 0:
-            self.set_status("文件名自动标签规则：未勾选任何标签")
+            self.set_status(T("文件名自动标签规则：未勾选任何标签"))
             return
         self.begin_activity(f"应用文件名规则（{n} 个标签）…")
         self.log_output(
@@ -36090,7 +36105,7 @@ class FileTaggerApp:
             try:
                 self._ui_threadsafe(self._on_full_sync_done)
             except Exception as exc:
-                note_swallowed("worker(_on_full_sync_done)：回主线程通知失败",
+                note_swallowed(T("worker(_on_full_sync_done)：回主线程通知失败"),
                                exc, level="warn")
 
         threading.Thread(target=worker, daemon=True).start()
@@ -36108,14 +36123,14 @@ class FileTaggerApp:
     def clear_hidden_tags(self):
         try:
             self.file_list.clear_hidden_tags()
-            self.set_status("已恢复全部被屏蔽的标签")
+            self.set_status(T("已恢复全部被屏蔽的标签"))
         except Exception as exc:
             print(exc)
 
     def clear_tag_filter(self):
         try:
             self.file_list._clear_tag_filter()
-            self.set_status("已清除标签筛选")
+            self.set_status(T("已清除标签筛选"))
         except Exception as exc:
             print(exc)
 
@@ -36272,7 +36287,7 @@ class FileTaggerApp:
     def _start_idle_rules_job(self):
         self._idle_jobs_running.add("rules")
         try:
-            self.log_output("☁ 闲时任务：开始按自动标签规则慢慢跑一遍…")
+            self.log_output(T("☁ 闲时任务：开始按自动标签规则慢慢跑一遍…"))
         except Exception:
             pass
         threading.Thread(target=self._idle_rules_worker,
@@ -36299,7 +36314,7 @@ class FileTaggerApp:
                             cancel=(lambda: self._idle_seconds()
                                     < IDLE_STOP_WITHIN_SEC)) or 0)
                 except Exception as _e:
-                    note_swallowed("闲时任务：同步文件名的标签链失败", _e)
+                    note_swallowed(T("闲时任务：同步文件名的标签链失败"), _e)
             for scope in self._idle_rule_scopes_safe(log=True):
                 if self._idle_seconds() < IDLE_STOP_WITHIN_SEC:
                     stopped = True
@@ -36320,7 +36335,7 @@ class FileTaggerApp:
                                 self.store.sync_auto_tags_for_paths(chunk)
                                 or 0)
                     except Exception as _e:
-                        note_swallowed("闲时任务：给一批文件打自动标签失败", _e)
+                        note_swallowed(T("闲时任务：给一批文件打自动标签失败"), _e)
                     total += len(chunk)
                     try:
                         time.sleep(IDLE_RULES_PAUSE)
@@ -36334,7 +36349,7 @@ class FileTaggerApp:
             self._ui_threadsafe(self._on_idle_rules_done,
                                 total, changed, stopped)
         except Exception as exc:
-            note_swallowed("worker(_on_idle_rules_done)：回主线程通知失败",
+            note_swallowed(T("worker(_on_idle_rules_done)：回主线程通知失败"),
                            exc, level="warn")
 
     def _on_idle_rules_done(self, total, changed, stopped):
@@ -36387,7 +36402,7 @@ class FileTaggerApp:
         try:
             api_client, _why = cd_api_client_from_settings()
             try:
-                self.log_output("☁ 闲时任务：" + _why)
+                self.log_output(T("☁ 闲时任务：") + _why)
             except Exception:
                 pass
         except Exception:
@@ -36414,7 +36429,7 @@ class FileTaggerApp:
                     files += f
                 roots_done += 1
         except Exception as _e:
-            note_swallowed("闲时任务：索引扫描失败", _e)
+            note_swallowed(T("闲时任务：索引扫描失败"), _e)
         finally:
             try:
                 if api_client is not None:
@@ -36426,7 +36441,7 @@ class FileTaggerApp:
             self._ui_threadsafe(self._on_idle_index_done,
                                 roots_done, dirs, files, stopped)
         except Exception as exc:
-            note_swallowed("worker(_on_idle_index_done)：回主线程通知失败",
+            note_swallowed(T("worker(_on_idle_index_done)：回主线程通知失败"),
                            exc, level="warn")
 
     def _on_idle_index_done(self, roots_done, dirs, files, stopped):
@@ -36604,11 +36619,11 @@ class FileTaggerApp:
         try:
             self.store.close()
         except Exception as _e:
-            note_swallowed("退出时关闭数据库失败", _e)
+            note_swallowed(T("退出时关闭数据库失败"), _e)
         try:
             self.root.destroy()
         except Exception as _e:
-            note_swallowed("退出时关闭窗口失败", _e)
+            note_swallowed(T("退出时关闭窗口失败"), _e)
 
 
 # ==========================================================================
@@ -36939,7 +36954,7 @@ def main():
         try:
             apply_unified_fonts(root)
         except Exception as _e:
-            note_swallowed("统一字体失败（界面可能大小不一）", _e)
+            note_swallowed(T("统一字体失败（界面可能大小不一）"), _e)
     except Exception:
         pass
     app = FileTaggerApp(root, ui_scale=ui_scale)
