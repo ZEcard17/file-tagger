@@ -12176,6 +12176,10 @@ class FileTaggerApp:
 
     # ---------------- UI ----------------
     def _build_ui(self):
+
+        # ★★ 状态栏按钮 / 主分栏抽成单独方法了（2026-10-08）
+        self._ui_main_panes()
+
         # ★★ v26：**顶部这一行原来塞了 12 个控件，reqw 高达 1850 像素。**
         #   实测（窗口 1400 宽）：「位置」那两个下拉框和「⭐ 收藏」按钮
         #   **被挤成了 1 像素宽**，也就是你根本看不见它们
@@ -12254,6 +12258,7 @@ class FileTaggerApp:
         self._spinner_chars = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
         self._spinner_idx = 0
         self._spinner_job = None
+        self._ui_status_buttons(status_bar)
 
         # ★ 状态栏最右侧：问题 / 输出 按钮
         # ★★ v25 补丁42：**这几个按钮会占很宽，窗口不够宽时要把它们挤掉。**
@@ -12298,6 +12303,107 @@ class FileTaggerApp:
         #     正确做法是**给每个色调单独注册一个 ttk 样式**（见
         #     `_make_tone_styles()`），然后用 `style=` 挂上去。
         #   ==================================================================
+
+
+
+        # ★ v25 补丁13：导航（历史/盘符/常用位置）+ 拖放
+        self._nav_hist = []
+        self._nav_pos = -1
+        self._nav_going = False
+        try:
+            self._refresh_places()
+            self._update_nav_buttons()
+        except Exception as _e:
+            note_swallowed(T("初始化导航栏失败"), _e)
+        try:
+            self._setup_dnd()
+        except Exception as _e:
+            note_swallowed(T("初始化拖放失败"), _e)
+        # ★ v25 补丁26：标签盒（默认隐藏，点状态栏「🗃 标签盒」才出来）
+        try:
+            self._build_tagbox()
+        except Exception as _e:
+            note_swallowed(T("初始化标签盒失败"), _e)
+        # ★ v25 补丁27：鼠标悬停预览（停住 0.6 秒弹小窗，移开就没）
+        try:
+            self.hover = HoverPreview(self)
+            cv = self.file_list.canvas
+            cv.bind("<Motion>", self.hover.on_motion, add="+")
+            cv.bind("<Leave>", self.hover.on_leave, add="+")
+            self.file_list.canvas.bind(
+                "<Button-1>",
+                lambda e: (self.hover.on_leave(), None)[1], add="+")
+        except Exception as _e:
+            note_swallowed(T("初始化悬停预览失败"), _e)
+
+        # 按上次的记忆决定预览窗格 / 标签库 一开始是开还是关（默认：预览关、标签库开）
+        # ★★ 2026-10-03：顺便把**上次拉好的各分区宽度**读出来
+        #   （用户要求「记住我调整的区域大小，关了程序再开还是我原来的比例」）。
+        self._pane_sizes = {}
+        try:
+            _ps = load_ui_setting("pane_sizes", {}) or {}
+            if isinstance(_ps, dict):
+                self._pane_sizes = _ps
+        except Exception:
+            self._pane_sizes = {}
+        self._preview_width = int(self._pane_sizes.get("pane_preview_w") or 0) or 380
+        # ★★ 2026-10-05 修接错线：只有 pane_sizes 里**没记过**预览宽度时，
+        #   才去读老版本的旧键 preview_width 当兜底。
+        #   以前是无条件读、无条件盖——用户拉好的宽度会被旧值顶掉。
+        try:
+            if not int(self._pane_sizes.get("pane_preview_w") or 0):
+                _old_pw = load_ui_setting("preview_width", 0) or 0
+                if int(_old_pw) > 40:
+                    self._preview_width = int(_old_pw)
+        except Exception:
+            pass
+        self._taglib_width = int(self._pane_sizes.get("pane_taglib_w") or 0) or 380
+        self._sidebar_width = int(self._pane_sizes.get("pane_sidebar_w") or 0) or 0
+        self._preview_visible = bool(load_ui_setting("preview_visible", False))
+        self._taglib_visible = bool(load_ui_setting("taglib_visible", True))
+        self._top_bar_visible = bool(load_ui_setting("top_bar_visible", True))
+        # ★★ 2026-10-05：分栏宽度的「记账闸门」——开机时先关着。
+        #   只有两种情况会打开：
+        #     ① 用户自己拖了分栏条（_on_paned_released）
+        #     ② 正常关窗（on_close 里显式打开，把最终结果存下来）
+        #   这样开机时的自动布局就**不会**把用户的比例冲掉了。
+        self._pane_layout_ready = False
+        # ★ 拖完分栏条 / 关窗时把宽度记下来
+        try:
+            self.paned.bind("<ButtonRelease-1>", self._on_paned_released, add="+")
+        except Exception:
+            pass
+        if not self._preview_visible:
+            try:
+                self.paned.forget(self.preview_frame)
+            except Exception:
+                pass
+        if not self._taglib_visible:
+            try:
+                self.paned.forget(self.tag_frame)
+            except Exception:
+                pass
+
+        # ★ 按钮上的 ▲/▼ 要和真实状态一致（用上面记下来的状态变量，
+        #   不能用 winfo_ismapped()：这时候窗口还没真正显示出来）
+        try:
+            self._preview_btn.config(
+                text=T("📄 预览 ▼") if self._preview_visible else T("📄 预览 ▲"))
+            self._taglib_btn.config(
+                text=T("🔖 标签库 ▼") if self._taglib_visible else T("🔖 标签库 ▲"))
+        except Exception:
+            pass
+
+        self.root.after(150, self._init_sash)
+
+    def _ui_status_buttons(self, status_bar):
+        """从 `_build_ui` 里抽出来的一节（2026-10-08）。
+
+        ★ `_build_ui` 原来 485 行，按**控件分组**抽成小方法。
+
+        ★ 本节：状态栏那一排按钮（撤销 + 右侧 8 个：问题/输出/网盘/顶部/预览/标签条/标签库/标签盒）
+        """
+
         try:
             _tones = self._make_tone_styles()
         except Exception:
@@ -12322,7 +12428,6 @@ class FileTaggerApp:
                 except Exception:
                     pass
             return b
-
         # ---- 撤销：**紧贴最左边**（用户明确要求）----
         #   它是"补救"用的，平时用不着，但手一抖时得**一眼找到**。
         #   ★ 放最左而不是最右：用户说"在 C:\Users\someone 共 47 项 的左边"。
@@ -12464,6 +12569,14 @@ class FileTaggerApp:
         except Exception:
             pass
 
+
+    def _ui_main_panes(self):
+        """从 `_build_ui` 里抽出来的一节（2026-10-08）。
+
+        ★ `_build_ui` 原来 485 行，按**控件分组**抽成小方法。
+
+        ★ 本节：主分栏（PanedWindow + 四个 Frame + 挂上 文件列表/预览/标签面板）
+        """
         # ★★ 2026-10-03：先给「分栏条」配个样子，再建分栏 ——
         #   用户反馈：「界面大分区没有边框/阴影，拖动大小的时候经常需要
         #   看鼠标提示」。也就是说：四块之间看不出分隔线、拖不动的时候
@@ -12509,95 +12622,6 @@ class FileTaggerApp:
         self._build_preview_panel(self.preview_frame)
         self._build_tag_panel(self.tag_frame)
 
-        # ★ v25 补丁13：导航（历史/盘符/常用位置）+ 拖放
-        self._nav_hist = []
-        self._nav_pos = -1
-        self._nav_going = False
-        try:
-            self._refresh_places()
-            self._update_nav_buttons()
-        except Exception as _e:
-            note_swallowed(T("初始化导航栏失败"), _e)
-        try:
-            self._setup_dnd()
-        except Exception as _e:
-            note_swallowed(T("初始化拖放失败"), _e)
-        # ★ v25 补丁26：标签盒（默认隐藏，点状态栏「🗃 标签盒」才出来）
-        try:
-            self._build_tagbox()
-        except Exception as _e:
-            note_swallowed(T("初始化标签盒失败"), _e)
-        # ★ v25 补丁27：鼠标悬停预览（停住 0.6 秒弹小窗，移开就没）
-        try:
-            self.hover = HoverPreview(self)
-            cv = self.file_list.canvas
-            cv.bind("<Motion>", self.hover.on_motion, add="+")
-            cv.bind("<Leave>", self.hover.on_leave, add="+")
-            self.file_list.canvas.bind(
-                "<Button-1>",
-                lambda e: (self.hover.on_leave(), None)[1], add="+")
-        except Exception as _e:
-            note_swallowed(T("初始化悬停预览失败"), _e)
-
-        # 按上次的记忆决定预览窗格 / 标签库 一开始是开还是关（默认：预览关、标签库开）
-        # ★★ 2026-10-03：顺便把**上次拉好的各分区宽度**读出来
-        #   （用户要求「记住我调整的区域大小，关了程序再开还是我原来的比例」）。
-        self._pane_sizes = {}
-        try:
-            _ps = load_ui_setting("pane_sizes", {}) or {}
-            if isinstance(_ps, dict):
-                self._pane_sizes = _ps
-        except Exception:
-            self._pane_sizes = {}
-        self._preview_width = int(self._pane_sizes.get("pane_preview_w") or 0) or 380
-        # ★★ 2026-10-05 修接错线：只有 pane_sizes 里**没记过**预览宽度时，
-        #   才去读老版本的旧键 preview_width 当兜底。
-        #   以前是无条件读、无条件盖——用户拉好的宽度会被旧值顶掉。
-        try:
-            if not int(self._pane_sizes.get("pane_preview_w") or 0):
-                _old_pw = load_ui_setting("preview_width", 0) or 0
-                if int(_old_pw) > 40:
-                    self._preview_width = int(_old_pw)
-        except Exception:
-            pass
-        self._taglib_width = int(self._pane_sizes.get("pane_taglib_w") or 0) or 380
-        self._sidebar_width = int(self._pane_sizes.get("pane_sidebar_w") or 0) or 0
-        self._preview_visible = bool(load_ui_setting("preview_visible", False))
-        self._taglib_visible = bool(load_ui_setting("taglib_visible", True))
-        self._top_bar_visible = bool(load_ui_setting("top_bar_visible", True))
-        # ★★ 2026-10-05：分栏宽度的「记账闸门」——开机时先关着。
-        #   只有两种情况会打开：
-        #     ① 用户自己拖了分栏条（_on_paned_released）
-        #     ② 正常关窗（on_close 里显式打开，把最终结果存下来）
-        #   这样开机时的自动布局就**不会**把用户的比例冲掉了。
-        self._pane_layout_ready = False
-        # ★ 拖完分栏条 / 关窗时把宽度记下来
-        try:
-            self.paned.bind("<ButtonRelease-1>", self._on_paned_released, add="+")
-        except Exception:
-            pass
-        if not self._preview_visible:
-            try:
-                self.paned.forget(self.preview_frame)
-            except Exception:
-                pass
-        if not self._taglib_visible:
-            try:
-                self.paned.forget(self.tag_frame)
-            except Exception:
-                pass
-
-        # ★ 按钮上的 ▲/▼ 要和真实状态一致（用上面记下来的状态变量，
-        #   不能用 winfo_ismapped()：这时候窗口还没真正显示出来）
-        try:
-            self._preview_btn.config(
-                text=T("📄 预览 ▼") if self._preview_visible else T("📄 预览 ▲"))
-            self._taglib_btn.config(
-                text=T("🔖 标签库 ▼") if self._taglib_visible else T("🔖 标签库 ▲"))
-        except Exception:
-            pass
-
-        self.root.after(150, self._init_sash)
 
     def _ui_top_toolbar_row1(self):
         """从 `_build_ui` 里抽出来的一节（2026-10-08）。
