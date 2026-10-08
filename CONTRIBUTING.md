@@ -1,63 +1,82 @@
-# 贡献指南 (Contributing)
+# 贡献指南 / Contributing
 
 > **★ 先谢谢你想帮忙！**
+> **★ Thanks for wanting to help!**
 >
 > **★ 不管你是"完全不懂代码"还是"老手"，这个文件里都有你能做的事。**
-> 按难度排好了，从最简单的看起就行。
+> **★ Whether you have never written code or you are a veteran, there is
+> something for you here.**
 
 ---
 
-## ★ 目录
+## ★ 目录 / Contents
 
-- [零、先读这段（很重要）](#零先读这段很重要)
-- [一、最简单的参与：补翻译（不用懂代码）](#一最简单的参与补翻译不用懂代码)
-- [二、报 bug / 提需求（提 issue）](#二报-bug--提需求提-issue)
-- [三、改代码（提 PR）](#三改代码提-pr)
-- [四、写插件（不用改主程序）](#四写插件不用改主程序)
-- [五、这个项目的"脾气"（写代码的规矩）](#五这个项目的脾气写代码的规矩)
-- [六、绝对不能碰的东西](#六绝对不能碰的东西)
+- [零、先读这段（很重要）](#零先读这段很重要--read-this-first)
+- [一、最简单的参与：补翻译](#一最简单的参与补翻译--easiest-translate)
+- [二、报 bug / 提需求](#二报-bug--提需求--bugs--feature-requests)
+- [三、改代码（提 PR）](#三改代码提-pr--code-changes-pull-requests)
+- [四、写插件](#四写插件--plugins)
+- [五、这个项目的"脾气"](#五这个项目的脾气--the-houses-rules)
+- [六、绝对不能碰的东西](#六绝对不能碰的东西--never-touch)
 
 ---
 
-## 零、先读这段（很重要）
+## 零、先读这段（很重要） / Read this first
 
-### ★ 这个项目有什么特别的
+### ★ 这个项目有什么特别的 / What makes this project unusual
 
 **★★ 它是个"从零长起来的个人项目"** —— 主程序 **3.7 万行在一个文件里**。
 这不是好习惯，但**已经这样了**，现在正在**慢慢拆**。
 
-**★ 所以你会看到**：
-- 大量**中文注释**（★ 而且注释写得比代码还细 —— 这是刻意的）
-- 注释里会写 **"为什么这么改"**、**"踩过什么坑"**
-  （★ 有个 `文档/错题本.md`，140+ 条，**每条都是真踩过的**）
-- ★ **代码风格不统一**（不同时期写的）
+**★★ It is a personal project that grew from scratch** — the main program is
+**37k lines in a single file**. Not a great habit, but that is how it started,
+and it is being **split up gradually**.
 
-**★★★ 一条最重要的话**：
+**★ 所以你会看到 / So you will notice**：
+- 大量**中文注释**（★ 而且注释写得比代码还细 —— 这是刻意的）
+  **a lot of Chinese comments** (deliberately more detailed than the code)
+- 注释里会写 **"为什么这么改"**、**"踩过什么坑"**
+  comments explain **why** and **what went wrong before**
+- ★ **代码风格不统一**（不同时期写的）
+  ★ **inconsistent style** (written over a long period)
+
+**★★★ 一条最重要的话 / The single most important thing**：
 > **这个项目的**注释**和**错题本**，比代码本身更值钱。**
 > 因为它们记录了"**为什么**"，而不只是"**是什么**"。
 
-### ★ 作者是个什么样的人
+> **The comments and the error log are worth more than the code itself**,
+> because they record **why**, not just **what**.
 
-**★ 说实话**：
+### ★ 作者是个什么样的人 / Who the author is
+
+**★ 说实话 / Honest disclosure**：
 - 作者**不是专业程序员**（自述"我不懂代码"）
+  the author is **not a professional programmer**
 - 项目里**大量代码由 AI（DeepSeek）辅助生成**
+  **much of the code was written with AI (DeepSeek) assistance**
 - ★ 但**需求、设计、取舍、测试标准都是作者定的**
+  ★ but **requirements, design, trade-offs and acceptance criteria are the
+  author's**
 
-**★★ 所以**：
+**★★ 所以 / Therefore**：
 - **别看不起这个项目** —— 它是**一个人业余时间**一点点磨出来的
+  **don't look down on it** — it was ground out in someone's spare time
 - **也别客气** —— 有问题直说，**说清楚比说好听有用**
+  **and don't be shy** — being clear beats being polite
 
 ---
 
-## 一、最简单的参与：补翻译（不用懂代码）
+## 一、最简单的参与：补翻译 / Easiest: translate
 
 **★★★ 这是"投入产出比最高"的贡献方式。**
+**★★★ This gives the most value for the least effort.**
 
-**★ 现在的情况**：界面有 **754 句**中文，**英文只翻了 16%**。
+**★ 现在的情况 / Current state**：界面有约 **760 句**中文，**英文覆盖 89%**。
+The UI has about **760 Chinese strings**; **English coverage is 89%**.
 
-### 怎么做（3 步）
+### 怎么做（3 步） / How to do it (3 steps)
 
-**① 打开 `语言/en_US.json`**，你会看到这样的内容：
+**① 打开 `语言/en_US.json`**，你会看到这样的内容 / open it and you will see：
 ```json
 {
   "_label": "English",
@@ -67,118 +86,153 @@
 }
 ```
 
-**② 加一行**（左边是中文原文，右边是你的翻译）：
+**② 加一行**（左边是中文原文，右边是你的翻译）
+**② add one line** (Chinese on the left, your translation on the right)：
 ```json
   "标签盒": "Tag box",
 ```
-★ **注意**：
+
+**★ 注意 / Watch out**：
 - 前面那个中文**必须跟程序里的完全一样**（一个字都不能差）
+  the Chinese key **must match the program exactly**
 - 最后要有**逗号**（除非是最后一行）
+  keep the **trailing comma** (except on the last line)
 - ★ **不要动** `_` 开头的键（那是给程序看的）
+  ★ **do not touch** keys starting with `_` (those are for the program)
 
 **③ 存盘、重开程序、切到 English 看效果**
+**③ save, restart the app, switch to English and check**
 
-### ★ 怎么知道"还差哪些"
+### ★ 怎么知道"还差哪些" / How to see what is missing
 
 ```bash
 python AIxiede.py --i18n-check
 ```
+
 **★ 会告诉你**：现在翻了百分之多少、**每个分类还差多少**。
+**★ It tells you** the coverage percentage and what is missing per category.
 
-### ★★ 三条规矩
+### ★★ 三条规矩 / Three rules
 
-| 规矩 | 为什么 |
+| 规矩 / Rule | 为什么 / Why |
 |---|---|
-| **保留 `%d` / `%s` 占位符** | 那是"要塞数字进去"的地方，删了会出错 |
-| **保留 emoji**（`🎨` `🗃`）| 它是界面的一部分 |
-| ★ **翻译"意思"，不是"字面"** | 界面上的字要**短、准、像本国人说的话** |
+| **保留 `%d` / `%s` 占位符** / keep `%d` / `%s` placeholders | 那是"要塞数字进去"的地方，删了会出错 / deleting them breaks formatting |
+| **保留 emoji**（`🎨` `🗃`）/ keep emoji | 它是界面的一部分 / they are part of the UI |
+| ★ **翻译"意思"，不是"字面"** / translate the **meaning** | 界面上的字要**短、准、像本国人说的话** / UI text should be short and natural |
 
-**★ 例**：
+**★ 例 / Example**：
 ```
-✔ 好的翻译：  "重命名…"        → "Rename…"
-★ 差的翻译：  "重命名…"        → "Again give a name…"（逐字硬译，很怪）
+✔ 好的翻译 / good:  "重命名…"  →  "Rename…"
+★ 差的翻译 / bad:   "重命名…"  →  "Again give a name…"   (word-for-word)
 ```
 
-### ★ 想加一门新语言？
+### ★ 想加一门新语言？ / Want to add a new language?
 
-**★★ 不用改任何代码！** 步骤：
+**★★ 不用改任何代码！** / **★★ No code changes needed!**
 
-1. **复制** `语言/en_US.json`
+1. **复制** `语言/en_US.json` / **copy** it
 2. **改名**成你的语言代码，比如 `ru_RU.json`（俄语）、`fr_FR.json`（法语）
+   **rename** it to your language code, e.g. `ru_RU.json`, `fr_FR.json`
    （★ 格式：`语言代码_国家代码`，[看这里](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)）
-3. **改第一行**：
+3. **改第一行** / **change the first line**：
    ```json
    {
      "_label": "Русский",
    ```
 4. **翻译**（慢慢来 —— **★ 没翻的会自动显示中文**，不会坏）
+   **translate** (take your time — **★ untranslated strings fall back to
+   Chinese**, nothing breaks)
 5. **重启程序** → 「设置 → 🌐 语言」里**就有你的语言了**
+   **restart** → your language appears under **Settings → 🌐 Language**
 
 **★ 真的不用改代码。** 程序是**扫描这个目录**的。
+**★ Really, no code changes.** The app **scans that folder**.
 
 ---
 
-## 二、报 bug / 提需求（提 issue）
+## 二、报 bug / 提需求 / Bugs & feature requests
 
 ### ★★ 一条铁律：**说清楚"怎么复现"**
+### ★★ One iron rule: **describe how to reproduce it**
 
-**★ 对比一下**：
+**★ 对比一下 / Compare**：
 
 ```
-★ 差的 issue：
-   标题：程序坏了
-   内容：打不开，快修
+★ 差的 issue / bad:
+   标题 / title: 程序坏了 / it's broken
+   内容 / body:  打不开，快修 / won't open, fix it
 
-★★ 好的 issue：
-   标题：从网盘目录打开时，文件列表一直转圈不出现
-   环境：Windows 10 / Python 3.12 / 网盘是 CloudDrive2
-   步骤：
-     1. 用 CloudDrive2 挂载一个网盘
-     2. 在程序里浏览到 \\CloudDrive\百度网盘\某目录
-     3. 等 30 秒 —— 列表一直是空的
-   期望：应该显示文件
-   实际：一直转圈
-   补充：直接看本地目录没问题；看日志里有"UNC 路径超时"
+★★ 好的 issue / good:
+   标题 / title: 从网盘目录打开时，文件列表一直转圈不出现
+                 / file list spins forever when opening a cloud folder
+   环境 / env:   Windows 10 / Python 3.12 / 网盘是 CloudDrive2
+   步骤 / steps:
+     1. 用 CloudDrive2 挂载一个网盘 / mount a cloud drive with CloudDrive2
+     2. 在程序里浏览到 \\CloudDrive\百度网盘\某目录 / browse to a folder there
+     3. 等 30 秒 —— 列表一直是空的 / wait 30s — the list stays empty
+   期望 / expected: 应该显示文件 / files should appear
+   实际 / actual:   一直转圈 / it keeps spinning
+   补充 / notes:    直接看本地目录没问题；日志里有"UNC 路径超时"
+                    / local folders are fine; the log shows a UNC timeout
 ```
 
-**★ 为什么"复现步骤"这么重要**：
+**★ 为什么"复现步骤"这么重要 / Why repro steps matter**：
 > 作者**不在你的电脑前**。没有步骤，他**只能猜** ——
 > 而猜测**十次有九次是错的**（然后你会觉得"他不理我"）。
+>
+> The author **is not sitting at your machine**. Without steps they can only
+> guess — and guesses are wrong nine times out of ten.
 
-### ★ issue 模板会提示你要填什么
+### ★ issue 模板会提示你要填什么 / Templates will guide you
 
 提 issue 时**照着模板填**就行（模板会自动出现）。
+The templates appear automatically when you open an issue.
 
-### ★★ 提需求的时候
+### ★★ 提需求的时候 / When requesting a feature
 
-**★ 说"你要解决什么问题"，别只说"加个功能"**：
+**★ 说"你要解决什么问题"，别只说"加个功能"**
+**★ Describe the problem, not just "add a feature"**
 
 ```
-★ 差：  "加个批量重命名功能"
-★★ 好：  "我有 300 个照片想按拍摄日期改名，
-        现在得一个个改。希望能选中一批、按规则批量改名。"
+★ 差 / bad:  "加个批量重命名功能" / "add batch rename"
+★★ 好 / good: "我有 300 个照片想按拍摄日期改名，现在得一个个改。
+              希望能选中一批、按规则批量改名。"
+              / "I have 300 photos I want renamed by capture date. Right now
+              it is one by one. I would like to select a batch and rename them
+              by a rule."
 ```
 
-**★ 为什么**：作者可能**有更好的办法**解决你那个"问题" ——
+**★ 为什么 / Why**：作者可能**有更好的办法**解决你那个"问题" ——
 但如果他只看到"加个功能"，就**只能照做**（哪怕不是最优解）。
+
+The author may know a **better way** to solve your actual problem — but if they
+only see "add a feature", they can only do exactly that.
 
 ---
 
-## 三、改代码（提 PR）
+## 三、改代码（提 PR） / Code changes (pull requests)
 
 ### ★★ 先看这段（不然你的 PR 可能白写）
+### ★★ Read this first (or your PR may be wasted)
 
 **★★★ 这个项目有"几个特别的规矩"，不照做的话代码会坏。**
+**★★★ This project has a few hard rules. Ignoring them breaks things.**
 
-### 规矩 1：**改之前先备份**
+### 规矩 1：**改之前先备份** / Rule 1: back up before editing
 
 项目习惯：改之前把 `AIxiede.py` 复制一份到 `备份/`，
 **文件名里带"好用的"**（比如 `AIxiede.py.bak-加夜间模式-好用的-20261006`）。
 
-**★ 为什么**：这是**个人项目**，没有 CI、没有回滚机制。
+The convention: copy `AIxiede.py` into `备份/` first, and put **"好用的"**
+("known-good") in the file name.
+
+**★ 为什么 / Why**：这是**个人项目**，没有 CI、没有回滚机制。
 **"随时能退回上一个能用的版本"是唯一的安全网。**
 
-### 规矩 2：**改完必须跑三个检查**
+There is **no CI and no rollback**. Being able to return to the last working
+version **is the only safety net**.
+
+### 规矩 2：**改完必须跑检查** / Rule 2: run the checks after editing
 
 ```bash
 # ① 语法 + 中文引号检查（★ 开发时踩过 7 次这个坑）
@@ -191,54 +245,70 @@ python 核对结构.py
 python reg2.py
 ```
 
-**★ 这三个脚本在 `测试残留/` 里**（★ 那个目录不进版本库，
-因为里面是临时脚本 —— 但**它们是这个项目的"测试套件"**）。
+**★ 这三个脚本在 `测试残留/` 里**（那个目录不进版本库，
+但**它们是这个项目的"测试套件"**）。
+
+Those three scripts live in `测试残留/` (not in the repo, but they are this
+project's test suite).
 
 ### 规矩 3：**`tk.Text` / `tk.Listbox` 一定要给 `width`**
+### Rule 3: always give `tk.Text` / `tk.Listbox` a `width`
 
 ```python
-# ★ 错的（默认 80 字符宽 ≈ 884 像素 → 窗口"莫名其妙很宽"）
+# ★ 错的 / bad（默认 80 字符宽 ≈ 884 像素 → 窗口"莫名其妙很宽"）
 tk.Text(parent)
 
-# ✔ 对的
+# ✔ 对的 / good
 tk.Text(parent, width=48)
 ```
 
-**★ 这是这个项目**踩过最多的坑**（错题本里记了好几次）。**
+**★ 这是这个项目**踩过最多的坑**。**
+**★ This is the most frequently hit pitfall in this project.**
 
 ### 规矩 4：**"看起来成比例"的东西，不能用像素写死**
+### Rule 4: never hard-code pixel sizes for proportion-based layout
 
 ```python
-# ★ 错的（换个缩放比例就错位）
+# ★ 错的 / bad（换个缩放比例就错位）
 pad = 6
 
-# ✔ 对的（跟着字体行高走）
+# ✔ 对的 / good（跟着字体行高走）
 pad = max(2, linespace // 6)
 ```
 
 ### 规矩 5：**★ 加新东西的时候，顺手"留个接口"**
+### Rule 5: ★ leave extension points when adding features
 
-**★★ 这是作者特别强调的一条**：
+**★★ 这是作者特别强调的一条 / The author stresses this one**：
 
 > 「你写程序要不多设点**冗余**吧，留点**接口**什么的，
 > 以后方便改方便用，虽然这事可能跟我是善变的有关」
+>
+> "Leave a bit of **redundancy** and some **extension points** —
+> it makes future changes easier, even if that is partly because I change my
+> mind a lot."
 
-**★ 什么意思**：
+**★ 什么意思 / What it means**：
 - 加"皮肤" → **顺便留"自定义皮肤注册"的入口**（别写死两种）
+  adding themes → also add a **theme registration hook** (don't hard-code two)
 - 加"菜单" → **顺便留"插件加菜单项"的入口**
+  adding menus → also add a **plugin menu hook**
 - 加"语言" → **顺便留"加一门语言就是加个文件"的机制**
+  adding languages → make it **"one file per language"**
 
-**★ 判据**：**"以后想改这个，要不要动源码？"**
+**★ 判据 / The test**：**"以后想改这个，要不要动源码？"**
 要动 → **就说明接口没留好。**
+**"Will a future change require editing the source?"** If yes, the extension
+point is missing.
 
-### 规矩 6：**注释要写"为什么"，不只写"是什么"**
+### 规矩 6：**注释要写"为什么"** / Rule 6: comments explain **why**
 
 ```python
-# ★ 差的注释
-# 设置超时 30 秒
+# ★ 差的注释 / bad
+# 设置超时 30 秒 / set timeout to 30s
 conn = sqlite3.connect(path, timeout=30.0)
 
-# ✔ 好的注释（这项目里的真实例子）
+# ✔ 好的注释 / good（这项目里的真实例子 / a real example from this project）
 # ★ v26 全功能巡检：原来没设等锁时间。而程序后台有很多线程
 #   也在写同一个库。只要恰好撞上，主界面一个操作就会直接报：
 #     sqlite3.OperationalError: database table is locked
@@ -248,27 +318,32 @@ conn = sqlite3.connect(path, timeout=30.0)
 conn = sqlite3.connect(path, timeout=30.0)
 ```
 
-### ★ PR 流程
+### ★ PR 流程 / PR workflow
 
 ```
-① Fork 这个仓库
-② 建个分支（名字随意，比如 fix-ball-blur）
-③ 改代码（★ 照着上面 6 条规矩）
-④ 跑那三个检查
+① Fork 这个仓库 / fork the repo
+② 建个分支（名字随意）/ create a branch (any name)
+③ 改代码（★ 照着上面 6 条规矩）/ make your changes (follow the 6 rules)
+④ 跑那三个检查 / run the three checks
 ⑤ 提 PR —— ★ 描述里说清"改了什么、为什么、怎么验证的"
+   open the PR — say what changed, why, and how you verified it
 ```
 
 **★★ 别怕 PR 被拒** —— 作者会**告诉你为什么**，而不是直接关掉。
+**★★ Don't fear rejection** — the author will **tell you why**, not just close
+it.
 
 ---
 
-## 四、写插件（不用改主程序）
+## 四、写插件 / Plugins
 
 **★★ 这是"扩展这个程序"的**正确姿势** —— 不用碰主程序一行代码。**
+**★★ This is the right way to extend the app — without touching the main
+program.**
 
-### 最短的插件（5 行）
+### 最短的插件（5 行） / The shortest possible plugin
 
-新建 `插件/我的插件.py`：
+新建 `插件/我的插件.py` / create `插件/我的插件.py`：
 ```python
 def register(api):
     api.add_menu("我的插件", [
@@ -277,50 +352,76 @@ def register(api):
 ```
 
 **存盘、重开程序** → 菜单里就多了一栏。
+**Save, restart** → a new menu appears.
 
-### `api` 能干什么
+### ★★ 多语言 / i18n for plugins
 
-| 想干的事 | 怎么写 |
+**★ 插件里的界面文字也走 `api.T()`**，这样切英文时插件文字也跟着变。
+**★ Plugin UI strings should go through `api.T()`** so they follow the language
+switch.
+
+```python
+def register(api):
+    api.add_menu(api.T("我的插件"), [
+        (api.T("打个招呼"), _hello),
+    ])
+```
+
+**★ 老版本主程序没有 `api.T` 也不会崩**（插件里有兜底）。
+**★ Older hosts without `api.T` will not crash** (there is a fallback).
+
+### `api` 能干什么 / What `api` offers
+
+| 想干的事 / Goal | 怎么写 / How |
 |---|---|
-| 加自己的菜单 | `api.add_menu("名字", [("项", 函数), None, ("项2", 函数2)])` |
-| 往已有菜单插一项 | `api.add_menu_item("设置", "我的设置", 函数)` |
-| 给程序加配色 | `api.register_theme("名字", {"win_bg": "#...", "fg": "#..."})` |
-| 看当前文件夹 | `api.current_dir()` |
-| 看选中了什么 | `api.selected_paths()` |
-| 往「输出」写日志 | `api.log("…")` |
+| 加自己的菜单 / own menu | `api.add_menu("名字", [("项", 函数), None, ("项2", 函数2)])` |
+| 往已有菜单插一项 / insert into an existing menu | `api.add_menu_item("设置", "我的设置", 函数)` |
+| 给程序加配色 / register a theme | `api.register_theme("名字", {"win_bg": "#...", "fg": "#..."})` |
+| 看当前文件夹 / current folder | `api.current_dir()` |
+| 看选中了什么 / selected paths | `api.selected_paths()` |
+| 往「输出」写日志 / write to the Output panel | `api.log("…")` |
+| 翻译 / translate | `api.T("中文")` |
 
-**★★ 完整说明见 `文档/插件怎么写.md`**（★ 里面写得很细，
-包括"**最容易忘的一件事：把 api 存起来**"）。
+**★★ 完整说明见 `文档-公开发布/插件怎么写.md`**
+**★★ Full guide: `文档-公开发布/插件怎么写.md`**
 
-**★★★ 最重要的一条**：
+**★★★ 最重要的一条 / The single most important rule**：
 > **插件坏了，程序不会坏** —— 每个插件单独 `try`，
 > 坏一个只记账、**绝不影响程序启动**。
-> （★ 作者专门为这个写了兜底，因为"程序打不开"是最难受的。）
+>
+> **A broken plugin never breaks the app** — each plugin runs in its own
+> `try`; a failure is logged and **never stops startup**.
 
 ---
 
-## 五、这个项目的"脾气"（写代码的规矩）
+## 五、这个项目的"脾气" / The house's rules
 
-**★ 作者自己总结的几条**（★ 都是**实测踩出来的**，不是空话）：
+**★ 作者自己总结的几条**（★ 都是**实测踩出来的**，不是空话）
+**★ Summarised by the author** (all learned the hard way)
 
-| # | 规矩 | 出处 |
+| # | 规矩 / Rule | 出处 / Source |
 |---|---|---|
-| **1** | ★★ **量，别猜** —— "我觉得"不算数，**跑一遍看数据** | 多次验证 |
-| **2** | ★★ **"有兜底"会掩盖"功能没生效"** —— 要专门验证"兜底**没**被用上" | 错题本 #143 |
-| **3** | ★★ **"改一套逻辑"要全文搜旧来源** —— 别只改"我记得的那一处" | 错题本 #139 |
-| **4** | ★★ **一个容器装两种"正交"的东西，早晚会串** —— 能各自单独改的就各存各的 | 错题本 #140 |
-| **5** | ★★ **"名字不存在 + 被 except 吞掉" = 永远不报错，只是不工作** | 错题本 #143 |
-| **6** | ★★★ **"修一个坏东西"之前，先确认它到底坏没坏** | 错题本 #138 |
-| **7** | ★★ **隐私/安全规则，写完要拿真实文件试一遍** —— "我以为挡住了"≠"真挡住了" | 错题本 #142 |
+| **1** | ★★ **量，别猜** —— "我觉得"不算数，**跑一遍看数据** / **measure, don't guess** | 多次验证 / verified repeatedly |
+| **2** | ★★ **"有兜底"会掩盖"功能没生效"** —— 要专门验证"兜底**没**被用上" / a fallback hides "it never ran" | 错题本 #143 |
+| **3** | ★★ **"改一套逻辑"要全文搜旧来源** / grep for the old source when changing logic | 错题本 #139 |
+| **4** | ★★ **一个容器装两种"正交"的东西，早晚会串** / one container for two orthogonal values will scramble | 错题本 #140 |
+| **5** | ★★ **"名字不存在 + 被 except 吞掉" = 永远不报错，只是不工作** / missing name + bare except = silent no-op | 错题本 #143 |
+| **6** | ★★★ **"修一个坏东西"之前，先确认它到底坏没坏** / prove it is broken before fixing it | 错题本 #138 |
+| **7** | ★★ **隐私/安全规则，写完要拿真实文件试一遍** / test privacy rules against real files | 错题本 #142 |
+| **8** | ★★★ **"测了没发现" ≠ "没有问题"** / "I tested it" ≠ "it is fine" | 错题本 #152 |
+| **9** | ★★ **要测一个函数收到了什么，就在函数里记录输入** / log inputs inside the function | 错题本 #157 |
 
-**★★ 完整版见 `文档/错题本.md`（140+ 条）** —— ★ **建议改代码前翻一翻**，
-**很多坑会以"换个样子"重现**。
+**★★ 完整版见 `文档-公开发布/AIxiede-错题本.md`（157 条）** ——
+★ **建议改代码前翻一翻**，**很多坑会以"换个样子"重现**。
+
+**★★ Full list: `文档-公开发布/AIxiede-错题本.md` (157 entries)** —
+★ **read it before editing**; many pitfalls come back in disguise.
 
 ---
 
-## 六、绝对不能碰的东西
+## 六、绝对不能碰的东西 / Never touch
 
-### 🚫 1. **数据库文件**
+### 🚫 1. **数据库文件** / the database files
 
 ```
 .file_tagger.db  /  .db-shm  /  .db-wal  /  .db.bak-*
@@ -330,42 +431,61 @@ def register(api):
 **★ 改代码时如果要测试，请用临时目录，别碰真的。**
 （★ `.gitignore` 已经挡住了它们，**不会进版本库** ✔）
 
-### 🚫 2. **`tk.Tk` 的全局补丁**
+**★ That is the user's entire dataset** (paths, tags, index).
+**★ Use a temp folder for testing — never the real one.**
+(★ `.gitignore` already excludes them ✔)
+
+### 🚫 2. **`tk.Tk` 的全局补丁** / global `tk.Tk` patches
 
 **★ 别写 `tk.Tk = 某个自定义类` 这种** ——
 这个项目里**有过**，导致**很多奇怪的问题**（错题本里有）。
 
-### 🚫 3. **后台线程里碰 Tcl/Tk**
+**★ Never write `tk.Tk = SomeCustomClass`** — it was tried here and caused
+**a pile of weird bugs**.
+
+### 🚫 3. **后台线程里碰 Tcl/Tk** / touching Tcl/Tk from background threads
 
 **★★ Tk 不是线程安全的。** 后台线程**只能**：
-- 改普通变量
-- 往 `queue` 里塞东西
-- **不能**直接 `widget.configure(...)`
+- 改普通变量 / touch plain variables
+- 往 `queue` 里塞东西 / push into a `queue`
+- **不能**直接 `widget.configure(...)` / **never** call `widget.configure(...)`
 
 **★ 正确做法**：后台线程塞 `queue`，主线程用 `after()` 轮询取出来再改界面。
+**★ Correct pattern**: background thread → `queue` → main thread polls with
+`after()` and updates the UI.
 
-### 🚫 4. **密钥 / 个人信息**
+### 🚫 4. **密钥 / 个人信息** / secrets and personal data
 
-**★ 别把**任何**密钥、密码、个人路径**写进代码**（这项目踩过，错题本 #141）。
+**★ 别把**任何**密钥、密码、个人路径**写进代码**（这项目踩过）。
+**★ Never put secrets, passwords or personal paths in the code.**
 
 **★ 密钥存在**设置文件**里**（`load_ui_setting("xxx")`），
 **不进代码、不进版本库**。
 
+**★ Secrets live in the **settings file** (`load_ui_setting("xxx")`) — **never
+in code, never in the repo**.
+
 ---
 
-## ★ 最后
+## ★ 最后 / Finally
 
 **★★ 谢谢你看完这份文档。**
+**★★ Thanks for reading this far.**
 
 **★ 不管你是补了一句翻译、提了一个 issue、还是改了一行代码** ——
 **都让这个项目往前挪了一点。**
 
+**★ Whether you added one translation, filed one issue or changed one line —
+you moved this project forward.**
+
 **★ 有问题就直接问**（开 issue 或者在 PR 里问），**别客气。**
+**★ Just ask** (open an issue or ask in the PR) — **don't be shy**.
 
 ---
 
 <div align="center">
 
 **★ 一个人做的项目，靠的是别人顺手帮一把。**
+**★ A one-person project survives on other people's small favours.**
 
 </div>
