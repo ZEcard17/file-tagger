@@ -6228,6 +6228,21 @@ except Exception as _e:
     note_swallowed(T("搬出去的 面板_导航.py 没找到"), _e)
 
 
+# ★★★ 「UI构建」这组方法已搬到 `AIxiede拆分开/程序分块/面板_UI构建.py`
+#   ★★ 方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_UI构建 as _面板UI构建
+    _面板UI构建._set_app(sys.modules[__name__])
+    _HAS_PANEL_UI构建 = True
+except Exception as _e:
+    _HAS_PANEL_UI构建 = False
+    note_swallowed(T("搬出去的 面板_UI构建.py 没找到"), _e)
+
+
 # ★★★ FileList 已拆到 `AIxiede拆分开/程序分块/FileList.py`（2026-10-08）
 #   ★★ 写法（错题本 #158）：① 直接 `from FileList import …`（不带包路径）
 #     ② `_set_app` 取别名 —— 模块名和类名同名时会跑到类上找
@@ -12396,316 +12411,31 @@ class FileTaggerApp:
 
         self.root.after(150, self._init_sash)
 
-    def _ui_status_buttons(self, status_bar):
-        """从 `_build_ui` 里抽出来的一节（2026-10-08）。
-
-        ★ `_build_ui` 原来 485 行，按**控件分组**抽成小方法。
-
-        ★ 本节：状态栏那一排按钮（撤销 + 右侧 8 个：问题/输出/网盘/顶部/预览/标签条/标签库/标签盒）
-        """
-
-        try:
-            _tones = self._make_tone_styles()
-        except Exception:
-            _tones = {}
-
-        def _mk_btn(parent, key, text, tip, command, tone):
-            """建一个"带底色"的状态栏按钮（越窄越自动缩成图标）。"""
-            try:
-                st = _tones.get(tone)
-                b = ttk.Button(parent, text=text, width=0, command=command,
-                               **({"style": st} if st else {}))
-            except Exception:
-                b = ttk.Button(parent, text=text, width=0, command=command)
-            try:
-                b._full_text = text
-                b._tone = tone
-            except Exception:
-                pass
-            if tip:
-                try:
-                    Tooltip(b, tip)
-                except Exception:
-                    pass
-            return b
-        # ---- 撤销：**紧贴最左边**（用户明确要求）----
-        #   它是"补救"用的，平时用不着，但手一抖时得**一眼找到**。
-        #   ★ 放最左而不是最右：用户说"在 C:\Users\someone 共 47 项 的左边"。
-        self._undo_btn = _mk_btn(
-            status_bar, "undo", T("↶ 撤销"),
-            "撤销上一步（Ctrl+Z）／没东西可撤时是灰的",
-            self.undo_do, "undo")
-        self._undo_btn.configure(state="disabled")
-        try:
-            self._undo_btn.pack(side="left", padx=(6, 10))
-        except Exception:
-            pass
-
-        # ---- 右边那一串（side="right" 是**从右往左**排，
-        #      所以要按"最终顺序的反序"来建）----
-        #   最终从左到右：标签盒 标签库 标签条 │ 预览 顶部 │ 网盘 │ 问题
-        #   → 建的顺序（从右往左）：问题 → 网盘 → 顶部 → 预览 → 标签条 → 标签库 → 标签盒
-        # ★ 每组之间用**大一点的 padx** 隔开，组内小一点 —— 这样"分组"
-        #   不用画线也看得出来（视觉上就是"三三两两挨在一起"）。
-        _GAP_IN = 3      # 组内
-        _GAP_OUT = 14    # 组间
-
-        # C 组：问题（最右）
-        self._problem_btn = _mk_btn(
-            status_bar, "problem", T("🔔 问题 0"),
-            "打开「问题」面板（里面还有 输出 / 进度 两页）",
-            lambda: self._toggle_log_panel("problems"), "problem")
-        self._problem_btn.pack(side="right", padx=(_GAP_OUT, 10))
-        # ★ 「输出」按钮删掉了（用户要求）—— 点开"问题"面板里就有输出页。
-        #   这里保留一个名字上的空位说明，防止以后有人又加回来。
-        self._output_btn = None
-
-        # C 组：网盘
-        self._net_btn = _mk_btn(
-            status_bar, "net", "",
-            "切换网盘浏览方式：索引（快）／真实（慢但最新）",
-            self.toggle_net_browse, "net")
-        self._net_btn.pack(side="right", padx=(_GAP_IN, 0))
-        self._update_net_btn()
-
-        # B 组：顶部
-        self._topbar_btn = _mk_btn(
-            status_bar, "top", T("▲ 顶部"),
-            "显示 / 隐藏顶部工具栏",
-            self.toggle_top_bar, "layout")
-        self._topbar_btn.pack(side="right", padx=(_GAP_IN, _GAP_OUT))
-        # B 组：预览
-        self._preview_btn = _mk_btn(
-            status_bar, "preview", T("📄 预览 ▲"),
-            "显示 / 隐藏右侧预览窗格",
-            self.toggle_preview, "layout")
-        self._preview_btn.pack(side="right", padx=(_GAP_IN, 0))
-
-        # A 组：标签条
-        self._tagbar_btn = _mk_btn(
-            status_bar, "tagbar", T("🏷 标签条 ▲"),
-            "显示 / 隐藏标签条",
-            self.toggle_tagbar, "tag")
-        self._tagbar_btn.pack(side="right", padx=(_GAP_IN, _GAP_OUT))
-        # A 组：标签库
-        self._taglib_btn = _mk_btn(
-            status_bar, "taglib", T("🔖 标签库 ▲"),
-            "显示 / 隐藏右侧「标签库（星图缩略图）」",
-            self.toggle_taglib, "tag")
-        self._taglib_btn.pack(side="right", padx=(_GAP_IN, 0))
-        # A 组：标签盒
-        self._tagbox_btn = _mk_btn(
-            status_bar, "tagbox", T("🗃 标签盒 ▲"),
-            "显示 / 隐藏底部的标签盒",
-            self.toggle_tagbox, "tag")
-        self._tagbox_btn.pack(side="right", padx=(_GAP_IN, 0))
-
-        # ★ 补丁42：窗口一窄就自动把按钮收成「只有图标」
-        try:
-            status_bar.bind("<Configure>", self._on_status_bar_config)
-        except Exception:
-            pass
-
-        # 启动卡顿检测
-        # ★★ 2026-10-06：真正的「打卡」交给一个**纯计算线程**（不碰界面），
-        #   这样界面一忙就不会误判成「卡住」，也就不会出现
-        #   「越卡越报、越报越卡」的死循环。
-        self._heartbeat = time.time()
-        try:
-            _heartbeat_start()
-        except Exception:
-            pass
-        # ★ v25 补丁25：快捷键改成「可自定义」。
-        #   这里不再把按键写死，而是交给 _setup_shortcuts()：
-        #   它按快捷键表（用户可以自己改，存在设置里）去绑定，
-        #   改完立刻生效，不用重启程序。
-        self._shortcut_binds = {}     # 动作键 -> 当前绑定的按键
-        self._setup_shortcuts()
-        # ★★ 2026-10-06：把「撤销记录本」准备好
-        #   （会把上次关程序前的记录读回来 —— 关了再开还能撤）
-        try:
-            self._undo_init()
-        except Exception as _e:
-            note_swallowed(T("初始化撤销记录失败（本次开程序撤不了上次的事）"), _e,
-                           quiet=True)
-        # ★★ 2026-10-06：把「快速预览」准备好（空格键用它）
-        self._quick_preview_init()
-        # ★★ 2026-10-06：把「用法记录」（听诊器）准备好。
-        #   ★ 只能在这儿 init —— 要等 DB_PATH 定下来才知道数据目录在哪。
-        #     放在这一步**前面**的话，开机那一串报错就记不上了。
-        try:
-            _usage_init(str(Path(DB_PATH).parent / ".file_tagger_usage.jsonl"))
-        except Exception as _e:
-            note_swallowed(T("初始化用法记录失败（这次不记日志）"), _e, quiet=True)
-        self.root.after(200, self._heartbeat_tick)
-        threading.Thread(target=self._stuck_watchdog, daemon=True).start()
-
-        # ★★ 2026-10-06：先把「上次用的皮肤」读出来 ——
-        #   必须在建任何控件之前定下来，否则会先建一批浅色控件、
-        #   再全部换一遍（又慢又可能闪一下）。
-        #
-        # ★★★ 2026-10-08 **加"自定义皮肤"的读取**（用户要"预留自定义皮肤入口"）★★★
-        #   ★ 顺序很重要：**先注册自定义皮肤，再读"上次用的是哪套"** ——
-        #     否则上次用的是自定义皮肤时，会被下面那句
-        #     `if _saved_theme not in (...)  → 退回 light` 打回白天。
-        #   ★ 这里就是"预留入口"的兑现状：以后做"导入皮肤"功能时，
-        #     只要往设置里写 `custom_themes`，**这里自动就认**，
-        #     启动流程一行都不用再改。
-        try:
-            _load_custom_themes()
-        except Exception:
-            pass
-        try:
-            _saved_theme = str(load_ui_setting("theme", "light") or "light")
-        except Exception:
-            _saved_theme = "light"
-        # ★ 用 `theme_has()` 判断（**不再写死 light/dark**）
-        if not theme_has(_saved_theme):
-            _saved_theme = "light"
-        try:
-            global THEME_NAME
-            THEME_NAME = _saved_theme
-            _apply_theme_constants()
-        except Exception:
-            pass
+    def _ui_status_buttons(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_UI构建.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板UI构建._ui_status_buttons(self, *a, **k)
 
 
-    def _ui_main_panes(self):
-        """从 `_build_ui` 里抽出来的一节（2026-10-08）。
 
-        ★ `_build_ui` 原来 485 行，按**控件分组**抽成小方法。
-
-        ★ 本节：主分栏（PanedWindow + 四个 Frame + 挂上 文件列表/预览/标签面板）
-        """
-        # ★★ 2026-10-03：先给「分栏条」配个样子，再建分栏 ——
-        #   用户反馈：「界面大分区没有边框/阴影，拖动大小的时候经常需要
-        #   看鼠标提示」。也就是说：四块之间看不出分隔线、拖不动的时候
-        #   也不知道鼠标底下是可以拖的东西。
-        #   这里做两件事：
-        #     ① 把分栏条画粗一点、上点颜色（Tk 默认那一条几乎是看不见的）；
-        #     ② 鼠标移到分栏条附近时，把光标换成「↔ 左右拖」的样子。
-        #   ★ 2026-10-06：现在这一步会**把整套皮肤一次性套上**
-        #     （按钮、滚动条、输入框、文件树、菜单全都包括），
-        #     见 _style_sashes 里的说明。
-        self._style_sashes()
-        self.paned = ttk.Panedwindow(self.root, orient="horizontal")
-        self.paned.pack(fill="both", expand=True, padx=8, pady=(0, 6))
-        # 鼠标在分栏条附近 → 光标变成「可以左右拖」的样子
-        try:
-            self.paned.bind("<Motion>", self._on_paned_motion, add="+")
-            self.paned.bind("<Leave>", self._on_paned_leave, add="+")
-        except Exception as _e:
-            note_swallowed(T("安装分栏条鼠标提示失败"), _e)
-
-        # ★ 四块各自加一圈淡边，一眼能看出「这里是一块」
-        self.sidebar = CategorySidebar(self.paned, self)
-        self.list_frame = ttk.Frame(self.paned, style="Card.TFrame")
-        # ★ v25 补丁8：右侧预览窗格（方案 A：分类库|文件列表|预览|标签库）
-        #   默认隐藏、宽度可拖，点状态栏「📄 预览」按钮才出现。
-        self.preview_frame = ttk.Frame(self.paned, style="Card.TFrame")
-        self.tag_frame = ttk.Frame(self.paned, padding=(10, 0, 0, 0),
-                                   style="Card.TFrame")
-        try:
-            # 左边那块是 tk.Frame —— 用高亮边框给它画一圈
-            self.sidebar.configure(highlightthickness=1,
-                                   highlightbackground=theme_get("line"),
-                                   highlightcolor=theme_get("line"))
-        except Exception:
-            pass
-
-        self.paned.add(self.sidebar, weight=0)
-        self.paned.add(self.list_frame, weight=5)
-        self.paned.add(self.preview_frame, weight=0)
-        self.paned.add(self.tag_frame, weight=0)
-
-        self._build_file_list(self.list_frame)
-        self._build_preview_panel(self.preview_frame)
-        self._build_tag_panel(self.tag_frame)
+    def _ui_main_panes(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_UI构建.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板UI构建._ui_main_panes(self, *a, **k)
 
 
-    def _ui_top_toolbar_row1(self):
-        """从 `_build_ui` 里抽出来的一节（2026-10-08）。
 
-        ★ 原来 `_build_ui` 是个 485 行的巨型装配方法，
-          按**控件分组**抽成小方法 —— 这样「哪块界面归哪段代码」一眼对上。
+    def _ui_top_toolbar_row1(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_UI构建.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板UI构建._ui_top_toolbar_row1(self, *a, **k)
 
-        ★ 本节：顶部工具栏第 1 行（收起侧栏 / 目录框 / 浏览 / 上一级 / 刷新 / 后退 / 前进）
-        """
-        self._top_bar = ttk.Frame(self.root, padding=(10, 8, 10, 0))
-        self._top_bar.pack(fill="x")
 
-        self.toggle_btn = ttk.Button(self._top_bar, text="◀", width=3,
-                                     command=self.toggle_sidebar)
-        self.toggle_btn.pack(side="left", padx=(0, 6))
+    def _ui_top_toolbar_row2(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_UI构建.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板UI构建._ui_top_toolbar_row2(self, *a, **k)
 
-        ttk.Label(self._top_bar, text=T("目录")).pack(side="left", padx=(0, 6))
-        self.path_var = tk.StringVar()
-        entry = ttk.Entry(self._top_bar, textvariable=self.path_var)
-        # ★ 不再 fill="x", expand=True —— 那样它会把后面的按钮全挤出去。
-        #   给一个够用的固定宽度（宽度单位是字符数），后面的按钮就都有位置。
-        entry.pack(side="left", fill="x", expand=True)
-        entry.bind("<Return>", lambda e: self.load_directory(
-            self._clean_path_input(self.path_var.get())))
-
-        # ★ 这几个按钮从右往左排，保证它们在窗口变窄时**最后**才被影响
-        ttk.Button(self._top_bar, text=T("刷新"), command=self.refresh_all).pack(
-            side="right", padx=(4, 0))
-        self._nav_fwd_btn = ttk.Button(self._top_bar, text=T("前进 ▶"), width=7,
-                                       command=self.go_forward)
-        self._nav_fwd_btn.pack(side="right", padx=(4, 0))
-        self._nav_back_btn = ttk.Button(self._top_bar, text=T("◀ 后退"), width=7,
-                                        command=self.go_back)
-        self._nav_back_btn.pack(side="right", padx=(6, 0))
-        ttk.Button(self._top_bar, text=T("上一级"), command=self.go_up).pack(
-            side="right", padx=4)
-        ttk.Button(self._top_bar, text=T("浏览…"), command=self.choose_dir).pack(
-            side="right", padx=(6, 0))
-
-    def _ui_top_toolbar_row2(self):
-        """从 `_build_ui` 里抽出来的一节（2026-10-08）。
-
-        ★ 原来 `_build_ui` 是个 485 行的巨型装配方法，
-          按**控件分组**抽成小方法 —— 这样「哪块界面归哪段代码」一眼对上。
-
-        ★ 本节：顶部工具栏第 2 行（位置：盘符 + 常用位置 + ⭐ 收藏）
-        """
-        # ---- 第 2 行：位置（盘符 / 常用位置 / ⭐）----
-        self._top_bar2 = ttk.Frame(self.root, padding=(10, 2, 10, 4))
-        self._top_bar2.pack(fill="x")
-        ttk.Label(self._top_bar2, text=T("位置")).pack(side="left", padx=(38, 4))
-        self._drive_var = tk.StringVar()
-        self._drive_cbo = ttk.Combobox(self._top_bar2, textvariable=self._drive_var,
-                                       width=6, state="readonly")
-        self._drive_cbo.pack(side="left")
-        self._drive_cbo.bind("<<ComboboxSelected>>", self._on_drive_pick)
-
-        self._place_var = tk.StringVar()
-        self._place_cbo = ttk.Combobox(self._top_bar2, textvariable=self._place_var,
-                                       width=22, state="readonly")
-        self._place_cbo.pack(side="left", padx=(4, 0))
-        self._place_cbo.bind("<<ComboboxSelected>>", self._on_place_pick)
-        ttk.Button(self._top_bar2, text=T("⭐ 收藏当前位置"), width=14,
-                   command=self._add_bookmark).pack(side="left", padx=(6, 0))
-
-        # ★ 日志面板先 pack（在状态栏上方）
-        self._build_log_panel()
-
-        # ★ v25 补丁4：把「被吞掉的异常」接到日志面板上。
-        #   以前 except: pass 的地方出错没人知道；现在这类提示会
-        #   出现在「🔔 问题」面板 + 状态栏，方便查「点了没反应」。
-        global _SWALLOW_SINK
-        _SWALLOW_SINK = self.log_problem
-        # ★★ 2026-10-05「先加说话」：额外装一道「出错必留痕」的保险。
-        #   用户抱怨「卡死 / 显示不全 / 改着改着功能没了」，根子之一是
-        #   六百多处「出错装没事」。上面这个 sink 只有**主动登记**的地方
-        #   才会走；这里再补两手，让**没登记的**也能被看见：
-        #     ① 后台线程里没被抓住的出错（线程崩了界面还在，最像「卡死」）
-        #     ② 主循环里没被抓住的出错
-        #   两手都只「记一笔」，绝不改变程序原有行为。
-        try:
-            self._install_error_spy()
-        except Exception as _e:
-            note_swallowed(T("装「出错必留痕」保险失败"), _e, quiet=True)
 
 
     def _style_sashes(self, *a, **k):
