@@ -663,31 +663,6 @@ class PropsDialog(tk.Toplevel):
                 pass
 
 
-# ==========================================================================
-# ★ v25 补丁25：快捷键表（用户可以自己改）
-#   ----------------------------------------------------------------------
-#   每一项 = (动作键, 中文说明, 默认按键)。
-#   动作键是程序内部用的名字，**不要改**；中文说明是给你看的；
-#   默认按键就是出厂设置，改坏了点「恢复默认」就能回来。
-#   实际按键存在设置文件的 shortcut_map 里。
-# ==========================================================================
-
-# 允许用户按的键名（写进设置文件的就是这些名字）
-SHORTCUT_KEY_CHOICES = [
-    "", "Delete", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10",
-    "Ctrl+A", "Ctrl+B", "Ctrl+C", "Ctrl+D", "Ctrl+E", "Ctrl+F", "Ctrl+G",
-    "Ctrl+H", "Ctrl+I", "Ctrl+J", "Ctrl+K", "Ctrl+L", "Ctrl+M", "Ctrl+N",
-    "Ctrl+O", "Ctrl+P", "Ctrl+Q", "Ctrl+R", "Ctrl+S", "Ctrl+T", "Ctrl+U",
-    "Ctrl+V", "Ctrl+W", "Ctrl+X", "Ctrl+Y", "Ctrl+Z",
-    "Ctrl+Shift+A", "Ctrl+Shift+C", "Ctrl+Shift+D", "Ctrl+Shift+E",
-    "Ctrl+Shift+F", "Ctrl+Shift+N", "Ctrl+Shift+P", "Ctrl+Shift+R",
-    "Ctrl+Shift+S", "Ctrl+Shift+T", "Ctrl+Shift+V",
-    "Alt+1", "Alt+2", "Alt+3", "Alt+4", "Alt+5",
-    "Alt+Left", "Alt+Right", "Alt+Up", "Alt+Down",
-    "Alt+A", "Alt+C", "Alt+D", "Alt+E", "Alt+F", "Alt+N", "Alt+P",
-    "Alt+R", "Alt+S", "Alt+T", "Alt+V", "Alt+X", "Alt+Z",
-    "BackSpace", "Space", "Insert", "Home", "End",
-]
 
 
 

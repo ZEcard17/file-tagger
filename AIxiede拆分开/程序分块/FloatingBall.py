@@ -682,7 +682,20 @@ class FloatingBall:
           · `square`  圆角方块（像按钮）
         """
         try:
+            # ★★★ 2026-10-08 **根上的防护**（账本里 1 次：
+            #   `AttributeError: 'NoneType' object has no attribute 'geometry'`）
+            #   ★ 真因：`_redraw()` 会碰 `self.win`，而 `hide()` 会把 `self.win`
+            #     置成 `None`。**球被关掉之后，任何"晚一步"的调用都会炸** ——
+            #     典型是**定时器回调**（每秒读网速 / 每 6 秒读硬盘）：
+            #     进函数时球还在，读数据那几毫秒里用户点了"关掉这个球"。
+            #   ★★ 所以**在 `_redraw` 入口直接挡一道** ——
+            #     这样"谁调的""什么时候调的"都不重要了。
+            #     （调用方那几处也补了判断，两处一起更稳。）
+            if self.win is None:
+                return
             c = self.canvas
+            if c is None:
+                return
             st = self.style
             w, h = self._ball_size()
             self.win.geometry("%dx%d+%d+%d"
@@ -1272,7 +1285,19 @@ class FloatingBall:
                     t = _mem_text()
                     if t:
                         self._mem_text = t
-                self._redraw()
+                # ★★★ 2026-10-08 修一个真 bug（账本里 1 次，但根因会反复咬）：
+                #   **这里是"定时器回调"** —— 开头那句 `if self.win is None`
+                #   只能挡住"进函数时球已经关了"；
+                #   ★★ 挡不住"**跑的过程中球被关掉**"（读网速/内存要几毫秒，
+                #      用户正好在这几毫秒里点了球上的"关掉这个球"）→
+                #      `self.win` 变成 None → `_redraw()` 里
+                #      `self.win.geometry(...)` 抛
+                #      `AttributeError: 'NoneType' object has no attribute 'geometry'`。
+                #   ★ 为什么难发现：这句在 `except: pass` 里，
+                #     **连账本都不记**（只有 `_redraw` 内部的 note_swallowed 抓到）。
+                #   → 判据：**定时器回调里，碰 Tk 之前要再确认一次"东西还在"**。
+                if self.win is not None:
+                    self._redraw()
         except Exception:
             pass
         try:
@@ -1317,10 +1342,17 @@ class FloatingBall:
 
     def _collect_disk(self):
         try:
+            # ★★ 2026-10-08：这也是**定时器回调**（`_tick_disk` 里 after 起的）——
+            #   球可能在这 1.6 秒里被关掉 → `self.win` 已经是 None →
+            #   `_redraw()` 里 `None.geometry(...)` 抛。
+            #   ★ 判据同 `_tick_stats`：**碰 Tk 之前再确认一次"球还在"**。
+            if self.win is None:
+                return
             t = getattr(self, "_disk_result", "")
             if t and t != self._disk_text:
                 self._disk_text = t
-                self._redraw()
+                if self.win is not None:
+                    self._redraw()
         except Exception:
             pass
 
