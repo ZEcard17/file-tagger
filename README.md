@@ -35,9 +35,15 @@
 ### ★ 方式一：直接下 exe（最简单，推荐）
 
 **★★ 下载地址**：
-**[文件标签管理器.exe](https://gitee.com/zecard/file-tagger/releases/download/v26/文件标签管理器.exe)**（93 MB）
+**★★★ 两种下载方式**（★ 内容一模一样，挑快的）：
 
-**★ 双击就跑，不用装 Python。**
+| 从哪儿下 | 链接 | 适合 |
+|---|---|---|
+| ★ **Gitee**（国内快）| **[文件标签管理器.exe](https://gitee.com/zecard/file-tagger/releases/download/v26/文件标签管理器.exe)** | ★ **国内用户** |
+| **GitHub** | **[FileTagger-v26.exe](https://github.com/ZEcard17/file-tagger/releases/download/v26/FileTagger-v26.exe)** | 国外 / 访问 GitHub 快 |
+
+**（93 MB，双击就跑，不用装 Python）**
+
 **★ 系统要求**：Windows 10 / 11（64 位）
 
 **★★★ 杀毒软件可能误报** —— 这是 Python 打包的通病，
