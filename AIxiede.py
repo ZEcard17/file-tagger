@@ -22169,340 +22169,37 @@ class QuickPreview:
             pass
 
 
-class HoverPreview:
-    """★ v25 补丁27：鼠标悬停在文件上时的「小预览窗」（移开就消失）。
-
-    它和右侧那个「预览窗格」不冲突：
-      · 预览窗格 = 你点一下文件，右边固定显示内容；
-      · 这个 = 鼠标**停住 0.6 秒**就飘一个小窗给你瞄一眼，移开就没，
-        不想看就完全不用管它。
-
-    设置键：
-      hover_preview        —— 总开关（默认开）
-      hover_preview_delay  —— 停多久才弹（默认 0.6 秒）
-    """
-
-    def __init__(self, app):
-        self.app = app
-        self.enabled = bool(load_ui_setting("hover_preview", True))
-        try:
-            self.delay_ms = int(float(
-                load_ui_setting("hover_preview_delay", 0.6)) * 1000)
-        except Exception:
-            self.delay_ms = 600
-        if self.delay_ms < 150:
-            self.delay_ms = 150
-        if self.delay_ms > 3000:
-            self.delay_ms = 3000
-        self.win = None
-        self._job = None
-        self._path = None
-        self._photo = None
-        self._last_xy = (0, 0)
-        self._img_lbl = None
-        self._txt = None
-        self._busy = False
-
-    # ---------- 悬停检测 ----------
-    def on_motion(self, event):
-        """文件列表里鼠标动了就调这个（很轻，不会卡）。"""
-        if not self.enabled:
-            return
-        try:
-            x_root = event.x_root
-            y_root = event.y_root
-        except Exception:
-            return
-        self._last_xy = (x_root, y_root)
-        path = None
-        try:
-            path = self.app.file_list.get_path_at_y(y_root, x_root)
-        except Exception:
-            path = None
-        if not path:
-            self._cancel()
-            return
-        if path == self._path and self.win is not None:
-            return
-        self._cancel()
-        self._path = path
-        try:
-            self._job = self.app.root.after(self.delay_ms, self._show_now)
-        except Exception:
-            self._job = None
-
-    def on_leave(self, event=None):
-        """鼠标离开文件列表 → 收窗。"""
-        self._cancel()
-
-    def _cancel(self):
-        if self._job is not None:
-            try:
-                self.app.root.after_cancel(self._job)
-            except Exception:
-                pass
-            self._job = None
-        self._hide_window()
-
-    def _hide_window(self):
-        if self.win is not None:
-            try:
-                self.win.destroy()
-            except Exception:
-                pass
-            self.win = None
-        self._photo = None
-
-    # ---------- 弹窗 ----------
-    def _show_now(self):
-        self._job = None
-        path = self._path
-        if not path or self._busy or APP_CLOSING:
-            return
-        try:
-            if not os.path.exists(path):
-                return
-        except Exception:
-            return
-        # 别打扰正在忙的时候
-        try:
-            if INDEX_SCAN_EVENT.is_set():
-                return
-        except Exception:
-            pass
-        self._busy = True
-        try:
-            self._build_window(path)
-        finally:
-            self._busy = False
-
-    def _build_window(self, path):
-        ext = os.path.splitext(path)[1].lower()
-        is_img = ext in IMAGE_EXTS
-        is_vid = ext in VIDEO_EXTS
-        is_pdf = (ext == ".pdf") and HAS_FITZ
-        is_book = ext in BOOK_EXTS
-        # ★★ 2026-10-03：用户要求「鼠标悬停的缩略图再大一些，最好大个两倍」——
-        #   这里原来固定 380x300，现在放大到 760x600（正好两倍），
-        #   同时按屏幕尺寸收一收，免得小屏幕上顶出边。
-        max_w, max_h = 760, 600
-        try:
-            _sw = self.app.root.winfo_screenwidth()
-            _sh = self.app.root.winfo_screenheight()
-            max_w = int(min(max_w, max(360, _sw * 0.55)))
-            max_h = int(min(max_h, max(260, _sh * 0.60)))
-        except Exception:
-            pass
-        text_only = not (is_img or is_vid or is_pdf or is_book)
-        win = tk.Toplevel(self.app.root)
-        win.overrideredirect(True)
-        try:
-            win.attributes("-topmost", True)
-        except Exception:
-            pass
-        # ★ 补丁27：小窗别超出屏幕（文本长了会撑得很高）
-        try:
-            max_h = min(max_h, win.winfo_screenheight() - 80)
-        except Exception:
-            pass
-        frame = tk.Frame(win, bg="#222", bd=1, relief="solid")
-        frame.pack(fill="both", expand=True)
-        title = tk.Label(frame, text=os.path.basename(path), bg="#222",
-                         fg="#eee", font=(FONT, UI_FONT_SIZE, BOLD),
-                         anchor="w", justify="left", wraplength=max_w - 16)
-        title.pack(fill="x", padx=6, pady=(4, 2))
-        body = tk.Frame(frame, bg="#222")
-        body.pack(fill="both", expand=True, padx=6, pady=(0, 6))
-        self._img_lbl = None
-        self._txt = None
-        shown = False
-
-        if is_img and HAS_PIL:
-            try:
-                from PIL import Image, ImageTk  # type: ignore
-                im = Image.open(path)
-                im.thumbnail((max_w - 12, max_h))
-                self._photo = ImageTk.PhotoImage(im)
-                self._img_lbl = tk.Label(body, image=self._photo, bg="#222")
-                self._img_lbl.pack()
-                shown = True
-            except Exception as exc:
-                self._info_in(body, "（这张图打不开：%s）" % str(exc)[:60])
-                shown = True
-        elif is_pdf:
-            # ★ 补丁28：PDF 也给它画第一页出来（鼠标一停就能瞄一眼）
-            im = None
-            try:
-                im = get_pdf_page_pil(path, 0, max_w - 12, max_h - 24)
-            except Exception:
-                im = None
-            if im is not None:
-                try:
-                    from PIL import ImageTk  # type: ignore
-                    self._photo = ImageTk.PhotoImage(im)
-                    self._img_lbl = tk.Label(body, image=self._photo, bg="#222")
-                    self._img_lbl.pack()
-                    npages = pdf_page_count(path)
-                    tk.Label(body, text="📄 PDF 第 1 页 · 共 %d 页" % npages,
-                             bg="#222", fg="#9cf", font=(FONT, UI_FONT_SIZE_SMALL)).pack()
-                    shown = True
-                except Exception:
-                    im = None
-            if not shown:
-                self._info_in(body, "📄 PDF（这一页画不出来，双击可以打开）")
-                shown = True
-        elif is_book:
-            # ★ 补丁29：电子书 —— 悬停时给一小段开头文字
-            head_txt = ""
-            try:
-                _t, chapters = book_load(path)
-                if chapters:
-                    head_txt = chapters[0][:600]
-            except Exception:
-                head_txt = ""
-            if head_txt:
-                tk.Label(body, text=head_txt, bg="#222", fg="#ddd",
-                         font=(FONT, UI_FONT_SIZE), justify="left", anchor="nw",
-                         wraplength=max_w - 16).pack(fill="both", expand=True)
-                tk.Label(body, text=T("📖 电子书（点一下能在右边整页看）"),
-                         bg="#222", fg="#9cf", font=(FONT, UI_FONT_SIZE_SMALL)).pack()
-            else:
-                self._info_in(body, "📖 电子书\n（读不出来，双击可以用系统"
-                                    "阅读器打开）")
-            shown = True
-        elif is_vid and HAS_PIL:
-            im = None
-            try:
-                im = get_video_thumbnail_pil(path, max_w - 12)
-            except Exception:
-                im = None
-            if im is not None:
-                try:
-                    from PIL import ImageTk  # type: ignore
-                    self._photo = ImageTk.PhotoImage(im)
-                    self._img_lbl = tk.Label(body, image=self._photo, bg="#222")
-                    self._img_lbl.pack()
-                    tk.Label(body, text=T("▶ 视频"), bg="#222",
-                             fg="#9cf", font=(FONT, UI_FONT_SIZE_SMALL)).pack()
-                    shown = True
-                except Exception:
-                    im = None
-            if not shown:
-                self._info_in(body, "▶ 视频\n（系统没给这张封面，双击可以播放）")
-                shown = True
-
-        if not shown or text_only:
-            # 文本 / 其它：显示前 2KB 文字或信息
-            info = self._quick_text(path)
-            if info is None:
-                info = ""
-            self._txt = tk.Label(body, text=info or "（没有可预览的内容）",
-                                 bg="#222", fg="#ddd", font=(FONT, UI_FONT_SIZE),
-                                 justify="left", anchor="nw",
-                                 wraplength=max_w - 16)
-            self._txt.pack(fill="both", expand=True)
-            # ★ 补丁27：限制小窗高度（文本长了别撑破屏幕），超了就在窗里滚动
-            try:
-                if self._txt.winfo_reqheight() > max_h - 40:
-                    self._txt.pack_forget()
-                    cvv = tk.Canvas(body, bg="#222", width=max_w - 14,
-                                    height=max_h - 40, highlightthickness=0)
-                    sbv = ttk.Scrollbar(body, orient="vertical",
-                                        command=cvv.yview)
-                    cvv.configure(yscrollcommand=sbv.set)
-                    sbv.pack(side="right", fill="y")
-                    cvv.pack(side="left", fill="both", expand=True)
-                    inner = tk.Frame(cvv, bg="#222")
-                    cvv.create_window((0, 0), window=inner, anchor="nw")
-                    tk.Label(inner, text=info, bg="#222", fg="#ddd",
-                             font=(FONT, UI_FONT_SIZE), justify="left", anchor="nw",
-                             wraplength=max_w - 30).pack()
-                    inner.bind("<Configure>",
-                               lambda e, c=cvv: c.configure(
-                                   scrollregion=c.bbox("all")))
-                    self._txt = inner
-            except Exception:
-                pass
-            shown = True
-
-        # 位置：鼠标右下方，靠边就翻到另一侧
-        try:
-            win.update_idletasks()
-            w = win.winfo_reqwidth()
-            h = win.winfo_reqheight()
-            sw = win.winfo_screenwidth()
-            sh = win.winfo_screenheight()
-            x = self._last_xy[0] + 18
-            y = self._last_xy[1] + 18
-            if x + w > sw - 8:
-                x = max(8, self._last_xy[0] - w - 18)
-            if y + h > sh - 8:
-                y = max(8, self._last_xy[1] - h - 18)
-            win.geometry("+%d+%d" % (x, y))
-        except Exception:
-            pass
-        self.win = win
-
-    def _info_in(self, parent, text):
-        tk.Label(parent, text=text, bg="#222", fg="#ddd", font=(FONT, UI_FONT_SIZE),
-                 justify="left", wraplength=360, anchor="nw").pack(
-            fill="both", expand=True)
-
-    def _quick_text(self, path):
-        """文本类返回前几 KB；其它返回一句信息（都很快，不读大文件）。"""
-        ext = os.path.splitext(path)[1].lower()
-        text_exts = {".txt", ".md", ".py", ".json", ".log", ".ini", ".bat",
-                     ".csv", ".xml", ".yml", ".yaml", ".html", ".htm", ".js",
-                     ".css", ".c", ".cpp", ".h", ".java", ".sh", ".cfg",
-                     ".conf", ".toml", ".rst", ".sql", ".tsv", ".srt", ".sub"}
-        if ext not in text_exts:
-            try:
-                st = os.stat(path)
-                return ("%s\n\n大小：%s\n修改：%s" % (
-                    os.path.basename(path),
-                    fmt_size(st.st_size),
-                    datetime.fromtimestamp(st.st_mtime).strftime(
-                        "%Y-%m-%d %H:%M")))
-            except Exception:
-                return os.path.basename(path)
-        try:
-            with open(path, "rb") as f:
-                raw = f.read(2048)
-        except Exception as exc:
-            return "（读不出来：%s）" % str(exc)[:60]
-        if b"\x00" in raw:
-            return "（这是个二进制文件）"
-        for enc in ("utf-8", "gbk", "utf-16"):
-            try:
-                return raw.decode(enc)[:1200]
-            except Exception:
-                continue
-        return raw.decode("utf-8", errors="replace")[:1200]
-
-    # ---------- 开关 ----------
-    def set_enabled(self, on):
-        self.enabled = bool(on)
-        try:
-            save_ui_setting("hover_preview", self.enabled)
-        except Exception:
-            pass
-        if not self.enabled:
-            self._cancel()
-
-    def toggle(self):
-        self.set_enabled(not self.enabled)
-        try:
-            self.app.set_status(
-                "鼠标悬停预览：%s（把鼠标停在文件上 %d 毫秒就弹小窗）"
-                % ("已开启" if self.enabled else "已关闭",
-                   int(self.delay_ms)))
-        except Exception:
+# ★★★ HoverPreview 已拆到 `AIxiede拆分开/程序分块/HoverPreview.py`（2026-10-08 第 3 批）
+#   ★ 主程序启动时把「自己」交给它（`_set_app`）——
+#     两边**不在开头互相 import**（那会打不开，见模块里的说明）。
+try:
+    # ★★ 注意两点写法（都是踩出来的）：
+    #   ① `sys.path` 里加的是「程序分块」**目录**，
+    #      所以是 `from HoverPreview import …`，
+    #      **不是** `from AIxiede拆分开.程序分块.HoverPreview import …`
+    #      （项目根不在 sys.path 里 → 找不到包）
+    #   ② `_set_app` 要**取个别名**（`as _fk_XXX`）——
+    #      ★ 因为模块名和类名**同名**，`HoverPreview._set_app` 会变成
+    #        "在**类**上找 _set_app" → AttributeError（我第二版这么错的）
+    from HoverPreview import HoverPreview, _set_app as _fk_HoverPreview
+    _fk_HoverPreview(sys.modules[__name__])
+    _HAS_HOVERPREVIEW = True
+except Exception as _e:
+    _HAS_HOVERPREVIEW = False
+    note_swallowed(T("拆出去的 HoverPreview.py 没找到，已退回内置简易版"), _e)
+    class HoverPreview:  # ★ 兜底：没模块也不崩，只是没这个功能
+        def __init__(self, *a, **k):
             pass
 
+        def on_motion(self, *a, **k):
+            pass
 
-# ==========================================================================
-#  ★ v25：公共小工具（鼠标滚轮 / 索引扫描）
-# ==========================================================================
+        def on_leave(self, *a, **k):
+            pass
+
+        def set_enabled(self, *a, **k):
+            pass
+
 def enable_wheel_scroll(top, canvas):
     """让整个窗口任意位置都能用鼠标滚轮滚动 canvas。
 

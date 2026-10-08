@@ -38,8 +38,6 @@ def _set_app(app):
     _APP = app
     _fill()
     _link_siblings()
-    _link_siblings()
-    _link_siblings()
 
 
 def _fill():
