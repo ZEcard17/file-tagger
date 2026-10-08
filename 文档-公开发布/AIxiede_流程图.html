@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>AIxiede.py 程序运行逻辑图</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #1e1e1e; color: #eee; }
+        h1 { color: #4fc3f7; }
+        h2 { color: #81c784; margin-top: 30px; }
+        .mermaid { background: #2d2d2d; padding: 20px; border-radius: 10px; }
+        pre { background: #2d2d2d; padding: 15px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>📋 AIxiede.py 程序运行逻辑图</h1>
+
+    <h2>1. 程序启动流程</h2>
+    <pre class="mermaid">
+flowchart TB
+    subgraph main["main() 入口"]
+        A["创建 Tk root"] --> B["探测系统字体"]
+        B --> C["计算 UI 缩放"]
+        C --> D["应用 DPI 缩放"]
+        D --> E["统一全程序字体"]
+        E --> F["FileTaggerApp(root)"]
+    end
+
+    subgraph app["FileTaggerApp 主应用"]
+        F --> G["TagStore 连接数据库"]
+        G --> H["heal_net_paths 自愈网盘路径"]
+        H --> I["_build_menu 构建菜单"]
+        I --> J["_build_ui 构建主界面"]
+        J --> K["启动后台线程信箱轮询"]
+        K --> L["refresh_categories 刷新分类"]
+        L --> M["refresh_tags 刷新标签"]
+        M --> N["load_directory 加载目录"]
+        N --> O["sidebar.refresh_file_tree 初始化文件树"]
+        O --> P["_setup_idle_jobs 闲时任务"]
+        P --> Q["3秒后自检"]
+    end
+    </pre>
+
+    <h2>2. UI 布局结构</h2>
+    <pre class="mermaid">
+flowchart LR
+    subgraph UI["主界面布局"]
+        direction TB
+        A["顶部工具栏"] --- B["PanedWindow 水平分栏"]
+        B --> C["左侧分类库"]
+        B --> D["中间文件列表"]
+        B --> E["右侧预览窗格"]
+        B --> F["右侧标签库"]
+    end
+    </pre>
+
+    <h2>3. 分类库结构</h2>
+    <pre class="mermaid">
+flowchart TB
+    subgraph sidebar["CategorySidebar 左侧分类库"]
+        direction TB
+        A["垂直分栏 PanedWindow"] --> B["上半部分类库 Canvas+Scrollbar"]
+        A --> C["下半部分文件目录树 ttk.Treeview"]
+        
+        B --> D["全部文件 CategoryItem"]
+        B --> E["分隔线"]
+        B --> F["新建分类按钮"]
+        B --> G["分类列表 CategoryItem..."]
+        
+        C --> H["📁 文件目录 标题"]
+        C --> I["↻ 刷新按钮"]
+        C --> J["Treeview 树形控件"]
+    end
+    </pre>
+
+    <h2>4. 文件列表加载流程</h2>
+    <pre class="mermaid">
+flowchart TB
+    A["load_directory(path)"] --> B{"视图模式?"}
+    B -->|"dir"| C["目录文件列表"]
+    B -->|"cat"| D["分类视图"]
+    B -->|"all"| E["全部文件"]
+    B -->|"search"| F["搜索结果"]
+    
+    C --> G["后台扫描目录"]
+    D --> H["查询分类文件"]
+    E --> I["查询所有文件"]
+    F --> J["全文搜索"]
+    
+    G --> K["_ui_queue 回主线程"]
+    H --> K
+    I --> K
+    J --> K
+    K --> L["FileList.set_rows"]
+    L --> M["排序"]
+    M --> N["计算布局"]
+    N --> O["缩略图后台加载"]
+    O --> P["_redraw 绘制 Canvas"]
+    </pre>
+
+    <h2>5. 预览窗格工作流程</h2>
+    <pre class="mermaid">
+flowchart TB
+    A["PreviewPane.show_path"] --> B{"文件类型判断"}
+    
+    B -->|"文本"| C["_show_text → tk.Text"]
+    B -->|"图片"| D["_show_pil_image → Canvas"]
+    B -->|"PDF"| E["_show_pdf_scroll → 连续滚动"]
+    B -->|"视频"| F["get_video_thumbnail_pil → 缩略图"]
+    B -->|"电子书"| G["_show_book → tk.Text"]
+    B -->|"其他"| H["_show_text → 文件信息"]
+    
+    D --> I["图片缩放适应宽度"]
+    E --> J["后台渲染第1页立刻显示"]
+    E --> K["后续页面边看边补"]
+    F --> L["cv2 截帧"]
+    </pre>
+
+    <h2>6. 悬停预览流程</h2>
+    <pre class="mermaid">
+flowchart TB
+    A["HoverPreview.on_motion"] --> B{"找到悬停文件?"}
+    B -->|"否"| C["_cancel 取消计时器"]
+    B -->|"是"| D["启动 delay_ms 计时器"]
+    D --> E{"计时结束?"}
+    E -->|"否"| F["取消"]
+    E -->|"是"| G["_show_now"]
+    
+    G --> H{"文件类型"}
+    H -->|"图片"| I["PIL 缩放显示"]
+    H -->|"PDF"| J["get_pdf_page_pil 第1页"]
+    H -->|"视频"| K["get_video_thumbnail_pil"]
+    H -->|"电子书"| L["book_load 显示开头文字"]
+    H -->|"其他"| M["_quick_text 前2KB"]
+    
+    I --> N["显示 760x600 窗口"]
+    J --> N
+    K --> N
+    L --> N
+    M --> N
+    </pre>
+
+    <h2>7. 视频缩略图获取流程</h2>
+    <pre class="mermaid">
+flowchart TB
+    A["get_video_thumbnail_pil(path)"] --> B["方法1: Windows缩略图"]
+    B -->|失败| C["方法2: ffmpeg 截帧"]
+    C -->|失败| D["方法3: cv2 直接解码"]
+    D -->|失败| E["返回 None"]
+    D -->|成功| F["返回 PIL Image"]
+    B -->|成功| F
+    C -->|成功| F
+    </pre>
+
+    <h2>8. 数据库数据结构</h2>
+    <pre class="mermaid">
+erDiagram
+    files ||--o{ file_tags : "文件-标签"
+    tags ||--o{ file_tags : "标签-文件"
+    tags ||--o{ tag_relations : "父子关系"
+    files ||--o{ category_files : "分类-文件"
+    categories ||--o{ category_files : "分类成员"
+    categories ||--o{ category_tag_links : "分类-标签超链接"
+    tags ||--o{ category_tag_links : "超链接标签"
+    
+    files {
+        int id PK
+        string path
+        string folder
+        int size
+        string mtime
+    }
+    tags {
+        int id PK
+        string name
+        string color
+        int sort_order
+    }
+    file_tags {
+        int file_id FK
+        int tag_id FK
+        int is_auto
+    }
+    tag_relations {
+        int parent_id FK
+        int child_id FK
+    }
+    categories {
+        int id PK
+        string name
+        string color
+        string icon
+    }
+    category_files {
+        int category_id FK
+        int file_id FK
+    }
+    category_tag_links {
+        int category_id FK
+        int tag_id FK
+    }
+    </pre>
+
+    <h2>9. 标签继承逻辑</h2>
+    <pre class="mermaid">
+flowchart TB
+    A["小说"] --> B["科幻"]
+    B --> C["卫斯理"]
+    
+    D["给文件打'卫斯理'标签"] --> E["file_tags 表写入"]
+    E --> F["卫斯理 is_auto=0 手工"]
+    E --> G["科幻 is_auto=1 继承"]
+    E --> H["小说 is_auto=1 继承"]
+    </pre>
+
+    <script>mermaid.initialize({ startOnLoad: true, theme: 'dark' });</script>
+</body>
+</html>

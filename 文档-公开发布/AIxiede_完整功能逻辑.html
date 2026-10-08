@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIxiede 文件标签管理器 — 完整功能逻辑文档</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            font-size: 15px;
+            line-height: 1.8;
+            color: #333;
+            background: #f5f7fa;
+            padding: 40px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 60px 70px;
+        }
+        h1 {
+            font-size: 28px;
+            color: #1a1a2e;
+            border-bottom: 3px solid #4a90d9;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        h1 .subtitle {
+            font-size: 16px;
+            color: #888;
+            font-weight: normal;
+            display: block;
+            margin-top: 8px;
+        }
+        h2 {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-top: 40px;
+            margin-bottom: 15px;
+            padding-left: 12px;
+            border-left: 4px solid #4a90d9;
+        }
+        h3 {
+            font-size: 17px;
+            color: #34495e;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+        p {
+            margin: 10px 0;
+        }
+        .lead {
+            font-size: 16px;
+            color: #555;
+            background: #f8f9fb;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        th {
+            background: #4a90d9;
+            color: #fff;
+            padding: 12px 15px;
+            text-align: left;
+        }
+        td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eef0f4;
+        }
+        tr:hover {
+            background: #f8f9fb;
+        }
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: Consolas, monospace;
+            font-size: 13px;
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #e0e0e0;
+            margin: 40px 0;
+        }
+        .layout-diagram {
+            background: #f8f9fb;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: Consolas, monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        .info-box {
+            background: #e8f4fd;
+            border-left: 4px solid #4a90d9;
+            padding: 12px 18px;
+            margin: 15px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px 18px;
+            margin: 15px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        ul, ol {
+            margin: 10px 0 10px 25px;
+        }
+        li {
+            margin: 5px 0;
+        }
+        .footer {
+            text-align: center;
+            color: #999;
+            font-size: 13px;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                padding: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            AIxiede 文件标签管理器
+            <span class="subtitle">完整功能逻辑文档 · 面向用户的操作手册</span>
+        </h1>
+
+        <p class="lead">本文档以「操作 → 效果」的方式说明每个功能的作用。什么点一下、拖一下会怎样，都写清楚了。</p>
+
+        <h2>一、整体布局</h2>
+
+        <p>程序从左到右分四列：</p>
+
+        <div class="layout-diagram">┌────────────┬──────────────────┬──────────────┬────────────────┐
+│  分类库    │    文件列表      │   预览窗格   │   标签库        │
+│（上半部分）│  （主区域）       │  （右侧）    │ （星图缩略图）  │
+│  文件树    │                  │              │                │
+│（下半部分）│                  │              │                │
+└────────────┴──────────────────┴──────────────┴────────────────┘</div>
+
+        <ul>
+            <li><strong>分类库（左上）</strong>：按分类组织标签</li>
+            <li><strong>文件树（左下）</strong>：目录结构，导航用</li>
+            <li><strong>文件列表（中间）</strong>：显示文件缩略图或列表</li>
+            <li><strong>预览窗格（右侧）</strong>：选中文件后显示内容</li>
+            <li><strong>标签库（最右）</strong>：星图缩略图，勾选标签筛选</li>
+        </ul>
+
+        <hr>
+
+        <h2>二、文件列表操作</h2>
+
+        <h3>2.1 单击选中一个文件</h3>
+        <ul>
+            <li><strong>效果</strong>：在文件列表中显示为高亮，右侧预览窗格显示文件内容</li>
+            <li><strong>如果文件是图片</strong>：显示图片缩略图（可随窗格宽度自动缩放）</li>
+            <li><strong>如果文件是视频</strong>：显示视频封面缩略图（后台解码第一帧）</li>
+            <li><strong>如果文件是 PDF</strong>：连续滚动显示所有页面（滚轮浏览）</li>
+            <li><strong>如果文件是文本</strong>：直接显示文本内容</li>
+            <li><strong>如果文件在网盘</strong>：显示文件信息，提供「拷到本地再打开」按钮</li>
+        </ul>
+
+        <h3>2.2 双击打开文件</h3>
+        <ul>
+            <li><strong>效果</strong>：用系统默认程序打开文件</li>
+            <li><strong>不经过预览</strong>，直接用系统程序：如用看图软件打开图片、用视频软件打开视频等</li>
+        </ul>
+
+        <h3>2.3 右键文件</h3>
+        <p>弹出一个菜单，包含以下操作：</p>
+
+        <table>
+            <tr><th>菜单项</th><th>点击效果</th></tr>
+            <tr><td>「打开」</td><td>用系统默认程序打开文件</td></tr>
+            <tr><td>「在文件资源管理器中显示」</td><td>打开系统资源管理器，定位到该文件</td></tr>
+            <tr><td>「复制路径」</td><td>把文件路径复制到剪贴板</td></tr>
+            <tr><td>「属性」</td><td>弹出一个窗口，显示文件的详细信息（大小、修改时间、标签等）</td></tr>
+            <tr><td>「去除标签」</td><td>弹出一个对话框，可以选择要从文件中移除的标签</td></tr>
+            <tr><td>「把标签全部加入标签盒」</td><td>把这个文件身上的所有标签一次性放进标签盒（方便批量打标）</td></tr>
+        </table>
+
+        <h3>2.4 框选文件（鼠标拖动）</h3>
+        <ul>
+            <li><strong>效果</strong>：拉出一个蓝色方框，框住的文件被选中（高亮）</li>
+            <li><strong>可以配合 Ctrl</strong>：按住 Ctrl 再单击，可以在已有选中的基础上加选/减选</li>
+            <li><strong>框选后再右键</strong>：可以对多个文件一起操作</li>
+        </ul>
+
+        <hr>
+
+        <h2>三、标签系统</h2>
+
+        <h3>3.1 标签条（窗口底部）</h3>
+
+        <p><strong>显示位置</strong>：窗口底部状态栏旁边，有一个「🏷 标签条」按钮</p>
+
+        <p><strong>点击「🏷 标签条」按钮</strong>：</p>
+        <ul>
+            <li>第一次点 → 标签条展开，显示当前文件身上的所有标签</li>
+            <li>第二次点 → 标签条收起</li>
+        </ul>
+
+        <p><strong>标签条里的标签可以点击</strong>：</p>
+        <ul>
+            <li><strong>左键点击标签</strong> → 筛选：只显示拥有这个标签的文件</li>
+            <li><strong>右键点击标签</strong> → 屏蔽：隐藏拥有这个标签的文件</li>
+            <li><strong>配合范围选项</strong>：可以选「当前视图范围内」或「整个数据库」</li>
+        </ul>
+
+        <p><strong>标签条右侧的信息</strong>：</p>
+        <ul>
+            <li>显示当前视图有多少文件、多少标签</li>
+            <li>例如：「图本 · 12345 个文件」</li>
+        </ul>
+
+        <h3>3.2 标签盒（右下角按钮）</h3>
+
+        <p><strong>点击「🏷 标签盒」按钮</strong> → 弹出一个独立的窗口</p>
+
+        <h4>标签盒的基本操作</h4>
+
+        <table>
+            <tr><th>操作</th><th>效果</th></tr>
+            <tr><td><strong>把标签拖进盒子里</strong></td><td>从标签库/星图拖拽标签到标签盒，松开鼠标，标签就进入盒子</td></tr>
+            <tr><td><strong>从盒子拖出标签</strong></td><td>把标签从盒子拖到文件列表里的文件上，给文件打上这个标签</td></tr>
+            <tr><td><strong>框选标签</strong></td><td>在盒子空白处拖动，拉出一个方框，框住的标签一起被选中（显示蓝边）</td></tr>
+            <tr><td><strong>Ctrl + 点击标签</strong></td><td>一个一个加选/减选选中状态</td></tr>
+            <tr><td><strong>点击空白处 / 按 Esc</strong></td><td>取消所有选中</td></tr>
+            <tr><td><strong>右键选中的标签</strong></td><td>菜单：「✖ 把选中的这 N 个一起移出盒子」</td></tr>
+            <tr><td><strong>拖拽选中的多个标签</strong></td><td>可以批量拖到文件上，一起给文件打多个标签</td></tr>
+        </table>
+
+        <h4>标签盒分格功能</h4>
+
+        <p>点击盒子顶部的「▦ 分格设置」按钮：</p>
+
+        <table>
+            <tr><th>操作</th><th>效果</th></tr>
+            <tr><td>选择「↔ 横着分」</td><td>把盒子分成左右几格（自己定数量）</td></tr>
+            <tr><td>选择「↕ 竖着分」</td><td>把盒子分成上下几层（自己定数量）</td></tr>
+            <tr><td>点「＋ / －」</td><td>增加/减少格子数量</td></tr>
+            <tr><td>把标签拖进某个格子</td><td>标签只属于那个格子，方便分类管理</td></tr>
+        </table>
+
+        <h4>标签盒工具栏按钮</h4>
+
+        <table>
+            <tr><th>按钮</th><th>点击效果</th></tr>
+            <tr><td>「＋ 从标签库勾选」</td><td>弹出一个列表，勾选标签放进盒子</td></tr>
+            <tr><td>「⤢ 摊开一点」</td><td>把盒子里的标签排列得更稀疏</td></tr>
+            <tr><td>「▦ 分格设置」</td><td>设置横分/竖分、格子数量</td></tr>
+            <tr><td>「✖ 清空盒子」</td><td>把所有标签从盒子里移除</td></tr>
+        </table>
+
+        <h3>3.3 标签星图（独立窗口）</h3>
+
+        <p><strong>打开方式</strong>：点击标签库顶部的「🌌 标签星图」按钮</p>
+
+        <h4>星图里的基本操作</h4>
+
+        <table>
+            <tr><th>操作</th><th>效果</th></tr>
+            <tr><td><strong>单击一个标签方块</strong></td><td>选中该标签，底部显示它的上下游标签</td></tr>
+            <tr><td><strong>双击一个标签方块</strong></td><td>在文件列表中显示拥有这个标签的所有文件</td></tr>
+            <tr><td><strong>鼠标滚轮</strong></td><td>缩放星图（像 GeoGebra 那样，标签大小不变，只改变距离）</td></tr>
+            <tr><td><strong>按住鼠标中键拖动</strong></td><td>平移星图画布</td></tr>
+            <tr><td><strong>拖动一个标签方块</strong></td><td>移动该标签在星图中的位置（松开鼠标确认）</td></tr>
+            <tr><td><strong>Shift + 拖动标签</strong></td><td>把标签放进标签盒</td></tr>
+            <tr><td><strong>Ctrl + 拖动多个标签</strong></td><td>一起拖动多个选中的标签</td></tr>
+        </table>
+
+        <h4>星图底部按钮</h4>
+
+        <table>
+            <tr><th>按钮</th><th>点击效果</th></tr>
+            <tr><td>「＋ 加父级标签…」</td><td>给选中的标签添加父级标签（弹窗勾选）</td></tr>
+            <tr><td>「＋ 加子级标签…」</td><td>给选中的标签添加子级标签（弹窗勾选）</td></tr>
+            <tr><td>「去除关系」</td><td>移除选中的上下游关系</td></tr>
+            <tr><td>「改颜色」</td><td>改变选中标签的显示颜色</td></tr>
+            <tr><td>「改名字」</td><td>给选中标签改名</td></tr>
+            <tr><td>「新建标签」</td><td>在星图空白处创建一个新标签</td></tr>
+            <tr><td>「删除标签」</td><td>删除选中的标签（如果有文件用它，会提示）</td></tr>
+            <tr><td>「保存」</td><td>保存所有修改到数据库</td></tr>
+            <tr><td>「缩放 → 适应窗口」</td><td>自动缩放让所有标签都显示在窗口内</td></tr>
+        </table>
+
+        <h3>3.4 标签库（最右侧栏）</h3>
+
+        <p><strong>显示内容</strong>：所有标签的缩略图列表（星图那种形式）</p>
+
+        <h4>标签库里的操作</h4>
+
+        <table>
+            <tr><th>操作</th><th>效果</th></tr>
+            <tr><td><strong>单击一个标签</strong></td><td>高亮选中该标签</td></tr>
+            <tr><td><strong>Ctrl + 单击</strong></td><td>多选/取消多选标签</td></tr>
+            <tr><td><strong>双击一个标签</strong></td><td>在文件列表中显示拥有这个标签的所有文件</td></tr>
+            <tr><td><strong>把标签拖到文件上</strong></td><td>给文件打上这个标签</td></tr>
+            <tr><td><strong>拖拽标签到标签盒</strong></td><td>把标签放进标签盒</td></tr>
+            <tr><td><strong>右键标签</strong></td><td>菜单：「在星图里打开」「改名字」「改颜色」「删除」</td></tr>
+        </table>
+
+        <h4>标签库顶部搜索栏</h4>
+        <ul>
+            <li>输入文字，按回车 → 搜索标签名</li>
+            <li>搜索结果高亮显示</li>
+        </ul>
+
+        <h4>标签库顶部工具栏按钮</h4>
+
+        <table>
+            <tr><th>按钮</th><th>点击效果</th></tr>
+            <tr><td>「🌌 标签星图」</td><td>打开标签星图编辑器</td></tr>
+            <tr><td>「＋ 新建标签」</td><td>创建一个新标签</td></tr>
+            <tr><td>「显示/隐藏 标签库」</td><td>显示或隐藏右侧整列标签库</td></tr>
+        </table>
+
+        <hr>
+
+        <h2>四、分类库（左侧上半部分）</h2>
+
+        <p><strong>显示内容</strong>：按分类组织的标签树</p>
+
+        <h3>分类库基本操作</h3>
+
+        <table>
+            <tr><th>操作</th><th>效果</th></tr>
+            <tr><td><strong>单击分类</strong></td><td>展开/折叠该分类下的子分类和标签</td></tr>
+            <tr><td><strong>单击标签</strong></td><td>在文件列表中显示属于该分类的文件</td></tr>
+            <tr><td><strong>右键分类/标签</strong></td><td>弹出菜单，可以新建子分类、新建标签、删除等</td></tr>
+            <tr><td><strong>拖动标签到文件上</strong></td><td>给文件打上这个标签</td></tr>
+        </table>
+
+        <hr>
+
+        <h2>五、文件树（左侧下半部分）</h2>
+
+        <p><strong>显示内容</strong>：目录结构，类似于 Windows 资源管理器</p>
+
+        <h3>文件树基本操作</h3>
+
+        <table>
+            <tr><th>操作</th><th>效果</th></tr>
+            <tr><td><strong>单击文件夹</strong></td><td>展开/折叠该文件夹</td></tr>
+            <tr><td><strong>双击文件夹</strong></td><td>进入该文件夹，文件列表显示该文件夹内容</td></tr>
+            <tr><td><strong>双击文件</strong></td><td>用系统默认程序打开文件</td></tr>
+            <tr><td><strong>右键</strong></td><td>弹菜单：新建文件/文件夹、在资源管理器中显示等</td></tr>
+        </table>
+
+        <hr>
+
+        <h2>六、预览窗格（右侧）</h2>
+
+        <p><strong>默认隐藏</strong>，点击窗口右下角「📄 预览」按钮显示</p>
+
+        <h3>预览窗格操作</h3>
+
+        <table>
+            <tr><th>操作</th><th>效果</th></tr>
+            <tr><td><strong>拖动窗格边缘</strong></td><td>调整预览窗格宽度，图片会自动适应新宽度</td></tr>
+            <tr><td><strong>选中一个文件</strong></td><td>自动在预览窗格里显示文件内容</td></tr>
+            <tr><td><strong>图片</strong></td><td>显示图片缩略图（可随宽度缩放）</td></tr>
+            <tr><td><strong>视频</strong></td><td>显示视频封面缩略图（后台解码）</td></tr>
+            <tr><td><strong>PDF</strong></td><td>连续滚动显示所有页面，滚轮浏览，页间无缝</td></tr>
+            <tr><td><strong>文本</strong></td><td>显示文本内容（最多 256KB）</td></tr>
+            <tr><td><strong>电子书（EPUB/MOBI等）</strong></td><td>分页显示，可用左右方向键翻页</td></tr>
+            <tr><td><strong>文件夹</strong></td><td>显示「这是一个文件夹，双击进入」</td></tr>
+            <tr><td><strong>网盘文件</strong></td><td>显示文件信息，提供「拷到本地再打开」按钮（后台拷贝，进度条显示）</td></tr>
+        </table>
+
+        <hr>
+
+        <h2>七、搜索功能</h2>
+
+        <h3>7.1 顶部搜索栏</h3>
+
+        <p><strong>位置</strong>：文件列表正上方</p>
+
+        <table>
+            <tr><th>操作</th><th>效果</th></tr>
+            <tr><td><strong>输入文字，按回车</strong></td><td>在当前视图范围内搜索文件名</td></tr>
+            <tr><td><strong>点击「×」清空</strong></td><td>清空搜索，恢复全部显示</td></tr>
+            <tr><td><strong>搜索框右边「显示 N / M」</strong></td><td>N=搜索命中的文件数，M=总文件数</td></tr>
+        </table>
+
+        <h3>7.2 高级搜索按钮</h3>
+
+        <p>点击搜索栏右边的扳手图标，弹出高级搜索面板：</p>
+
+        <table>
+            <tr><th>选项</th><th>效果</th></tr>
+            <tr><td>「标签」输入框</td><td>只显示拥有指定标签的文件（多标签用逗号分隔）</td></tr>
+            <tr><td>「范围」下拉</td><td>选择「当前视图范围内」或「整个数据库」</td></tr>
+            <tr><td>「大小」范围</td><td>按文件大小筛选（如：1MB - 10MB）</td></tr>
+            <tr><td>「修改时间」范围</td><td>按修改时间筛选</td></tr>
+            <tr><td>「类型」下拉</td><td>按文件类型筛选（如：图片、视频、文档）</td></tr>
+        </table>
+
+        <hr>
+
+        <h2>八、视图模式</h2>
+
+        <h3>8.1 切换按钮</h3>
+
+        <p>文件列表上方有一排视图切换按钮：</p>
+
+        <table>
+            <tr><th>按钮</th><th>效果</th></tr>
+            <tr><td>「瀑布流」</td><td>大图缩略图布局（根据窗口宽度自动排布）</td></tr>
+            <tr><td>「列表」</td><td>每行显示文件名、标签等信息（一排 8 个）</td></tr>
+            <tr><td>「详情」</td><td>显示文件详细信息列表（名称、大小、时间、标签）</td></tr>
+        </table>
+
+        <h3>8.2 缩略图大小</h3>
+
+        <p>瀑布流模式下：</p>
+        <ul>
+            <li><strong>滚轮在空白处滚动</strong> → 调整缩略图大小（放大/缩小）</li>
+            <li>缩略图尺寸变化时，布局自动重新排布</li>
+        </ul>
+
+        <hr>
+
+        <h2>九、闲时自动任务</h2>
+
+        <p>程序闲置时，会自动在后台执行以下任务：</p>
+
+        <table>
+            <tr><th>任务</th><th>效果</th></tr>
+            <tr><td><strong>同步文件名标签链</strong></td><td>根据文件名规则自动打标签</td></tr>
+            <tr><td><strong>打自动标签</strong></td><td>根据文件内容或规则自动打标签</td></tr>
+            <tr><td><strong>索引扫描</strong></td><td>扫描文件变化，更新数据库</td></tr>
+        </table>
+
+        <p>状态栏会显示闲时任务的进度。</p>
+
+        <hr>
+
+        <h2>十、右下角按钮</h2>
+
+        <p>窗口右下角有一排小按钮：</p>
+
+        <table>
+            <tr><th>按钮</th><th>点击效果</th></tr>
+            <tr><td>「📄 预览」</td><td>显示/隐藏右侧预览窗格</td></tr>
+            <tr><td>「🏷 标签条」</td><td>展开/收起底部标签条</td></tr>
+            <tr><td>「🏷 标签盒」</td><td>打开标签盒窗口</td></tr>
+            <tr><td>「🔔 问题」</td><td>打开「问题」面板，显示程序运行中的错误和警告</td></tr>
+            <tr><td>「📋 输出」</td><td>打开「输出」面板，显示程序运行日志</td></tr>
+            <tr><td>「🏷 标签库」</td><td>显示/隐藏右侧标签库栏</td></tr>
+        </table>
+
+        <hr>
+
+        <h2>十一、菜单栏</h2>
+
+        <h3>文件菜单</h3>
+        <table>
+            <tr><th>选项</th><th>效果</th></tr>
+            <tr><td>「新建标签」</td><td>创建一个新标签</td></tr>
+            <tr><td>「导入文件列表…」</td><td>从文本文件导入文件列表</td></tr>
+            <tr><td>「导出文件列表…」</td><td>把当前文件列表导出到文本文件</td></tr>
+            <tr><td>「退出」</td><td>关闭程序</td></tr>
+        </table>
+
+        <h3>视图菜单</h3>
+        <table>
+            <tr><th>选项</th><th>效果</th></tr>
+            <tr><td>「瀑布流 / 列表 / 详情」</td><td>切换视图模式</td></tr>
+            <tr><td>「刷新」</td><td>重新扫描当前目录</td></tr>
+            <tr><td>「全屏」</td><td>进入/退出全屏模式</td></tr>
+        </table>
+
+        <h3>工具菜单</h3>
+        <table>
+            <tr><th>选项</th><th>效果</th></tr>
+            <tr><td>「标签星图」</td><td>打开标签星图编辑器</td></tr>
+            <tr><td>「重建缩略图缓存」</td><td>清除并重新生成所有缩略图</td></tr>
+            <tr><td>「数据库维护」</td><td>打开数据库维护工具</td></tr>
+            <tr><td>「设置…」</td><td>打开设置面板</td></tr>
+        </table>
+
+        <h3>帮助菜单</h3>
+        <table>
+            <tr><th>选项</th><th>效果</th></tr>
+            <tr><td>「使用手册」</td><td>打开本手册</td></tr>
+            <tr><td>「关于」</td><td>显示程序版本和版权信息</td></tr>
+        </table>
+
+        <hr>
+
+        <h2>十二、快捷键</h2>
+
+        <table>
+            <tr><th>快捷键</th><th>效果</th></tr>
+            <tr><td><code>Ctrl + F</code></td><td>聚焦到搜索框</td></tr>
+            <tr><td><code>Ctrl + A</code></td><td>全选当前视图所有文件</td></tr>
+            <tr><td><code>Delete</code></td><td>删除选中的文件（移动到回收站）</td></tr>
+            <tr><td><code>F5</code></td><td>刷新当前目录</td></tr>
+            <tr><td><code>Escape</code></td><td>取消当前选择 / 关闭弹窗</td></tr>
+            <tr><td><code>Ctrl + Z</code></td><td>撤销上一次操作（部分功能支持）</td></tr>
+            <tr><td><code>Ctrl + Y</code></td><td>重做</td></tr>
+            <tr><td><code>Ctrl + C</code></td><td>复制选中文件的路径</td></tr>
+            <tr><td><code>Ctrl + V</code></td><td>粘贴文件（从剪贴板）</td></tr>
+            <tr><td><code>Enter</code></td><td>打开选中的文件</td></tr>
+            <tr><td><code>Space</code></td><td>预览选中的文件（等同于选中后看右侧预览窗格）</td></tr>
+        </table>
+
+        <hr>
+
+        <h2>十三、状态栏信息解读</h2>
+
+        <p>状态栏左侧显示程序当前状态：</p>
+
+        <table>
+            <tr><th>显示内容</th><th>含义</th></tr>
+            <tr><td>「就绪」</td><td>程序正常，等待操作</td></tr>
+            <tr><td>「正在扫描…」</td><td>正在扫描目录</td></tr>
+            <tr><td>「正在加载缩略图…」</td><td>正在生成缩略图</td></tr>
+            <tr><td>「共 12345 个文件」</td><td>当前视图共有多少文件</td></tr>
+            <tr><td>「已选中 5 个」</td><td>选中了多少文件</td></tr>
+            <tr><td>「标签条作用范围：整个视图（12345 个文件 / 87 个标签）」</td><td>标签条筛选的范围</td></tr>
+        </table>
+
+        <hr>
+
+        <h2>十四、常见问题处理</h2>
+
+        <h3>Q: 预览窗格里视频/图片显示不出来</h3>
+        <p><strong>A:</strong> 可能原因：</p>
+        <ol>
+            <li>网盘文件需要点击「拷到本地再打开」</li>
+            <li>视频编码不支持</li>
+            <li>图片格式不支持</li>
+        </ol>
+
+        <h3>Q: 拖拽标签到文件上没反应</h3>
+        <p><strong>A:</strong> 确保拖拽的目标是文件列表里的文件，而不是空白处</p>
+
+        <h3>Q: 标签盒里的标签拖不动</h3>
+        <p><strong>A:</strong></p>
+        <ol>
+            <li>确保没有在框选模式（按 Escape 取消框选）</li>
+            <li>确保点击的是标签本身，不是标签之间的空白</li>
+        </ol>
+
+        <h3>Q: 程序很卡</h3>
+        <p><strong>A:</strong></p>
+        <ol>
+            <li>可能是数据库太大（检查 db 文件大小）</li>
+            <li>网盘文件操作可能较慢</li>
+            <li>缩略图缓存可能需要重建（工具菜单 → 重建缩略图缓存）</li>
+        </ol>
+
+        <h3>Q: 想撤销某个操作</h3>
+        <p><strong>A:</strong> 部分操作支持 Ctrl+Z 撤销，如标签的增删改、标签盒操作等</p>
+
+        <div class="footer">
+            <p>文档版本：AIxiede v26 · 最后更新：2026-01-26</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>AIxiede 使用手册</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: "Microsoft YaHei", Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; color: #333; line-height: 1.8; }
+        h1 { color: #1a73e8; text-align: center; margin-bottom: 30px; font-size: 28px; }
+        h2 { color: #1a73e8; margin-top: 40px; border-bottom: 3px solid #1a73e8; padding-bottom: 10px; font-size: 22px; }
+        h3 { color: #34a853; margin-top: 25px; font-size: 18px; }
+        h4 { color: #ea4335; margin-top: 20px; font-size: 16px; }
+        
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        
+        .operation { background: #e8f0fe; border-left: 4px solid #1a73e8; padding: 15px 20px; margin: 15px 0; border-radius: 5px; }
+        .operation::before { content: "🎯 操作："; font-weight: bold; color: #1a73e8; }
+        
+        .effect { background: #f0fdf4; border-left: 4px solid #34a853; padding: 15px 20px; margin: 10px 0; border-radius: 5px; }
+        .effect::before { content: "✅ 效果："; font-weight: bold; color: #34a853; }
+        
+        .tip { background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 15px; margin: 10px 0; border-radius: 5px; font-size: 14px; }
+        .tip::before { content: "💡 技巧："; font-weight: bold; color: #d39e00; }
+        
+        .example { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; font-size: 14px; }
+        .example::before { content: "📝 示例："; font-weight: bold; color: #666; }
+        
+        .keyboard { background: #333; color: #fff; padding: 3px 8px; border-radius: 3px; font-family: monospace; font-size: 13px; }
+        
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background: #f8f9fa; font-weight: bold; }
+        tr:hover { background: #f5f5f5; }
+        
+        .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 15px 0; }
+        .flow-item { background: #e8f0fe; padding: 8px 15px; border-radius: 20px; font-size: 14px; border: 1px solid #1a73e8; }
+        .flow-arrow { color: #666; font-size: 18px; }
+        
+        .shortcut { display: flex; background: #f8f9fa; padding: 10px 15px; margin: 5px 0; border-radius: 5px; align-items: center; gap: 15px; }
+        .shortcut-key { background: #333; color: white; padding: 5px 10px; border-radius: 5px; font-family: monospace; }
+        
+        .interface { 
+            background: #e8f0fe; 
+            border: 2px solid #1a73e8; 
+            border-radius: 10px; 
+            padding: 15px; 
+            margin: 20px 0; 
+            font-size: 13px;
+        }
+        .interface-grid {
+            display: grid;
+            grid-template-columns: 150px 1fr 180px;
+            grid-template-rows: auto 1fr auto;
+            gap: 5px;
+            min-height: 200px;
+        }
+        .interface-cell { background: white; padding: 8px; border-radius: 5px; text-align: center; font-size: 12px; }
+        .interface-header { background: #1a73e8; color: white; grid-column: span 3; border-radius: 5px; padding: 5px; }
+        .interface-sidebar { background: #c2d7f5; grid-row: span 2; }
+        .interface-main { background: #f0fdf4; }
+        .interface-preview { background: #fff3cd; grid-row: span 2; }
+        .interface-taglib { background: #fce8e6; grid-row: span 2; }
+        .interface-status { background: #e8f0fe; grid-column: span 3; font-size: 11px; }
+        
+        .tag { display: inline-block; background: #e8f0fe; color: #1a73e8; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin: 2px; }
+        .tag-red { background: #fce8e6; color: #ea4335; }
+        .tag-green { background: #f0fdf4; color: #34a853; }
+        .tag-yellow { background: #fff3cd; color: #d39e00; }
+        
+        .question { background: #f8f9fa; border-radius: 10px; padding: 15px 20px; margin: 15px 0; }
+        .question::before { content: "❓ "; font-size: 18px; }
+        .question strong { color: #1a73e8; }
+        
+        code { background: #f1f3f4; padding: 2px 6px; border-radius: 3px; font-size: 13px; }
+        
+        hr { border: none; border-top: 1px solid #eee; margin: 30px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 AIxiede 文件标签管理器 - 使用手册</h1>
+
+        <h2>1. 认识界面</h2>
+        
+        <h3>1.1 界面布局</h3>
+        <div class="interface">
+            <div class="interface-grid">
+                <div class="interface-cell interface-header">菜单栏 + 工具栏（路径输入 / 搜索 / 视图切换）</div>
+                <div class="interface-cell interface-sidebar">
+                    <strong>📂 左侧分类库</strong><br>
+                    ├─ 分类列表<br>
+                    └─ 文件目录树
+                </div>
+                <div class="interface-cell interface-main">
+                    <strong>📄 中间文件列表</strong><br>
+                    单击选中 / 双击打开<br>
+                    右侧显示标签条
+                </div>
+                <div class="interface-cell interface-preview">
+                    <strong>👁 右侧预览</strong><br>
+                    单击文件后<br>
+                    这里显示预览
+                </div>
+                <div class="interface-cell interface-taglib">
+                    <strong>🏷 标签库</strong><br>
+                    所有标签列表<br>
+                    可拖拽
+                </div>
+                <div class="interface-cell interface-status">
+                    <strong>状态栏</strong> + <strong>标签盒</strong>（常用标签快捷打标签）
+                </div>
+            </div>
+        </div>
+
+        <h3>1.2 界面区域说明</h3>
+        <table>
+            <tr><th>区域</th><th>位置</th><th>作用</th></tr>
+            <tr><td>分类库</td><td>左上方</td><td>点击切换显示不同分类的文件</td></tr>
+            <tr><td>文件列表</td><td>中间</td><td>显示文件，双击打开</td></tr>
+            <tr><td>预览窗格</td><td>右侧</td><td>单击文件后显示预览内容</td></tr>
+            <tr><td>标签盒</td><td>底部</td><td>快捷给文件打标签</td></tr>
+            <tr><td>工具栏</td><td>顶部</td><td>搜索、切换视图、设置</td></tr>
+        </table>
+
+        <hr>
+
+        <h2>2. 文件浏览</h2>
+
+        <h3>2.1 进入目录</h3>
+        <div class="operation">双击左侧「文件目录树」中的文件夹</div>
+        <div class="effect">中间文件列表切换到该目录，显示该目录下的所有文件</div>
+        <div class="example">
+            文件树：<br>
+            └─ 📁 电影<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;├─ 📁 科幻<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;└─ 📁 动画<br><br>
+            双击「电影」→ 显示电影下的所有文件<br>
+            双击「科幻」→ 只显示科幻下的文件
+        </div>
+
+        <h3>2.2 切换分类</h3>
+        <div class="operation">单击左侧分类库中的任意分类</div>
+        <div class="effect">
+            分类库中该项高亮显示（蓝色背景）<br>
+            中间列表显示该分类的所有文件
+        </div>
+        <div class="example">
+            分类库：<br>
+            <span class="tag">⭐ 全部文件</span> ← 显示所有文件<br>
+            <span class="tag tag-red">🌟 科幻</span> ← 显示标签含"科幻"的文件<br>
+            <span class="tag tag-green">🌟 卫斯理</span> ← 显示标签含"卫斯理"的文件
+        </div>
+
+        <h3>2.3 切换视图模式</h3>
+        <div class="operation">点击工具栏中的「列表」或「瀑布流」按钮</div>
+        <div class="effect">
+            <strong>列表视图</strong>：每行一个文件，像 Windows 资源管理器<br>
+            <strong>瀑布流</strong>：缩略图网格，适合看图片和视频封面
+        </div>
+
+        <h3>2.4 选中文件</h3>
+        <table>
+            <tr><th>操作</th><th>效果</th></tr>
+            <tr><td>单击</td><td>选中单个文件，右侧显示预览</td></tr>
+            <tr><td>Ctrl + 单击</td><td>追加选中 / 取消选中</td></tr>
+            <tr><td>Shift + 单击</td><td>范围选中（选中两次点击之间的所有文件）</td></tr>
+            <tr><td>鼠标拖框</td><td>框选多个文件</td></tr>
+        </table>
+
+        <div class="tip">框选后有 300ms 宽限期，不会被误当成双击</div>
+
+        <hr>
+
+        <h2>3. 文件预览</h2>
+
+        <h3>3.1 单击预览</h3>
+        <div class="operation">单击文件列表中的任意文件</div>
+        <div class="effect">右侧预览窗格显示该文件的内容</div>
+
+        <h3>3.2 不同文件的预览效果</h3>
+        <table>
+            <tr><th>文件类型</th><th>预览内容</th></tr>
+            <tr><td>文本（txt/md/py...）</td><td>直接显示文字内容（前256KB）</td></tr>
+            <tr><td>图片（jpg/png/gif...）</td><td>显示缩略图，可随窗格宽度自动撑满</td></tr>
+            <tr><td>PDF</td><td>连续滚动浏览所有页面</td></tr>
+            <tr><td>视频（mp4/avi/mkv...）</td><td>显示视频封面缩略图</td></tr>
+            <tr><td>电子书（epub/mobi...）</td><td>显示前几页文字</td></tr>
+            <tr><td>其他</td><td>显示文件名、路径、大小等基本信息</td></tr>
+        </table>
+
+        <h3>3.3 预览窗格拉宽</h3>
+        <div class="operation">拖动中间列表和右侧预览之间的分隔条</div>
+        <div class="effect">
+            预览窗格变宽<br>
+            → 图片会自动撑满新宽度<br>
+            → 文字信息也会自动换行
+        </div>
+
+        <h3>3.4 悬停预览</h3>
+        <div class="operation">把鼠标停在文件列表中的文件上，不要动，等 0.6 秒</div>
+        <div class="effect">弹出一个小的预览窗口</div>
+        <div class="example">
+            <strong>悬停能看到的内容：</strong><br>
+            🖼️ 图片 → 直接显示图片<br>
+            📄 PDF → 显示第一页<br>
+            🎬 视频 → 显示视频封面<br>
+            📝 文本 → 显示前几行文字
+        </div>
+        <div class="tip">鼠标移开，预览窗立即消失</div>
+
+        <h3>3.5 打开文件</h3>
+        <div class="operation">双击文件</div>
+        <div class="effect">用系统默认程序打开该文件</div>
+        <div class="example">
+            mp4 → 用 PotPlayer/VLC/默认播放器打开<br>
+            jpg → 用图片查看器打开<br>
+            txt → 用记事本打开
+        </div>
+
+        <hr>
+
+        <h2>4. 标签管理</h2>
+
+        <h3>4.1 给文件打标签（最快方式）</h3>
+        <div class="operation">
+            1. 选中一个或多个文件<br>
+            2. 点击底部的「标签盒」中的标签按钮
+        </div>
+        <div class="effect">选中的文件都获得该标签</div>
+        <div class="example">
+            标签盒：[<span class="tag tag-red">科幻</span>] [<span class="tag tag-green">卫斯理</span>] [<span class="tag tag-yellow">文学</span>] [+更多▼]<br><br>
+            选中 3 个文件，点击「科幻」<br>
+            → 这 3 个文件都获得「科幻」标签
+        </div>
+
+        <h3>4.2 拖拽标签</h3>
+        <div class="operation">
+            1. 鼠标放在文件行右侧的某个标签上（不要点击）<br>
+            2. 拖动这个标签到另一个文件的标签区域
+        </div>
+        <div class="effect">目标文件获得该标签</div>
+        <div class="example">
+            星际穿越.mp4 &nbsp;<span class="tag tag-red">科幻</span> <span class="tag tag-green">2024</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;拖动「科幻」到这里<br><br>
+            结果：三体.txt 获得「科幻」标签
+        </div>
+
+        <h3>4.3 移除文件的标签</h3>
+        <div class="operation">右键点击文件行右侧的某个标签</div>
+        <div class="effect">弹出菜单：编辑标签 / 从文件中移除 / 查看标签</div>
+
+        <h3>4.4 标签的继承</h3>
+        <div class="example">
+            标签关系：<br>
+            小说<br>
+            &nbsp;└─ 科幻<br>
+            &nbsp;&nbsp;&nbsp;└─ 卫斯理<br><br>
+            给文件打「卫斯理」标签后，文件同时拥有：<br>
+            ✓ <span class="tag tag-red">卫斯理</span>（直接打的）<br>
+            ✓ <span class="tag">科幻</span>（卫斯理的父标签，自动继承）<br>
+            ✓ <span class="tag tag-green">小说</span>（科幻的父标签，自动继承）
+        </div>
+
+        <h3>4.5 创建新标签</h3>
+        <div class="operation">
+            方法1：右键标签库 → 「新建标签」<br>
+            方法2：直接给不存在的标签打标签时，会自动创建
+        </div>
+
+        <h3>4.6 标签星图</h3>
+        <div class="operation">点击菜单「工具」→「🏷 标签星图」</div>
+        <div class="effect">打开新窗口，以星形图显示所有标签及其关系</div>
+        <div class="example">
+            可视化效果：<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag tag-green">小说</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;科幻<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;卫斯理 —— 刘慈欣
+        </div>
+
+        <hr>
+
+        <h2>5. 分类管理</h2>
+
+        <h3>5.1 创建分类</h3>
+        <div class="operation">
+            1. 点击分类库最下方的「＋ 新建分类」<br>
+            2. 输入分类名称、选择颜色和图标
+        </div>
+        <div class="effect">新分类出现在分类库中</div>
+
+        <h3>5.2 把文件添加到分类</h3>
+        <div class="operation">
+            方法1：拖拽<br>
+            &nbsp;&nbsp;选中文件 → 拖到左侧分类上<br><br>
+            方法2：右键菜单<br>
+            &nbsp;&nbsp;右键文件 → 「添加到分类」→ 选择目标分类
+        </div>
+        <div class="example">
+            选中 2 个文件，拖到「科幻」分类上<br>
+            → 这 2 个文件被添加到「科幻」分类
+        </div>
+
+        <h3>5.3 分类关联标签</h3>
+        <div class="operation">
+            1. 在分类库中右键点击分类<br>
+            2. 选择「关联标签」<br>
+            3. 勾选要关联的标签
+        </div>
+        <div class="effect">
+            该分类下的文件会自动显示这些标签
+        </div>
+        <div class="example">
+            分类「科幻」关联了「科幻」和「小说」标签<br>
+            把「星际穿越.mp4」添加到「科幻」分类后：<br>
+            → 文件显示：星际穿越.mp4 &nbsp;<span class="tag tag-red">科幻</span> <span class="tag tag-green">小说</span>
+        </div>
+
+        <h3>5.4 编辑/删除分类</h3>
+        <div class="operation">在分类库中右键点击分类</div>
+        <div class="effect">
+            菜单选项：打开 / 编辑 / 关联标签 / 清空成员 / 删除分类<br>
+            <em>（清空和删除只影响分类，不影响文件本身）</em>
+        </div>
+
+        <hr>
+
+        <h2>6. 搜索和筛选</h2>
+
+        <h3>6.1 按文件名搜索</h3>
+        <div class="operation">点击工具栏搜索框，输入文件名的一部分</div>
+        <div class="effect">列表实时过滤，只显示文件名包含搜索文字的文件</div>
+        <div class="example">
+            搜索「星际」→ 只显示「星际穿越.mp4」<br>
+            搜索空 → 显示所有文件
+        </div>
+
+        <h3>6.2 按标签筛选</h3>
+        <div class="operation">点击文件列表上方的标签筛选栏中的标签</div>
+        <div class="effect">
+            勾选「科幻」→ 只显示含有「科幻」标签的文件<br>
+            勾选多个 → 显示同时含有这些标签的文件（AND关系）
+        </div>
+        <div class="example">
+            筛选栏：[<span class="tag tag-red" style="border:2px solid #1a73e8">🏷 科幻 ☑</span>] [<span class="tag">🏷 卫斯理 ☐</span>]<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;勾选后只显示含「科幻」的文件
+        </div>
+
+        <h3>6.3 清除筛选</h3>
+        <div class="operation">点击搜索框右侧的「×」或筛选栏的「重置」</div>
+        <div class="effect">恢复显示所有文件</div>
+
+        <hr>
+
+        <h2>7. 网盘文件</h2>
+
+        <h3>7.1 网盘文件预览</h3>
+        <div class="effect">
+            单击文件 → 右侧预览显示缩略图<br>
+            视频预览 → cv2 直接解码，无需下载<br>
+            图片预览 → 直接显示
+        </div>
+
+        <h3>7.2 本地缓存</h3>
+        <div class="effect">
+            首次预览时拷贝到本地临时目录<br>
+            → 第一次稍慢（需要拷贝）<br>
+            → 之后再次预览秒开（读本地副本）
+        </div>
+
+        <hr>
+
+        <h2>8. 常用技巧</h2>
+
+        <h3>8.1 快速给多个文件打标签</h3>
+        <div class="flow">
+            <div class="flow-item">框选多个文件</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-item">点击标签盒中的标签</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-item">全部获得该标签</div>
+        </div>
+
+        <h3>8.2 利用继承简化标签</h3>
+        <div class="example">
+            建议建立标签层级：<br><br>
+            小说<br>
+            &nbsp;├─ 科幻<br>
+            &nbsp;│&nbsp;&nbsp;├─ 卫斯理<br>
+            &nbsp;│&nbsp;&nbsp;└─ 刘慈欣<br>
+            &nbsp;└─ 文学<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;├─ 托尔斯泰<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;└─ 陀思妥耶夫斯基<br><br>
+            给「基地系列」打标签 = 同时拥有「基地系列」「科幻」「文学」「小说」
+        </div>
+
+        <h3>8.3 用分类组织文件</h3>
+        <div class="flow">
+            <div class="flow-item">创建分类</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-item">添加相关文件</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-item">点击分类快速查看</div>
+        </div>
+
+        <h3>8.4 利用自动标签规则</h3>
+        <div class="operation">工具 → 自动标签规则</div>
+        <div class="example">
+            规则示例：<br>
+            文件名包含「科幻」 → 自动打「科幻」标签<br>
+            扩展名是 .epub → 自动打「电子书」标签<br><br>
+            新文件入库时自动打标签，省去手动操作
+        </div>
+
+        <h3>8.5 拖动分栏条调整布局</h3>
+        <div class="operation">拖动各区域之间的分隔条</div>
+        <div class="effect">
+            分类库 | 文件列表 | 预览窗格 | 标签库<br>
+            ↑<br>
+            拖动这里可以改变各区域宽度
+        </div>
+
+        <hr>
+
+        <h2>快捷键</h2>
+        <table>
+            <tr><th>快捷键</th><th>功能</th></tr>
+            <tr><td><span class="keyboard">Ctrl + A</span></td><td>全选</td></tr>
+            <tr><td><span class="keyboard">Ctrl + C</span></td><td>复制文件路径</td></tr>
+            <tr><td><span class="keyboard">Delete</span></td><td>从列表移除（不删除文件本身）</td></tr>
+            <tr><td><span class="keyboard">F5</span></td><td>刷新当前目录</td></tr>
+            <tr><td><span class="keyboard">Escape</span></td><td>取消选中</td></tr>
+        </table>
+
+        <hr>
+
+        <h2>常见问题</h2>
+
+        <div class="question">
+            <strong>Q: 为什么视频预览是静态图而不是播放？</strong><br>
+            A: 程序显示的是视频的缩略图（封面），双击文件才能用播放器播放完整视频。
+        </div>
+
+        <div class="question">
+            <strong>Q: 为什么分类库下面的文件树是空的？</strong><br>
+            A: 文件树显示的是当前数据库中已索引的目录。确保文件已经被程序管理。
+        </div>
+
+        <div class="question">
+            <strong>Q: 标签后面的数字是什么意思？</strong><br>
+            A: 表示使用该标签的文件数量。
+        </div>
+
+        <div class="question">
+            <strong>Q: 可以给文件夹打标签吗？</strong><br>
+            A: 目前只支持给单个文件打标签。文件夹用于在文件树中导航。
+        </div>
+
+        <hr>
+
+        <p style="text-align:center; color:#666; margin-top:30px;">
+            AIxiede 文件标签管理器 v26 · 2026<br>
+            祝使用愉快！
+        </p>
+    </div>
+</body>
+</html>
