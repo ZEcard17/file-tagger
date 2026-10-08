@@ -6021,6 +6021,96 @@ except Exception as _e:
     note_swallowed(T("搬出去的 面板_预览控制.py 没找到"), _e)
 
 
+# ★★★ 「标签操作」这组方法已搬到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+#   ★★ 方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_标签操作 as _面板标签操作
+    _面板标签操作._set_app(sys.modules[__name__])
+    _HAS_PANEL_标签操作 = True
+except Exception as _e:
+    _HAS_PANEL_标签操作 = False
+    note_swallowed(T("搬出去的 面板_标签操作.py 没找到"), _e)
+
+
+# ★★★ 「文件操作」这组方法已搬到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+#   ★★ 方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_文件操作 as _面板文件操作
+    _面板文件操作._set_app(sys.modules[__name__])
+    _HAS_PANEL_文件操作 = True
+except Exception as _e:
+    _HAS_PANEL_文件操作 = False
+    note_swallowed(T("搬出去的 面板_文件操作.py 没找到"), _e)
+
+
+# ★★★ 「分页」这组方法已搬到 `AIxiede拆分开/程序分块/面板_分页.py`
+#   ★★ 方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_分页 as _面板分页
+    _面板分页._set_app(sys.modules[__name__])
+    _HAS_PANEL_分页 = True
+except Exception as _e:
+    _HAS_PANEL_分页 = False
+    note_swallowed(T("搬出去的 面板_分页.py 没找到"), _e)
+
+
+# ★★★ 「搜索过滤」这组方法已搬到 `AIxiede拆分开/程序分块/面板_搜索过滤.py`
+#   ★★ 方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_搜索过滤 as _面板搜索过滤
+    _面板搜索过滤._set_app(sys.modules[__name__])
+    _HAS_PANEL_搜索过滤 = True
+except Exception as _e:
+    _HAS_PANEL_搜索过滤 = False
+    note_swallowed(T("搬出去的 面板_搜索过滤.py 没找到"), _e)
+
+
+# ★★★ 「统计显示」这组方法已搬到 `AIxiede拆分开/程序分块/面板_统计显示.py`
+#   ★★ 方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_统计显示 as _面板统计显示
+    _面板统计显示._set_app(sys.modules[__name__])
+    _HAS_PANEL_统计显示 = True
+except Exception as _e:
+    _HAS_PANEL_统计显示 = False
+    note_swallowed(T("搬出去的 面板_统计显示.py 没找到"), _e)
+
+
+# ★★★ 「扫描索引」这组方法已搬到 `AIxiede拆分开/程序分块/面板_扫描索引.py`
+#   ★★ 方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_扫描索引 as _面板扫描索引
+    _面板扫描索引._set_app(sys.modules[__name__])
+    _HAS_PANEL_扫描索引 = True
+except Exception as _e:
+    _HAS_PANEL_扫描索引 = False
+    note_swallowed(T("搬出去的 面板_扫描索引.py 没找到"), _e)
+
+
 # ★★★ FileList 已拆到 `AIxiede拆分开/程序分块/FileList.py`（2026-10-08）
 #   ★★ 写法（错题本 #158）：① 直接 `from FileList import …`（不带包路径）
 #     ② `_set_app` 取别名 —— 模块名和类名同名时会跑到类上找
@@ -11526,9 +11616,11 @@ class FileTaggerApp:
         except Exception:
             pass
 
-    def _pause_scan_placeholder(self):
-        """（占位，保持方法顺序整齐 —— 没实际内容）"""
-        return None
+    def _pause_scan_placeholder(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_扫描索引.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板扫描索引._pause_scan_placeholder(self, *a, **k)
+
 
     def _on_esc_hide_menu(self, event=None):
         """★ `Esc`：菜单栏临时出现时，按一下就藏回去（顺手的习惯）。"""
@@ -12572,44 +12664,11 @@ class FileTaggerApp:
         return _面板外观零件._retheme_custom_parts(self, *a, **k)
 
 
-    def _retheme_stats_labels(self):
-        """把「文件 / 共 N / 未打标签 N / 仅中间标签 N」那一排的颜色刷成当前皮肤。
+    def _retheme_stats_labels(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_统计显示.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板统计显示._retheme_stats_labels(self, *a, **k)
 
-        ★★ 2026-10-07 新增。为什么要单独立一个方法：
-          这排标签是**主界面最常瞄到**的几个字（每次看列表都在），
-          但它们的颜色以前是**写死的**（"#555" / 深红 / 深黄），
-          而且**没登记进换皮肤流程** —— 于是：
-            · 夜间模式下"共 N"是深灰，**看不太见**
-            · 切皮肤后它们**不跟着变**（用户说的"有时候黑了，东点西点又好了"）
-          ★ 这跟错题本 #70（rowheight 写死 22）是同一类病根：
-            **写死 + 漏登记**。凡是"自己指定颜色"的控件，都要问两句：
-              ① 颜色是 theme_get 取的吗？  ② 换皮肤时会重刷吗？
-        """
-        for nm, key in (("stat_total_lbl", "fg"),
-                        ("stat_untagged_lbl", "danger"),
-                        ("stat_mid_lbl", "warn")):
-            w = getattr(self, nm, None)
-            if w is None:
-                continue
-            try:
-                col = theme_get(key)
-                # ttk.Label 用 configure(foreground=)，tk.Label 用 config(fg=)
-                try:
-                    w.configure(foreground=col)
-                except Exception:
-                    w.configure(fg=col)
-                # ★ tk.Label 还得自己改底色（ttk 的不需要）
-                try:
-                    w.configure(background=theme_get("panel_bg"))
-                except Exception:
-                    pass
-            except Exception as _e:
-                try:
-                    note_swallowed(T("换皮肤：刷统计标签失败（{x}）", x=nm), _e,
-                                   quiet=True)
-                except Exception:
-                    pass
-        # 列表标题「文件」两个字是 ttk.Label，跟着主题走，这里不用管
 
     def _make_tone_styles(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_外观零件.py`
@@ -12920,83 +12979,17 @@ class FileTaggerApp:
         return _面板预览控制.toggle_taglib(self, *a, **k)
 
 
-    def _reinsert_tag_frame(self):
-        """★ v25 补丁41：把右侧面板按正确顺序摆好。
+    def _reinsert_tag_frame(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作._reinsert_tag_frame(self, *a, **k)
 
-        ★ 为什么不用 paned.insert()？
-          实测（就是这条日志的元凶）：
-            · ttk.PanedWindow 的 insert / forget **索引语义和 panes()
-              返回的列表对不上** —— forget 一个中间面板之后，
-              再 insert 到「看起来正确」的序号，Tk 会直接抛
-              "Slave index N out of bounds"；
-            · 而且 insert 的序号**不能超过当前面板数**，按 4 个面板
-              算出来的位置去插，一旦此刻只挂着 2 个就必爆。
-          这个报错原来被 except 吞掉、只记了一条「切换预览窗格失败」，
-          但真实后果是**面板没插进去**（预览窗格点了没反应）。
 
-        ★ 所以改成最笨也最可靠的办法：**全撤掉、按正确顺序重加一遍**。
-          ttk.PanedWindow 一共就 4 个面板，重加一次的开销可以忽略
-          （实测几十微秒），换来的是永远不可能越界。
-        顺序：分类库 → 文件列表 → 预览窗格 → 标签库
-              （不在的那几个自动跳过）
-        """
-        wanted = [self.sidebar, self.list_frame, self.preview_frame,
-                  self.tag_frame]
+    def _safe_list_title(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_统计显示.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板统计显示._safe_list_title(self, *a, **k)
 
-        def _in_paned(w):
-            """这个面板现在是不是挂在 paned 上。"""
-            try:
-                return str(w) in [str(p) for p in self.paned.panes()]
-            except Exception:
-                return False
-
-        # ★ 分类库「应不应该显示」用**记忆**判断：
-        #   第一次调用时记下它当时在不在，以后就照这个记忆走。
-        #   为什么：_reinsert_tag_frame 会先全撤再重加，撤完那一刻
-        #   「在不在」当然变成 False —— 如果每次都现查，第一次撤完
-        #   分类库就永久消失了（实测踩过这个坑）。
-        if not hasattr(self, "_sidebar_wanted"):
-            self._sidebar_wanted = _in_paned(self.sidebar)
-        visible = {
-            str(self.sidebar): bool(self._sidebar_wanted),
-            # ★ 文件列表**必须永远在**（它是主界面，丢了就什么都点不了）
-            str(self.list_frame): True,
-            str(self.preview_frame): bool(
-                getattr(self, "_preview_visible", False)),
-            str(self.tag_frame): bool(
-                getattr(self, "_taglib_visible", True)),
-        }
-        # 先全撤掉（只撤真的挂着的，免得 Tk 报 "not managed"）
-        for w in list(self.paned.panes()):
-            try:
-                self.paned.forget(w)
-            except Exception:
-                pass
-        # 再按正确顺序加回来
-        for w in wanted:
-            if not visible.get(str(w), False):
-                continue
-            try:
-                weight = 5 if w is self.list_frame else 0
-                self.paned.add(w, weight=weight)
-            except Exception as _e:
-                note_swallowed(T("重新排列右侧面板失败"), _e)
-
-    def _safe_list_title(self, text):
-        """★ 补丁37：标题里**绝不能以省略号结尾**。
-
-        实测过：标题文本以「…」结尾时，Tk 会把整个标签当成「竖直书写」——
-        控件请求尺寸会变成 4 像素宽、几百万像素高，把文件列表挤成 1 像素；
-        而 1 像素的画布收不到鼠标事件 → 单击选不中文件。
-        所以标题里统一把结尾的省略号去掉。
-        """
-        try:
-            t = str(text or "")
-            while t and t[-1] in "…⋯":
-                t = t[:-1]
-            return t.rstrip() or "文件"
-        except Exception:
-            return "文件"
 
     def _fix_list_title_height(self):
         """★ 补丁37：兜底 —— 万一标题又被撑成竖直书写，记一条到「🔔 问题」。"""
@@ -13229,48 +13222,11 @@ class FileTaggerApp:
             "quick_preview": self.on_quick_preview_key,
         }
 
-    def _focus_search_entry(self):
-        """★ Ctrl+F：跳到搜索框。
+    def _focus_search_entry(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_搜索过滤.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板搜索过滤._focus_search_entry(self, *a, **k)
 
-        ★★ 2026-10-07 修「Ctrl+F 之后界面整体变淡，近视看不清」（用户报）：
-          病根不在 `focus_set()` 本身，而在**它顺带触发的"全选高亮"**。
-          Tk 的 Entry 一拿到焦点、如果里面有字，很多情况下会显示成
-          **选中态**（浅蓝底 `select_bg` + 深灰字）——
-          原来那段 `select_bg` 是 `#cfe2ff`，**一满行浅蓝铺在搜索框里**，
-          用户看到的就是"界面变淡了、看不清"。
-          （浅色皮肤下尤其明显；深色皮肤下 `#31456b` 也偏闷。）
-
-          修法三件（都很轻，不引入新状态）：
-            ① 拿焦点之后，**把光标放到末尾、并且清掉选中区**
-               —— 这样就是"正常白底 + 光标在最后"，不再有满行高亮。
-            ② 顺手 `selection_clear()`，双保险（有些 Tk 版本 ① 不够）。
-            ③ 最后把当前搜索内容**报给状态栏** —— 让用户知道
-               "已经跳到搜索框了、现在在搜什么"，这也算补上 #46 说的那种"反馈"。
-        """
-        try:
-            se = self.file_list.search_entry
-        except Exception:
-            return
-        try:
-            se.focus_set()
-        except Exception:
-            pass
-        # ① + ② 去掉"全选高亮"，光标落到末尾
-        try:
-            n = len(se.get() or "")
-            se.icursor(n)
-            se.selection_clear()
-        except Exception:
-            pass
-        # ③ 给个反馈（不吵，只写状态栏）
-        try:
-            cur = (se.get() or "").strip()
-            if cur:
-                self.set_status(T("搜索框已聚焦，当前搜索：{x}", x=cur))
-            else:
-                self.set_status(T("搜索框已聚焦，输入关键字即可搜索"))
-        except Exception:
-            pass
 
     def _quick_preview_init(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_预览控制.py`
@@ -13336,19 +13292,11 @@ class FileTaggerApp:
         except Exception:
             pass
 
-    def toggle_tagbox(self):
-        self.tagbox_visible = not getattr(self, "tagbox_visible", False)
-        try:
-            save_ui_setting("tagbox_visible", bool(self.tagbox_visible))
-        except Exception:
-            pass
-        self._pack_tagbox()
-        try:
-            self.set_status(
-                "标签盒：%s" % ("已显示（独立窗口，可拖动 / 缩放 / 置顶）"
-                               if self.tagbox_visible else "已收起"))
-        except Exception:
-            pass
+    def toggle_tagbox(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.toggle_tagbox(self, *a, **k)
+
 
     def _redraw_tagbox(self):
         try:
@@ -13357,13 +13305,11 @@ class FileTaggerApp:
         except Exception:
             pass
 
-    def open_tagbox_picker(self):
-        """从标签库勾选放进标签盒（菜单/按钮都走这里）。"""
-        try:
-            TagBoxPicker(self.root, self.tagbox)
-        except Exception as exc:
-            messagebox.showerror("标签盒", "打不开勾选窗口：%s" % exc,
-                                 parent=self.root)
+    def open_tagbox_picker(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.open_tagbox_picker(self, *a, **k)
+
 
     def toggle_hover_preview(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_预览控制.py`
@@ -14245,73 +14191,23 @@ class FileTaggerApp:
         except Exception:
             return False
 
-    # ---------------- ★★ 2026-10-06：撤销（Ctrl+Z）----------------
-    def _undo_init(self):
-        """开机时把「撤销记录本」准备好（把上次关程序前的记录读回来）。"""
-        self._undo_stack = []
-        self._undo_redo_stack = []
-        try:
-            p = _undo_file_path()
-            if p and os.path.isfile(p):
-                with open(p, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                if isinstance(data, list):
-                    self._undo_stack = data[-UNDO_MAX:]
-        except Exception as _e:
-            note_swallowed(T("读撤销记录失败（这次开程序撤不了上次的事）"), _e,
-                           quiet=True)
-        self._undo_save_soon()
+    def _undo_init(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板文件操作._undo_init(self, *a, **k)
 
-    def _undo_save_soon(self):
-        """把撤销记录写到磁盘（**关程序再开还能撤** —— 资源管理器做不到这个）。
 
-        ★ 放到后台线程写，绝不拖慢界面（这是本程序一贯的规矩）。
-        """
-        try:
-            if getattr(self, "_undo_save_job", None) is not None:
-                return
-        except Exception:
-            pass
+    def _undo_save_soon(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板文件操作._undo_save_soon(self, *a, **k)
 
-        def _do():
-            self._undo_save_job = None
-            try:
-                p = _undo_file_path()
-                if not p:
-                    return
-                with open(p, "w", encoding="utf-8") as f:
-                    json.dump(self._undo_stack[-UNDO_MAX:], f,
-                              ensure_ascii=False)
-            except Exception:
-                pass
 
-        try:
-            self._undo_save_job = self.root.after(800, _do)
-        except Exception:
-            self._undo_save_job = None
+    def undo_record(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板文件操作.undo_record(self, *a, **k)
 
-    def undo_record(self, kind, items, note=""):
-        """★ 记一条「怎么反着做回去」。**批量动作算一条**。
-
-        kind: "delete" / "rename" / "tag_add" / "tag_remove"
-        items: 各类型要的东西（见下面注释）
-        ★ 记录里**只放纯数据**（路径、名字），不放控件、不放文件句柄 ——
-          因为它要写到磁盘，下次开程序还要能用。
-        """
-        try:
-            if not items:
-                return
-            rec = {"kind": kind, "items": list(items),
-                   "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                   "note": note}
-            self._undo_stack.append(rec)
-            if len(self._undo_stack) > UNDO_MAX:
-                self._undo_stack = self._undo_stack[-UNDO_MAX:]
-            self._undo_redo_stack = []      # 记了新动作，红就作废
-            self._undo_save_soon()
-            self._undo_update_btn()
-        except Exception as _e:
-            note_swallowed(T("记撤销记录失败（这一步撤不了）"), _e, quiet=True)
 
     def undo_do(self):
         """★ 按 Ctrl+Z：把最后一条反着执行一遍。**要告诉用户撤了什么。**"""
@@ -14400,114 +14296,17 @@ class FileTaggerApp:
         except Exception:
             pass
 
-    def _undo_apply(self, kind, items):
-        """真正去执行一条反向操作。
+    def _undo_apply(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板文件操作._undo_apply(self, *a, **k)
 
-        返回 (成功了吗, 说明文字, 失败清单)。
-        ★ 2026-10-07：**加了第三个返回值「失败清单」** ——
-          以前返回两个，只分"全成功/全失败"两种情况。
-          但**"删了 3 个、只还原回来 1 个"**这种半成不成的，
-          原来会被当成"成功"报出去（`ok>0` 就算成功）→ **等于骗人**。
-          用户以为"撤销了、都回来了"，其实桌上还少两个。
-          （见错题本 #14 / 待清算清单第 2 条。）
-        """
-        if kind == "delete":
-            # items: [路径, ...]（这些已经被丢进回收站了）
-            ok, errs = _recycle_restore(items)
-            # ★ 部分成功也要如实说 —— 不能因为回来了一部分就报"已撤销"
-            if ok == 0:
-                return (False,
-                        "回收站还原失败：%s"
-                        % ("；".join(errs[:3]) if errs else "系统没回应"),
-                        errs)
-            # ★ 库里的记录也要跟着回来 —— 否则文件回来了、标签却没了。
-            #   （删除时调的是 store.forget_path；这里用重新登记的办法补回。）
-            #   ★ 只对**真回来了的**那几项登记（失败的本就不在，登记了是脏数据）。
-            for p in items:
-                try:
-                    if os.path.exists(p):
-                        self.store.remember_paths([p])
-                except Exception:
-                    pass
-            self.refresh_current_dir()
-            self.refresh_rows_tags()
-            self.refresh_categories()
-            if errs:
-                # 半成功：**说清楚回来了几个、还差几个**
-                return (True,
-                        "还原 %d 项，**还有 %d 项没回来**" % (ok, len(errs)),
-                        errs)
-            return True, "还原 %d 项" % ok, []
-        if kind == "rename":
-            # items: [(新路径, 旧路径), ...]
-            done = 0
-            errs = []
-            for new_p, old_p in items:
-                try:
-                    if not os.path.exists(new_p):
-                        errs.append("%s 已经不在了" % os.path.basename(new_p))
-                        continue
-                    if os.path.exists(old_p):
-                        errs.append("%s 那个名字已经被占了"
-                                    % os.path.basename(old_p))
-                        continue
-                    os.rename(new_p, old_p)
-                    try:
-                        self.store.move_file_path(new_p, old_p)
-                    except Exception:
-                        pass
-                    done += 1
-                except Exception as exc:
-                    errs.append("%s：%s" % (os.path.basename(str(new_p)), exc))
-            if done == 0:
-                return (False,
-                        "；".join(errs[:3]) if errs else "没有可改回的", errs)
-            self.refresh_current_dir()
-            self.refresh_rows_tags()
-            if errs:
-                return (True,
-                        "改回 %d 个，**还有 %d 个没改回**" % (done, len(errs)),
-                        errs)
-            return True, "改回 %d 个" % done, []
-        if kind in ("tag_add", "tag_remove"):
-            # items: [(路径, 标签名), ...]；tag_add 的反动作是去掉
-            done = 0
-            errs = []
-            for path, tname in items:
-                try:
-                    if kind == "tag_add":
-                        self.store.remove_tag_from_path(path, tname)
-                    else:
-                        self.store.add_tag_to_file(path, tname)
-                    done += 1
-                except Exception as exc:
-                    errs.append("%s：%s" % (os.path.basename(str(path)), exc))
-            if done == 0:
-                return (False,
-                        "；".join(errs[:3]) if errs else "没有可改的", errs)
-            self.refresh_rows_tags()
-            self.refresh_categories()
-            if errs:
-                return (True,
-                        "改回 %d 个，**还有 %d 个没改回**" % (done, len(errs)),
-                        errs)
-            return True, "改回 %d 个" % done, []
-        return False, "不认识这种操作", []
 
-    def _undo_update_btn(self):
-        """撤销按钮 / 菜单项亮不亮。"""
-        try:
-            n = len(getattr(self, "_undo_stack", []) or [])
-        except Exception:
-            n = 0
-        try:
-            if n:
-                self._undo_btn.config(state="normal",
-                                      text="↶ 撤销 (%d)" % n)
-            else:
-                self._undo_btn.config(state="disabled", text=T("↶ 撤销"))
-        except Exception:
-            pass
+    def _undo_update_btn(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板文件操作._undo_update_btn(self, *a, **k)
+
 
     def on_undo_key(self, event=None):
         """Ctrl+Z 的入口（在输入框里打字时不抢键）。"""
@@ -14540,158 +14339,17 @@ class FileTaggerApp:
         self.set_status(T("已新建文件夹：{x}", x=name))
         self.refresh_current_dir()
 
-    def _do_rename(self, path=None):
-        """重命名选中的文件 / 文件夹，并把数据库里的路径同步过去。
+    def _do_rename(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板文件操作._do_rename(self, *a, **k)
 
-        ★ 为什么要同步数据库：标签是按「文件记录」挂的，路径不改的话
-          改完名双击打不开、标签看着也像丢了。
-        """
-        if path is None:
-            path = self.file_list.get_single_selection()
-        if not path:
-            messagebox.showinfo("提示", T("请先选中**一个**文件或文件夹（单击它）。"),
-                                parent=self.root)
-            return
-        old_name = os.path.basename(path.rstrip("\\")) or path
-        # ★ v26 修正：SimpleInputDialog 在它自己的构造函数里已经
-        #   wait_window 过了（窗口关闭时构造函数才返回），这里**不要**
-        #   再 wait 一次 —— 那时 dlg 已经被销毁，再等会抛
-        #   TclError: bad window path name（虽然被 except 吞了，但纯属浪费）。
-        dlg = SimpleInputDialog(self.root, title=T("重命名（输入新名字）"),
-                                initial=old_name)
-        new_name = (getattr(dlg, "result", None) or "").strip()
-        if not new_name or new_name == old_name:
-            return
-        if any(ch in new_name for ch in '\\/:*?"<>|'):
-            messagebox.showerror("不能这样改名",
-                                 '名字里不能有  \\ / : * ? " < > |  这些字符',
-                                 parent=self.root)
-            return
-        parent_dir = os.path.dirname(path.rstrip("\\"))
-        new_path = os.path.join(parent_dir, new_name)
-        if os.path.exists(new_path):
-            messagebox.showerror("不能改名",
-                                 "这个位置已经有同名的了：\n%s" % new_path,
-                                 parent=self.root)
-            return
-        is_dir = os.path.isdir(path)
-        try:
-            os.rename(path, new_path)
-        except Exception as exc:
-            messagebox.showerror("改名失败", str(exc), parent=self.root)
-            return
-        n = 0
-        try:
-            if is_dir:
-                n = self.store.rename_prefix_paths(path, new_path)
-                try:
-                    self.store.clear_dir_cache_under(path)
-                except Exception:
-                    pass
-            else:
-                n = 1 if self.store.move_file_path(path, new_path) else 0
-        except Exception as exc:
-            self.log_problem(T("改名成功了，但数据库里的路径没同步好：{x}", x=exc),
-                             level="error")
-        self.log_output(T("已改名：{x} → {y}（数据库同步 {z} 条）", x=old_name, y=new_name, z=n))
-        # ★★ 2026-10-06：记一笔撤销（记「新名 → 旧名」，撤销时改回去）
-        self.undo_record("rename", [(new_path, path)])
-        self.set_status(T("已改名：{x} → {y}", x=old_name, y=new_name))
-        self.file_list.selected_paths = {new_path}
-        self.refresh_current_dir()
-        self.refresh_rows_tags()
 
-    def _do_delete(self, paths=None):
-        """把选中的文件 / 文件夹删到回收站（可还原），并从库里清掉它们的记录。"""
-        if paths is None:
-            paths = list(self.file_list.get_selection() or [])
-        if not paths:
-            messagebox.showinfo("提示", "请先选中要删的东西（单击 / 框选 / Ctrl+A）。",
-                                parent=self.root)
-            return
-        n = len(paths)
-        first = os.path.basename(paths[0].rstrip("\\")) or paths[0]
-        extra = "" if n == 1 else "\n（还有 %d 项）" % (n - 1)
+    def _do_delete(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板文件操作._do_delete(self, *a, **k)
 
-        # ★★★ 2026-10-07：**网盘上的东西，删之前就要说清楚"这个撤不回来"**。
-        #
-        #   背景（错题本 #14 / #67，用户亲测确认）：
-        #     **网盘（CloudDrive）删文件进的是「网盘自己的回收站」，
-        #       不是 Windows 回收站。**
-        #     而我们的「撤销删除」走的是系统回收站（Shell.Application 的 10 号
-        #     特殊目录）—— **系统回收站里根本没有它，永远找不着**。
-        #
-        #   为什么要在**删之前**说、而不是等用户按 Ctrl+Z 才说：
-        #     · 删除是**不可逆**操作，用户有权在动手前知道后果
-        #     · 等到按撤销才发现"撤不了"，东西**已经没了**，说也晚了
-        #     · 这属于「会丢东西」那一类红线（见待清算清单开头）
-        #
-        #   ★ 只警告、不阻止 —— 用户想删还是让他删（网盘客户端里也许能找回）。
-        _remote = []
-        try:
-            for p in paths:
-                if is_remote_path(p):
-                    _remote.append(os.path.basename(str(p).rstrip("\\")) or str(p))
-        except Exception:
-            _remote = []
-
-        if _remote:
-            _shown = "\n".join("   · " + x for x in _remote[:6])
-            _more = ("\n   …还有 %d 项" % (len(_remote) - 6)
-                     if len(_remote) > 6 else "")
-            _ask = (
-                "把选中的 %d 项丢进回收站？\n\n  第一项：%s%s\n\n"
-                "⚠️ 注意：这里面有 **%d 项在网盘上**：\n%s%s\n\n"
-                "★ 网盘上的东西，删掉之后**本程序撤不回来** ——\n"
-                "   它进的是**网盘自己的回收站**，不是 Windows 回收站，\n"
-                "   我们够不着它。要找回的话，得去**网盘客户端**里找。\n\n"
-                "（本地文件不受影响，本地删了照样能撤销。）\n\n"
-                "还删吗？"
-                % (n, first, extra, len(_remote), _shown, _more))
-            _title = "删到回收站（有网盘文件，撤不回来）"
-        else:
-            _ask = ("把选中的 %d 项丢进回收站？\n\n  第一项：%s%s\n\n"
-                    "丢进回收站还能还原，不是永久删除。" % (n, first, extra))
-            _title = "删到回收站"
-
-        if not messagebox.askyesno(_title, _ask, parent=self.root):
-            return
-        ok, errs = 0, []
-        _done_paths = []          # ★ 2026-10-06：真正删成功的，用来记撤销
-        for p in paths:
-            try:
-                _send_to_recycle_bin(p)
-            except Exception as exc:
-                errs.append("%s：%s" % (p, exc))
-                continue
-            ok += 1
-            _done_paths.append(p)
-            if p in self.file_list.selected_paths:
-                self.file_list.selected_paths.discard(p)
-            try:
-                self.store.forget_path(p)
-            except Exception as _e:
-                note_swallowed(T("删除后清理数据库记录失败"), _e)
-            # 文件夹的话，把它下面的记录和缓存也清掉
-            if os.path.isdir(os.path.dirname(p)) and "." not in os.path.basename(p):
-                try:
-                    self.store.clear_dir_cache_under(p)
-                except Exception:
-                    pass
-        self.log_output(T("已删到回收站：{x} 项", x=ok))
-        # ★★ 2026-10-06：记一笔撤销（**整批算一条** —— 按一次 Ctrl+Z 全回来）
-        if _done_paths:
-            self.undo_record("delete", _done_paths)
-        self.set_status("已删到回收站：%d 项%s"
-                        % (ok, "" if not errs else "（%d 项失败）" % len(errs)))
-        if errs:
-            self.log_problem("删除失败：%s" % "；".join(errs[:3]), level="error")
-            messagebox.showwarning("有删不掉的",
-                                   "这几项没删掉：\n\n%s" % "\n".join(errs[:5]),
-                                   parent=self.root)
-        self.refresh_current_dir()
-        self.refresh_rows_tags()
-        self.refresh_categories()
 
     def on_delete_key(self, event=None):
         if self._focus_is_input():
@@ -14717,20 +14375,11 @@ class FileTaggerApp:
         self._do_new_folder()
         return "break"
 
-    # ---------------- ★ v25 补丁12：复制 / 剪切 / 粘贴 ----------------
-    def copy_selected(self, cut=False):
-        """把选中的文件/文件夹放进「程序内的剪贴板」（Ctrl+C / Ctrl+X）。"""
-        paths = list(self.file_list.get_selection() or [])
-        if not paths:
-            messagebox.showinfo("提示", "请先选中要%s的东西（单击 / 框选 / Ctrl+A）。"
-                                % ("剪切" if cut else "复制"), parent=self.root)
-            return
-        self._clip = {"paths": paths, "cut": bool(cut)}
-        word = "剪切" if cut else "复制"
-        self.set_status("已%s %d 项 —— 打开目标文件夹后按 Ctrl+V 粘贴" % (word, len(paths)))
-        self.log_output("已%s %d 项：%s" % (word, len(paths),
-                                        "、".join(os.path.basename(p) for p in paths[:5])
-                                        + ("…" if len(paths) > 5 else "")))
+    def copy_selected(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板文件操作.copy_selected(self, *a, **k)
+
 
     def paste_into_current(self):
         """把剪贴板里的东西粘贴到当前文件夹（Ctrl+V）。"""
@@ -14834,114 +14483,17 @@ class FileTaggerApp:
         except Exception:
             pass
 
-    def _move_paths_to_folder(self, paths, target_dir):
-        """★★ 2026-10-03 新增：把文件 / 文件夹**移动**进某个文件夹。
+    def _move_paths_to_folder(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板文件操作._move_paths_to_folder(self, *a, **k)
 
-        这是「在列表里按住一个文件，拖到某个文件夹那一行上松手」走的路
-        （文件列表拖动时回调 on_move_to_folder）。**以前主程序从来没接上
-        这个回调**（一直是 None），所以松手以后什么都不发生 ——
-        用户说「这个我想让它真的能用」，指的就是这一步。
 
-        ★ 一定会先弹确认框（列出要移动的东西和目标文件夹），
-          因为「移动」是真的把文件从原位置挪走。
-        ★ 移动完会把数据库里的路径一起改掉（标签跟着走，不会丢）。
-        """
-        tgt = str(target_dir or "").rstrip("\\")
-        if not tgt:
-            return
-        srcs = []
-        for p in (paths or []):
-            p = str(p)
-            try:
-                if not p or not os.path.exists(p):
-                    continue
-                if os.path.normcase(os.path.dirname(p.rstrip("\\"))) == os.path.normcase(tgt):
-                    continue                       # 本来就在这个文件夹里
-                if os.path.normcase(p.rstrip("\\")) == os.path.normcase(tgt):
-                    continue                       # 拖到自己身上
-                # 不许把文件夹拖进它自己 / 它的子目录里
-                if os.path.normcase(tgt).startswith(
-                        os.path.normcase(p.rstrip("\\")) + os.sep):
-                    continue
-                srcs.append(p)
-            except Exception:
-                continue
-        if not srcs:
-            self.set_status(T("没有可移动的东西（可能本来就在那个文件夹里）"))
-            return
-        names = "、".join(os.path.basename(str(p).rstrip("\\")) for p in srcs[:4])
-        if len(srcs) > 4:
-            names += "…（共 %d 项）" % len(srcs)
-        if not messagebox.askyesno(
-                "移动 %d 项" % len(srcs),
-                "把选中的 %d 项**移动**到：\n%s\n\n  内容：%s\n\n"
-                "「移动」会把原位置的东西挪走（不是复制一份）。\n"
-                "标签会跟着一起走，不会丢。\n\n确定移动吗？"
-                % (len(srcs), tgt, names),
-                parent=self.root):
-            self.set_status(T("已取消移动"))
-            return
-        self.begin_activity("正在移动 %d 项…" % len(srcs))
-        self.log_output("拖动移动：%d 项 → %s" % (len(srcs), tgt))
+    def _drag_move_done(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板文件操作._drag_move_done(self, *a, **k)
 
-        def worker():
-            done, errs = [], []
-            for src in srcs:
-                try:
-                    name = os.path.basename(str(src).rstrip("\\")) or str(src)
-                    is_dir = os.path.isdir(src)
-                    dst = _unique_target_path(tgt, name, is_dir)
-                    shutil.move(src, dst)
-                    done.append((src, dst))
-                except Exception as exc:
-                    errs.append("%s：%s" % (os.path.basename(str(src)), exc))
-            try:
-                self._ui_threadsafe(self._drag_move_done, tgt, done, errs)
-            except Exception as exc:
-                note_swallowed(T("worker(_drag_move_done)：回主线程通知失败"),
-                               exc, level="warn")
-
-        threading.Thread(target=worker, daemon=True).start()
-
-    def _drag_move_done(self, target, done, errs):
-        """（主线程）拖动移动完成 → 同步数据库路径 + 刷新界面。
-
-        ★ 和「剪切粘贴」走的是同一套数据库动作：路径改掉、标签保留。
-        """
-        self.end_activity()
-        for src, dst in done:
-            try:
-                if os.path.isdir(dst):
-                    self.store.rename_prefix_paths(src, dst)
-                else:
-                    self.store.move_file_path(src, dst)
-            except Exception as _e:
-                note_swallowed(T("拖动移动后同步数据库路径失败"), _e)
-            try:
-                self.store.clear_dir_cache_under(os.path.dirname(str(src)))
-            except Exception:
-                pass
-        n = len(done)
-        self.log_output(T("拖动移动完成：{x} 项 → {y}", x=n, y=target))
-        self.set_status("已移动 %d 项 → %s%s" % (
-            n, os.path.basename(target.rstrip("\\")) or target,
-            "" if not errs else "（%d 项失败）" % len(errs)))
-        if errs:
-            self.log_problem("移动失败：%s" % "；".join(errs[:3]), level="error")
-            messagebox.showwarning("有没移成功的",
-                                   "这些没成功：\n\n%s" % "\n".join(errs[:5]),
-                                   parent=self.root)
-        try:
-            if self.view_mode == "dir" and self.current_dir:
-                self.load_directory(self.current_dir)
-            else:
-                self.refresh_current_dir()
-        except Exception as _e:
-            note_swallowed(T("移动后刷新界面失败"), _e)
-        try:
-            self.refresh_rows_tags()
-        except Exception:
-            pass
 
     def on_copy_key(self, event=None):
         if self._focus_is_input():
@@ -15194,42 +14746,11 @@ class FileTaggerApp:
         except Exception as _e:
             note_swallowed(T("注册拖放失败"), _e)
 
-    def _on_drag_out(self, event):
-        """把选中的文件拖出去（拖到资源管理器 = 系统当成复制）。
+    def _on_drag_out(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板文件操作._on_drag_out(self, *a, **k)
 
-        ★★ 2026-10-03 重要修正 —— 这段是「拖到文件夹上松手 = 移动进去」
-        一直不能用的**第二个原因**：
-
-          系统级的「拖出去」是拖放库（tkinterdnd2）在鼠标一动就抢过去的：
-          它会开一个**模态的拖动循环**，鼠标被它抓走，
-          我们自己写的 `_marquee_move` / `_marquee_end` 就再也收不到动作
-          —— 也就是说：**只要在文件上开始拖，程序内部就永远不知道你在拖**
-          （实测：合成一次 B1-Motion，程序直接卡死不返回，因为那个拖动
-           循环在等一次永远等不到的「松手」）。
-          原来这里只在「正在拉框」时返回 None 挡住它；
-          「正在拖文件」（_file_drag.started）时没挡 → 于是内部拖动全程失灵。
-
-          现在：**只要是我们自己在拖（拉框 或 拖文件），就返回 None
-          让拖放库靠边站**；真想拖到资源管理器，按住 Ctrl 再拖
-          （保留这个老功能，免得把它彻底弄没了）。
-        """
-        try:
-            fl = self.file_list
-            if getattr(fl, "_marq", None) and fl._marq.get("started"):
-                return None
-            fd = getattr(fl, "_file_drag", None)
-            if fd and fd.get("started") and not _ctrl_down():
-                return None
-        except Exception:
-            pass
-        try:
-            paths = list(self.file_list.get_selection() or [])
-            if not paths:
-                return None
-            return (COPY, DND_FILES, "{ %s }" % " ".join(
-                "{%s}" % p for p in paths))
-        except Exception:
-            return None
 
     def _on_drop_files(self, event):
         """资源管理器拖过来的文件/文件夹 → 复制到当前文件夹。"""
@@ -15305,45 +14826,11 @@ class FileTaggerApp:
         if parent != self.current_dir:
             self.load_directory(parent)
 
-    def _apply_stats_display(self):
-        """把「共 N 个 / 未打标签 N / 仅中间标签 N」这几个数字刷到界面上。
+    def _apply_stats_display(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_统计显示.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板统计显示._apply_stats_display(self, *a, **k)
 
-        ★★ v26：**这里以前每点一次文件都要重算一遍 800 个文件的标签统计。**
-          实测（图本分类 800 行）：`tag_stats_for_paths` 一次要 0.04 秒左右，
-          而它是**跟着 `on_file_select` 走的** —— 也就是说
-          **你每点一个文件、每框选一次，它都要跑一遍**。
-          一屏点十几下就攒出明显的卡顿感。
-          ★ 关键：这几个数字只跟「当前列表里有哪些文件」有关，
-            **跟你选中了哪个文件完全没关系**。
-            所以这里缓存上一次的结果（用文件列表的指纹判断），
-            列表没变就直接用缓存，一点活都不干。
-        """
-        paths = [r["path"] for r in self._base_rows]
-        if not paths:
-            self.stat_total_lbl.config(text="")
-            self.stat_untagged_lbl.config(text="")
-            self.stat_mid_lbl.config(text="")
-            self._stats_cache_key = None
-            return
-        key = (len(paths), paths[0], paths[-1])
-        cached = getattr(self, "_stats_cache", None)
-        if cached is not None and getattr(self, "_stats_cache_key", None) == key:
-            total, untagged, mid_only = cached
-        else:
-            total, untagged, mid_only = self.store.tag_stats_for_paths(paths)
-            self._stats_cache = (total, untagged, mid_only)
-            self._stats_cache_key = key
-        if self.stats_filter == "untagged":
-            self.stat_total_lbl.config(text=T("共 {n}    【仅显示未打标签】", n=total))
-        elif self.stats_filter == "mid_only":
-            self.stat_total_lbl.config(
-            text=T("共 {n}    【仅显示仅中间标签】", n=total))
-        else:
-            self.stat_total_lbl.config(text=T("共 {n} 项", n=total))
-        self.stat_untagged_lbl.config(
-            text=T("未打标签 {n}", n=untagged) if untagged else "")
-        self.stat_mid_lbl.config(
-            text=f"仅中间标签 {mid_only}" if mid_only else "")
 
     def _refresh_file_list_from_base(self):
         if not self.stats_filter:
@@ -15355,15 +14842,17 @@ class FileTaggerApp:
         self.file_list.set_rows(rows)
         self._apply_stats_display()
 
-    def toggle_stats_filter(self, mode):
-        if self.stats_filter == mode:
-            self.stats_filter = None
-        else:
-            self.stats_filter = mode
-        self._refresh_file_list_from_base()
+    def toggle_stats_filter(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_统计显示.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板统计显示.toggle_stats_filter(self, *a, **k)
 
-    def _clear_stats_filter(self):
-        self.stats_filter = None
+
+    def _clear_stats_filter(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_统计显示.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板统计显示._clear_stats_filter(self, *a, **k)
+
 
     def load_directory(self, path):
         if not path:
@@ -15560,21 +15049,11 @@ class FileTaggerApp:
         self._page = 0
         self._load_current_page()
 
-    def _schedule_bg_scan(self, dir_key):
-        # ★ v25 补丁18：已经知道读不到的目录（网盘里删了）就别再排了，
-        #   省得每次点开都去撞一次、还刷日志。
-        try:
-            if dir_key in self._dead_dirs():
-                return
-        except Exception:
-            pass
-        self._bg_scan_pending_dir = dir_key
-        if self._bg_scan_timer is not None:
-            try:
-                self.root.after_cancel(self._bg_scan_timer)
-            except Exception:
-                pass
-        self._bg_scan_timer = self.root.after(500, self._try_start_bg_scan)
+    def _schedule_bg_scan(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_扫描索引.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板扫描索引._schedule_bg_scan(self, *a, **k)
+
 
     def _try_start_bg_scan(self):
         self._bg_scan_timer = None
@@ -15616,103 +15095,23 @@ class FileTaggerApp:
             target=self._bg_scan_worker, args=(d,), daemon=True)
         self._bg_scan_thread.start()
 
-    def _bg_scan_worker(self, dir_key):
-        entries = []
-        err = None
-        try:
-            with os.scandir(dir_key) as it:
-                for e in it:
-                    name = e.name
-                    is_d = False
-                    size = None
-                    mtime = None
-                    try:
-                        is_d = e.is_dir(follow_symlinks=False)
-                        if not is_d:
-                            try:
-                                st = e.stat()
-                                size = st.st_size
-                                mtime = st.st_mtime
-                            except OSError:
-                                pass
-                    except OSError:
-                        pass
-                    entries.append((name, is_d, size, mtime))
-        except Exception as exc:
-            err = str(exc)
-        # ★ v25 补丁18：往界面回话之前先看一眼「程序是不是正在关」。
-        #   关窗时如果这个线程还在跑，它 root.after() 上去会让 Tk 直接崩
-        #   （表现为关窗闪退 / 进程退出码不是 0）。这里先检查、再试，
-        #   宁可不刷新列表，也不能把程序带崩。
-        if not APP_CLOSING:
-            # ★★ 2026-10-03：这里原来写的是 self.root.after(...) ——
-            #   后台线程调 root.after 偶尔会卡死在 tkinter 内部，
-            #   卡住就等于「扫完了但没人知道」，列表永远空着。
-            #   现在走信箱（后台线程只碰一个 Python 列表，绝不碰 Tcl）。
-            self._ui_threadsafe(self._on_bg_scan_done, dir_key, entries, err)
+    def _bg_scan_worker(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_扫描索引.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板扫描索引._bg_scan_worker(self, *a, **k)
 
-    def _dir_view_is_plain(self, dir_key):
-        """★ v25：现在显示的到底是不是「这个目录的普通文件列表」。
 
-        搜索（含子目录 / 关键字）、标签筛选、分类视图下都不是 ——
-        这时后台目录扫描回来了也不能去改列表，否则会把搜索结果
-        冲成整个目录的文件。
-        """
-        if self.view_mode != "dir" or not self.current_dir:
-            return False
-        if str(self.current_dir) != dir_key:
-            return False
-        spec = self._view_spec or {}
-        if spec.get("kind") != "dir":
-            return False
-        if self._tag_filter_base_spec is not None:
-            return False
-        return True
+    def _dir_view_is_plain(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_搜索过滤.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板搜索过滤._dir_view_is_plain(self, *a, **k)
 
-    def _on_bg_scan_done(self, dir_key, entries, err):
-        self._bg_scan_running_dir = None
-        # ★ v25 补丁14：关窗过程中这个回调还可能被排到队列里，进来先看一眼，
-        #   窗口没了就直接返回，不要再去碰已经销毁的控件。
-        if getattr(self, "_closing", False):
-            return
-        self.end_activity()
-        plain_dir_view = self._dir_view_is_plain(dir_key)
-        if err is None:
-            self.log_output(T("扫描完成：{k}  共 {n} 项",
-                              k=dir_key, n=len(entries)))
-            try:
-                self.store.save_dir_entries(dir_key, entries)
-            except Exception as exc:
-                self.log_problem(f"写目录缓存失败：{exc}", level="error")
-            if plain_dir_view:
-                self._apply_dir_entries(dir_key, entries)
-                self.set_status(
-                    T("{k}    共 {n} 项（已刷新）",
-                      k=dir_key, n=len(entries)))
-        else:
-            # ★ v25 补丁18：目录读不到时别再当「错误」刷屏。
-            #   网盘里删除过的目录、空目录、一时读不到的目录，以前每点开
-            #   一次就在「问题」面板里报一次红 —— 用户反映很烦。
-            #   现在把「东西不在了」这一类单独处理：只记一句普通日志、
-            #   记住这个目录别再反复去试；真的读不动（权限/网络坏）才报错。
-            if is_gone_error(err):
-                try:
-                    self._dead_dirs().add(dir_key)
-                except Exception:
-                    pass
-                self.log_output(
-                    f"这个目录现在读不到（网盘里可能已经删掉了）：{dir_key}"
-                    f"  · 已跳过，不再重试")
-                if plain_dir_view:
-                    self.set_status(
-                        f"{dir_key}    目录读不到（可能已删除），已跳过")
-            else:
-                self.log_problem(f"目录扫描失败：{dir_key} - {err}",
-                                 level="error")
-                if plain_dir_view:
-                    self.set_status(f"目录扫描失败：{err}")
-        if getattr(self, "_bg_scan_pending_dir", None):
-            self._try_start_bg_scan()
+
+    def _on_bg_scan_done(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_扫描索引.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板扫描索引._on_bg_scan_done(self, *a, **k)
+
 
     def _dead_dirs(self):
         """★ v25 补丁18：记住「读不到 / 已删除」的目录，别再反复去试它。"""
@@ -15722,141 +15121,23 @@ class FileTaggerApp:
             self._dead_dir_set = s
         return s
 
-    def _load_current_page(self):
-        """根据 _view_spec 载入当前页的数据。"""
-        spec = self._view_spec
-        if not spec:
-            return
-        kind = spec.get("kind")
-        ps = FILE_PAGE_SIZE
-        pg = self._page
+    def _load_current_page(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_分页.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板分页._load_current_page(self, *a, **k)
 
-        try:
-            if kind == "dir":
-                all_paths = spec.get("all_paths") or []
-                total = len(all_paths)
-                page_paths = all_paths[pg * ps:(pg + 1) * ps]
-                with_loc = False
-            elif kind == "all":
-                total = self.store.all_files_count()
-                page_paths = self.store.all_files_page(ps, pg * ps)
-                with_loc = True
-            elif kind == "cat":
-                cid = spec["cid"]
-                total = self.store.files_in_category_count(cid)
-                page_paths = self.store.files_in_category_page(
-                    cid, ps, pg * ps)
-                with_loc = True
-            elif kind == "paths":
-                all_paths = spec.get("paths") or []
-                total = len(all_paths)
-                page_paths = all_paths[pg * ps:(pg + 1) * ps]
-                with_loc = True
-            else:
-                return
-        except Exception as exc:
-            self.set_status(f"载入失败：{exc}")
-            self.log_problem(f"载入页面失败（{kind}）：{exc}",
-                             level="error")
-            return
 
-        spec["total"] = total
-        self._page_total = total
+    def _populate_paths_page(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_分页.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板分页._populate_paths_page(self, *a, **k)
 
-        self._populate_paths_page(page_paths, with_location=with_loc)
-        self._update_page_ui()
 
-    def _populate_paths_page(self, paths, with_location=True):
-        """只载入一页文件（不做全量查询、不做全量标签）
-           ★ 不 stat 任何文件（网盘 stat 会走网络，几秒就卡住了）"""
-        # ★ v22：自动打标签已改成「手动启动」。
-        #   打开文件夹 / 打开分类库时，这里不再自动跑自动标签规则；
-        #   只有点工具栏的「🏷 重读标签」（或菜单「🏷 重读标签…」）
-        #   才会按「自动标签规则」把标签更新一遍。
-        #   v21 及以前这里是受 auto_scan_on_open 控制的自动扫描，现在已取消。
+    def refresh_rows_tags(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.refresh_rows_tags(self, *a, **k)
 
-        try:
-            tag_map = self.store.tags_for_paths(paths)
-        except Exception:
-            tag_map = {}
-
-        spec = self._view_spec or {}
-        entries_map = spec.get("entries_map") or {}
-
-        # ★ 目录视图：直接用 entries_map
-        #   其他视图：批量从 dir_cache 表查一次（纯 SQLite，不碰磁盘）
-        dir_meta_lookup = {}
-        if not entries_map:
-            try:
-                dir_meta_lookup = self.store.lookup_paths_meta(paths)
-            except Exception:
-                dir_meta_lookup = {}
-
-        rows = []
-        for p in paths:
-            path = Path(p)
-            name = path.name
-            is_dir = False
-            size = "?"
-            size_bytes = None
-
-            meta = entries_map.get(name)
-            if meta is None:
-                meta = dir_meta_lookup.get(p)
-
-            if meta is not None:
-                is_dir = meta[0]
-                if is_dir:
-                    size = ""
-                    size_bytes = -1
-                else:
-                    sz = meta[1]
-                    if sz is not None:
-                        size_bytes = sz
-                        size = self.human_size(sz)
-                    else:
-                        size = "?"
-            else:
-                # ★ 完全没缓存：按文件名猜，绝不 stat
-                is_dir = ("." not in name)
-                if is_dir:
-                    size = ""
-                    size_bytes = -1
-                else:
-                    size = "?"
-                    size_bytes = None
-
-            rows.append({
-                "path": p,
-                "name": name,
-                "kind": "文件夹" if is_dir else self.file_kind(name),
-                "size": size,
-                "size_bytes": size_bytes,
-                "location": str(path.parent) if with_location else "",
-                "tags": tag_map.get(p, []),
-            })
-        self._base_rows = rows
-        self._refresh_file_list_from_base()
-
-    def refresh_rows_tags(self):
-        paths = [r["path"] for r in self.file_list.rows]
-        if not paths:
-            return
-        # ★ v22：这里不再自动跑自动标签规则（改为手动点「🏷 重读标签」），
-        #   只按数据库里已有的标签刷新显示。
-        tag_map = self.store.tags_for_paths(paths)
-        self.file_list.refresh_all_tags(tag_map)
-        for r in self._base_rows:
-            if r["path"] in tag_map:
-                r["tags"] = tag_map[r["path"]]
-        # ★ v26：标签真的变了 → 把统计缓存作废，下次重新算
-        self._stats_cache_key = None
-        self._apply_stats_display()
-        try:
-            self.refresh_categories()
-            self.refresh_tags()
-        except Exception:
-            pass
 
     def refresh_all(self):
         # 用户主动刷新，允许重算分类计数
@@ -16115,42 +15396,23 @@ class FileTaggerApp:
             self.show_category(cid)
         self.set_status(f"已清空分类「{name}」的直接成员")
 
-    def link_category_tags(self, cid, name):
-        dlg = CategoryTagLinkDialog(self.root, self.store, cid, name)
-        if not dlg.saved:
-            return
-        self.refresh_categories()
-        if self.view_mode == "cat" and self.current_cat_id == cid:
-            self.show_category(cid)
-        n = len(self.store.linked_tag_ids(cid))
-        self.set_status(f"分类「{name}」已关联 {n} 个标签超链接")
+    def link_category_tags(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.link_category_tags(self, *a, **k)
 
-    def show_category_tag_links(self, cid, name):
-        linked = self.store.linked_tag_ids(cid)
-        if not linked:
-            messagebox.showinfo("已关联标签",
-                                f"分类「{name}」尚未关联任何标签",
-                                parent=self.root)
-            return
-        tag_map = {t[0]: t[1] for t in self.store.all_tags()}
-        names = [tag_map.get(t, f"#{t}") for t in linked]
-        messagebox.showinfo("已关联标签",
-                            f"分类「{name}」关联了 {len(names)} 个标签：\n\n"
-                            + "\n".join("· " + n for n in names),
-                            parent=self.root)
 
-    # ---------- ★ 分类的"打开时自动屏蔽标签" ----------
-    def edit_category_hidden_tags(self, cid, name):
-        dlg = CategoryHiddenTagsDialog(self.root, self.store, cid, name)
-        if not dlg.saved:
-            return
-        n = len(self.store.get_category_hidden_tags(cid))
-        if n:
-            self.set_status(f"分类「{name}」已设置 {n} 个打开时自动屏蔽的标签")
-        else:
-            self.set_status(f"分类「{name}」不再自动屏蔽任何标签")
-        if self.view_mode == "cat" and self.current_cat_id == cid:
-            self.show_category(cid)
+    def show_category_tag_links(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.show_category_tag_links(self, *a, **k)
+
+
+    def edit_category_hidden_tags(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.edit_category_hidden_tags(self, *a, **k)
+
 
     def _apply_category_hidden_tags(self, cid):
         """把某个分类保存的"自动屏蔽标签"应用到当前文件列表。"""
@@ -16177,18 +15439,11 @@ class FileTaggerApp:
         except Exception:
             pass
 
-    def add_selection_to_category(self, cid, cname):
-        paths = self.file_list.get_selection()
-        if not paths:
-            return
-        n = 0
-        for path in paths:
-            self.store.add_file_to_category(cid, path)
-            n += 1
-        self.refresh_categories()
-        if self.view_mode == "cat":
-            self.show_category(self.current_cat_id)
-        self.set_status(f"已把 {n} 项添加到分类「{cname}」")
+    def add_selection_to_category(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.add_selection_to_category(self, *a, **k)
+
 
     def remove_from_current_category(self):
         if self.view_mode != "cat" or not self.current_cat_id:
@@ -16202,28 +15457,11 @@ class FileTaggerApp:
         self.refresh_categories()
         self.show_category(self.current_cat_id)
 
-    def _update_page_ui(self):
-        try:
-            total = self._page_total or 0
-            ps = FILE_PAGE_SIZE
-            n_pages = max(1, (total + ps - 1) // ps)
-            page_disp = self._page + 1
-            if total == 0:
-                self.page_info_lbl.config(text=T("共 0 项"))
-            else:
-                self.page_info_lbl.config(
-                    text=T("第 {a} / {b} 页    共 {c} 项",
-                                                  a=page_disp, b=n_pages, c=total))
-            if self._page <= 0:
-                self.page_prev_btn.state(["disabled"])
-            else:
-                self.page_prev_btn.state(["!disabled"])
-            if self._page >= n_pages - 1:
-                self.page_next_btn.state(["disabled"])
-            else:
-                self.page_next_btn.state(["!disabled"])
-        except Exception:
-            pass
+    def _update_page_ui(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_分页.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板分页._update_page_ui(self, *a, **k)
+
 
     def _invalidate_tag_scope(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_日志状态.py`
@@ -16231,9 +15469,11 @@ class FileTaggerApp:
         return _面板日志状态._invalidate_tag_scope(self, *a, **k)
 
 
-    def _tag_base_spec(self):
-        """标签筛选前的原始视图规格（没在筛选时就是当前视图）。"""
-        return self._tag_filter_base_spec or self._view_spec or {}
+    def _tag_base_spec(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作._tag_base_spec(self, *a, **k)
+
 
     def _tag_scope_base_paths(self):
         """「整个视图」范围里的文件全集（纯查库，不碰磁盘）。"""
@@ -16260,23 +15500,17 @@ class FileTaggerApp:
         return (spec.get("kind"), spec.get("cid"), len(paths),
                 paths[0] if paths else "", paths[-1] if paths else "")
 
-    def _on_tag_scope_changed(self, scope):
-        if scope == "view":
-            self._start_tag_scope_scan()
-            self.set_status(T("标签条作用范围：整个视图（正在统计标签…）"))
-        else:
-            try:
-                self.file_list.set_tag_scope_stats(None)
-            except Exception:
-                pass
-            if self._restore_tag_filter_view():
-                self.set_status(T("标签条作用范围：当前页（已还原视图）"))
-            else:
-                self.set_status(T("标签条作用范围：当前页"))
+    def _on_tag_scope_changed(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作._on_tag_scope_changed(self, *a, **k)
 
-    def _on_tag_filter_view(self):
-        """FileList 在「整个视图」范围下点了标签 → 重建文件列表。"""
-        self._apply_tag_scope_filter()
+
+    def _on_tag_filter_view(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作._on_tag_filter_view(self, *a, **k)
+
 
     def _start_tag_scope_scan(self):
         """后台统计「整个视图」里的标签（纯 SQLite 查询，不 stat 磁盘）。"""
@@ -16373,42 +15607,29 @@ class FileTaggerApp:
         self.set_status(
             f"整库标签筛选（{mode}）：{len(out)} / {len(base_paths)} 个文件")
 
-    def _restore_tag_filter_view(self):
-        """找出被标签筛选替换掉的原始视图并还原。"""
-        if self._tag_filter_base_spec is None:
-            return False
-        self._view_spec = self._tag_filter_base_spec
-        self._tag_filter_base_spec = None
-        self._page = 0
-        self._load_current_page()
-        return True
+    def _restore_tag_filter_view(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作._restore_tag_filter_view(self, *a, **k)
 
-    def _page_prev(self):
-        if self._page <= 0:
-            return
-        self._page -= 1
-        self._load_current_page()
 
-    def _page_next(self):
-        ps = FILE_PAGE_SIZE
-        total = self._page_total or 0
-        n_pages = max(1, (total + ps - 1) // ps)
-        if self._page >= n_pages - 1:
-            return
-        self._page += 1
-        self._load_current_page()
+    def _page_prev(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_分页.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板分页._page_prev(self, *a, **k)
 
-    def _page_jump(self):
-        try:
-            n = int((self.page_jump_var.get() or "").strip())
-        except Exception:
-            return
-        ps = FILE_PAGE_SIZE
-        total = self._page_total or 0
-        n_pages = max(1, (total + ps - 1) // ps)
-        n = max(1, min(n_pages, n))
-        self._page = n - 1
-        self._load_current_page()
+
+    def _page_next(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_分页.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板分页._page_next(self, *a, **k)
+
+
+    def _page_jump(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_分页.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板分页._page_jump(self, *a, **k)
+
 
     # ---------- ★ 两个独立刷新键 ----------
     def _refresh_current_dir_files(self):
@@ -16418,32 +15639,11 @@ class FileTaggerApp:
         else:
             self.refresh_all()
 
-    # ---------- ★ 重读标签（唯一会执行自动标签规则的手动入口）----------
-    def _current_view_paths(self):
-        """返回「当前视图」里显示的文件路径（不打分页，取全集）。
+    def _current_view_paths(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_搜索过滤.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板搜索过滤._current_view_paths(self, *a, **k)
 
-        - 打开某个文件路径（dir）→ 这个目录里的文件
-        - 打开左侧某个分类库（cat）→ 这个分类里的文件
-        - 全部文件（all）→ 所有已记录的文件
-        - 搜索 / 筛选（paths）→ 结果里的文件
-        """
-        spec = self._view_spec or {}
-        kind = spec.get("kind")
-        try:
-            if kind == "dir":
-                return list(spec.get("all_paths") or [])
-            if kind == "cat":
-                cid = spec.get("cid")
-                if cid is None:
-                    return []
-                return list(self.store.files_in_category(cid))
-            if kind == "paths":
-                return list(spec.get("paths") or [])
-            if kind == "all":
-                return list(self.store.all_files())
-        except Exception as exc:
-            self.log_problem(f"取当前视图文件失败：{exc}", level="warn")
-        return []
 
     def _on_manual_retag_done(self, changed, total):
         """「🏷 重读标签」跑完后的界面刷新。"""
@@ -16451,89 +15651,17 @@ class FileTaggerApp:
         self._on_full_sync_done()
         self.set_status(f"重读标签完成：{total} 个文件里更新了 {changed} 个")
 
-    def _refresh_current_dir_tags(self):
-        """🏷 重读标签：按「自动标签规则」把当前视图的文件更新一遍。
+    def _refresh_current_dir_tags(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作._refresh_current_dir_tags(self, *a, **k)
 
-        v22 起自动标签规则不再自动执行，只有这里（以及
-        「⚙ 自动标签规则…」窗口里的扫描按钮）才会真正跑一遍。
-        """
-        paths = self._current_view_paths()
-        if not paths:
-            # 兜底：当前视图没有文件时，退回「所有已记录文件」
-            try:
-                paths = list(self.store.all_files())
-            except Exception:
-                paths = []
-        if not paths:
-            messagebox.showinfo("提示", T("当前没有可更新标签的文件"),
-                                parent=self.root)
-            return
-        if not messagebox.askyesno(
-                "重读标签",
-                f"按「自动标签规则」重新扫描并更新标签？\n\n"
-                f"本次范围：当前视图的 {len(paths)} 个文件\n"
-                f"（数据量大时可能需要较长时间）"):
-            return
-        self.begin_activity(f"正在更新 {len(paths)} 个文件的标签…")
-        self.log_output(
-            f"重读标签（手动触发自动规则）：{len(paths)} 个文件")
-        
-        def worker():
-            total = len(paths)
-            changed_all = 0
-            step = 300
-            try:
-                for i in range(0, total, step):
-                    chunk = paths[i:i + step]
-                    try:
-                        changed_all += self.store.sync_auto_tags_for_paths(
-                            chunk)
-                    except Exception as exc:
-                        self.log_problem(
-                            f"第 {i + 1} 个起的批次失败：{exc}",
-                            level="warn")
-                    self.log_progress(
-                        f"已处理 {min(i + step, total)} / {total}"
-                        f"（累计更新 {changed_all}）")
-                self.log_output(
-                    f"重读标签完成：{changed_all} 个文件的标签有变化")
-            except Exception as exc:
-                self.log_problem(f"重读标签失败：{exc}", level="error")
-            try:
-                self._ui_threadsafe(self._on_manual_retag_done,
-                                    changed_all, total)
-            except Exception as exc:
-                note_swallowed(T("worker(_on_manual_retag_done)：回主线程通知失败"),
-                               exc, level="warn")
-                
-        threading.Thread(target=worker, daemon=True).start()
 
-    # ---------- ★ v25 补丁2 / ★ 2026-10-03 重写：网盘挂载改名后的路径自愈 ----------
-    def _apply_net_root_fixes(self, roots):
-        """顺手把「指向失效网盘的索引根目录」处理好（改名 / 删掉多余的）。
+    def _apply_net_root_fixes(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_扫描索引.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板扫描索引._apply_net_root_fixes(self, *a, **k)
 
-        为什么要管这个：库里那些文件的路径修好了，可「索引管理」里还挂着
-        一个永远连不上的旧根目录 —— 以后每次自动索引都会去摸它、白等一场。
-        """
-        done = []
-        for r in roots:
-            try:
-                if r["action"] == "delete":
-                    with self.store._lock:
-                        with self.store.conn:
-                            self.store.conn.execute(
-                                "DELETE FROM index_roots WHERE id = ?", (r["id"],))
-                    done.append("删掉多余的旧索引根：%s" % r["path"])
-                else:
-                    with self.store._lock:
-                        with self.store.conn:
-                            self.store.conn.execute(
-                                "UPDATE index_roots SET path = ? WHERE id = ?",
-                                (r["new"], r["id"]))
-                    done.append("索引根改名：%s  →  %s" % (r["path"], r["new"]))
-            except Exception as _e:
-                note_swallowed(T("修复网盘路径：处理索引根目录失败"), _e)
-        return done
 
     def _do_heal_net_paths(self):
         """☁ 把库里指向「失效的旧网盘挂载名」的记录改成当前挂载名。
@@ -16999,293 +16127,53 @@ class FileTaggerApp:
             f"同一个文件现在只剩一条记录了，标签应该都能正常显示。",
             parent=self.root)
 
-    # ---------- ★ v25：搜索视图的进出（含子目录搜索 / 关键字搜索共用） ----------
-    def _cancel_recursive_scan(self, invalidate_cache=True):
-        """作废还在跑的「含子目录搜索」。
+    def _cancel_recursive_scan(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_扫描索引.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板扫描索引._cancel_recursive_scan(self, *a, **k)
 
-        - token +1：迟到的扫描结果回来时会被丢掉
-        - invalidate_cache：连目录树缓存一起丢掉（切视图 / 重扫目录时用）
-        """
-        self._recursive_token = getattr(self, "_recursive_token", 0) + 1
-        self._recursive_active = False
-        self._recursive_roots = []
-        try:
-            self.file_list.search_external = False
-        except Exception:
-            pass
-        if invalidate_cache:
-            self._recursive_cache = None
 
-    def _search_scan_roots(self):
-        """含子目录搜索该扫哪些目录 —— 跟现在列表显示的视图保持一致。
+    def _search_scan_roots(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_扫描索引.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板扫描索引._search_scan_roots(self, *a, **k)
 
-        - 打开某个文件夹（dir）→ 就扫这个文件夹
-        - 分类库 / 全部文件 / 搜索结果 → 扫这些文件所在的目录
-          （合并去重；被别的根包住的子目录会被去掉）
-        返回 (roots, 说明文字)
-        """
-        spec = self._view_spec or {}
-        kind = spec.get("kind")
-        if self.view_mode == "dir" or kind == "dir":
-            d = str(self.current_dir) if self.current_dir else ""
-            return ([d] if d else []), "当前文件夹"
-        try:
-            all_paths = self._current_view_paths()
-        except Exception:
-            all_paths = []
-        dirs = []
-        seen = set()
-        for p in all_paths:
-            d = os.path.dirname(p)
-            if d and d not in seen:
-                seen.add(d)
-                dirs.append(d)
-        # ★ 这些文件基本都在同一棵树下时，直接用它们的公共祖先当
-        #   唯一基点（否则几十上百个目录要一个一个扫，网盘上等到哭）
-        if len(dirs) > 1:
-            try:
-                common = os.path.commonpath(dirs)
-                if path_depth(common) >= 4:
-                    note = f"（{len(dirs)} 个目录合并成公共目录）"
-                    dirs = [common]
-                else:
-                    note = ""
-            except Exception:
-                note = ""
-        else:
-            note = ""
-        roots, truncated = collapse_roots(dirs, RECURSIVE_MAX_ROOTS)
-        label = {"cat": "当前分类里这些文件所在目录",
-                 "all": "全部文件所在目录",
-                 "paths": "当前结果所在目录"}.get(kind, "当前视图的文件目录")
-        if note:
-            label += note
-        if truncated:
-            label += f"（目录太多，只扫最靠上的 {RECURSIVE_MAX_ROOTS} 个）"
-        return roots, label
 
-    def _begin_search_view(self):
-        """★ v25：搜索要换视图了 —— 记下现在的视图，并清掉遗留的标签筛选。
+    def _begin_search_view(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_搜索过滤.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板搜索过滤._begin_search_view(self, *a, **k)
 
-        否则会出现两种「结果不正常」：
-          1) 上一次的「整库标签筛选」把搜索结果悄悄砍一刀；
-          2) 清空搜索后回不到原来的分类 / 全部文件（跑到某个文件夹去）。
-        """
-        if self._search_return_state is None:
-            spec = self._tag_filter_base_spec or self._view_spec
-            state = {
-                "spec": dict(spec) if isinstance(spec, dict) else None,
-                "view_mode": self.view_mode,
-                "cat_id": self.current_cat_id,
-                "dir": str(self.current_dir) if self.current_dir else None,
-                "filter_ids": set(self.file_list.filter_tag_ids or ()),
-                "filter_match_all": bool(self.file_list.filter_match_all),
-                "had_filter": self._tag_filter_base_spec is not None,
-            }
-            if (state["spec"] or {}).get("kind") == "paths" \
-                    and not state["had_filter"]:
-                state["spec"] = None   # 上一次就是搜索结果，别记它
-            self._search_return_state = state
-        if self.file_list.filter_tag_ids:
-            self.file_list.set_tag_filter(set())
-        self._tag_filter_base_spec = None
 
-    def _restore_view_after_search(self):
-        """清空搜索 → 回到搜索前的视图。返回是否还原成功。"""
-        st = self._search_return_state
-        self._search_return_state = None
-        self._cancel_recursive_scan(invalidate_cache=True)
-        if not st:
-            return False
-        spec = st.get("spec") or {}
-        kind = spec.get("kind") or st.get("view_mode")
-        try:
-            if kind == "cat" and st.get("cat_id") is not None:
-                self.show_category(st["cat_id"])
-            elif kind == "all":
-                self.show_all_files()
-            elif kind == "dir" and st.get("dir"):
-                self.load_directory(st["dir"])
-            elif kind == "paths" and spec:
-                self._view_spec = spec
-                self._page = 0
-                self._load_current_page()
-            else:
-                return False
-        except Exception as exc:
-            self.log_problem(f"还原搜索前的视图失败：{exc}", level="warn")
-            return False
-        # 把搜索前选中的标签筛选放回去（整个视图范围下会自动重算）
-        ids = st.get("filter_ids") or set()
-        if ids:
-            self.file_list.set_tag_filter(ids, st.get("filter_match_all"))
-            self._invalidate_tag_scope()
-        self.set_status(T("已退出搜索，回到原来的视图"))
-        return True
+    def _restore_view_after_search(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_搜索过滤.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板搜索过滤._restore_view_after_search(self, *a, **k)
 
-    def _on_global_search(self, keyword):
-        """在分类或全部文件视图中进行全局搜索"""
-        if not keyword:
-            # 清空搜索 → 先试着还原搜索前的视图
-            if self._restore_view_after_search():
-                return
-            if self.view_mode == "dir":
-                self.file_list.search_external = False
-                self.file_list._apply_search_filter()
-            elif self.view_mode == "cat" and self.current_cat_id:
-                self.show_category(self.current_cat_id)
-            elif self.view_mode == "all":
-                self.show_all_files()
-            return
 
-        if self.view_mode == "dir":
-            # 当前文件夹：就是本地按「文件名/标签/路径」开关过滤
-            self.file_list.search_external = False
-            self.file_list._apply_search_filter()
-            return
+    def _on_global_search(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_搜索过滤.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板搜索过滤._on_global_search(self, *a, **k)
 
-        # ★ v25：换搜索视图前先把原视图记下来、并清掉遗留的标签筛选
-        self._begin_search_view()
-        # 查库实现的是"路径含关键字"，本地的「文件名/标签/路径」开关
-        # 仍然负责把结果再收窄一点（跟平时在分类里搜索一致）
-        self.file_list.search_external = False
-        if self.view_mode == "cat" and self.current_cat_id:
-            cats = {c["id"]: c for c in self.store.all_categories()}
-            cat_name = cats.get(self.current_cat_id, {}).get("name", "")
-            paths = self.store.search_files_in_category(self.current_cat_id, keyword)
-            # ★ 2026-10-06：标题里带上**找到几个** —— 外面每个正经搜索
-            #   都有这个数，用户才知道「该继续打字收窄，还是已经够了」。
-            #   原来只有状态栏闪一下（很容易被后面的消息盖掉）。
-            self.list_title.config(
-                text=f"分类搜索：{keyword}　找到 {len(paths)} 个")
-            self._invalidate_tag_scope()
-            self._view_spec = {"kind": "paths", "paths": paths}
-            self._page = 0
-            self._load_current_page()
-            self.set_status(f"在分类「{cat_name}」中搜索 \"{keyword}\"：找到 {len(paths)} 个文件")
-        elif self.view_mode == "all":
-            paths = self.store.search_all_files(keyword)
-            self.list_title.config(
-                text=f"全部文件搜索：{keyword}　找到 {len(paths)} 个")
-            self._invalidate_tag_scope()
-            self._view_spec = {"kind": "paths", "paths": paths}
-            self._page = 0
-            self._load_current_page()
-            self.set_status(f"在所有文件中搜索 \"{keyword}\"：找到 {len(paths)} 个文件")
-        else:
-            # 其他视图（比如搜索结果里再搜）：退回本地过滤
-            self.file_list.search_external = False
-            self.file_list._apply_search_filter()
 
-    # ---------- ★ 文件列表：含子目录搜索 ----------
-    def _on_recursive_search(self, keyword):
-        """FileList 的"含子目录"模式触发（按回车）。"""
-        if not keyword:
-            # 清除搜索 → 还原搜索前的视图
-            self._cancel_recursive_scan(invalidate_cache=False)
-            self._restore_view_after_search()
-            return
+    def _on_recursive_search(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_扫描索引.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板扫描索引._on_recursive_search(self, *a, **k)
 
-        # ★ v25：分类 / 全部文件 / 搜索结果视图里，库里本来就存着完整
-        #   路径，直接按完整路径查库就等于「含子目录」——秒回，
-        #   不必去扫盘（分类里的文件散在好几个盘时，扫盘要几分钟）。
-        kind = (self._view_spec or {}).get("kind")
-        if self.view_mode != "dir" and kind != "dir":
-            self.log_output(
-                f"含子目录搜索：按完整路径查库「{keyword}」（不用扫盘）")
-            self._on_global_search(keyword)
-            self.list_title.config(text=f"含子目录搜索：{keyword}")
-            return
 
-        roots, label = self._search_scan_roots()
-        if not roots:
-            messagebox.showinfo(
-                "没有可搜索的目录",
-                "当前列表里没有可以递归搜索的目录。\n\n"
-                "先打开一个文件夹，或者选中一个分类库再搜。",
-                parent=self.root)
-            return
-        self._begin_search_view()
-        # ★ 每次回车都算新一轮：token 换掉，旧扫描回来也不认
-        self._cancel_recursive_scan(invalidate_cache=False)
-        self._recursive_active = True
-        token = self._recursive_token
-        self._recursive_roots = list(roots)
-        key = "|".join(sorted(roots))
-        # ★ v25：每次回车都重新扫一遍（以前是复用旧缓存，用户刚
-        #   下载/删掉的文件搜不到，结果看着「不正常」）。
-        self.begin_activity("扫描当前目录树…")
-        self.log_output(
-            f"含子目录搜索：扫描 {len(roots)} 个目录（{label}）")
-        for r in roots[:6]:
-            self.log_output(f"    · {r}")
+    def _on_recursive_scan_done(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_扫描索引.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板扫描索引._on_recursive_scan_done(self, *a, **k)
 
-        def worker():
-            rows = []
-            truncated = False
-            try:
-                for base in roots:
-                    if self._recursive_token != token:
-                        break
-                    for root, _dirs, files in os.walk(base):
-                        if self._recursive_token != token:
-                            break
-                        for fn in files:
-                            rows.append(os.path.join(root, fn))
-                            if len(rows) >= RECURSIVE_MAX_FILES:
-                                truncated = True
-                                break
-                        if truncated:
-                            break
-                    if truncated:
-                        break
-            except Exception as exc:
-                self.log_problem(f"目录树扫描失败：{exc}", level="error")
-            try:
-                self._ui_threadsafe(self._on_recursive_scan_done,
-                                    token, key, rows, keyword, truncated)
-            except Exception as exc:
-                note_swallowed(T("worker(_on_recursive_scan_done)：回主线程通知失败"),
-                               exc, level="warn")
 
-        threading.Thread(target=worker, daemon=True).start()
+    def _apply_recursive_filter(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_扫描索引.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板扫描索引._apply_recursive_filter(self, *a, **k)
 
-    def _on_recursive_scan_done(self, token, key, paths, keyword,
-                                truncated=False):
-        """目录树扫完了。token 对不上 → 这轮已经作废（清空了搜索 / 换了视图）。"""
-        if token != self._recursive_token or not self._recursive_active:
-            self.log_output(T("含子目录搜索：这轮扫描已作废，结果丢掉"))
-            return
-        self.end_activity()
-        self._recursive_cache = {"key": key, "paths": paths,
-                                 "ts": time.time()}
-        self.log_output(f"含子目录搜索：扫描到 {len(paths)} 个文件")
-        if truncated:
-            self.log_problem(
-                f"目录树太大，只看了前 {RECURSIVE_MAX_FILES} 个文件，"
-                f"结果可能不全", level="warn")
-        self._apply_recursive_filter(keyword)
-
-    def _apply_recursive_filter(self, keyword):
-        cache = self._recursive_cache
-        if not cache:
-            return
-        paths = cache["paths"]
-        kw = (keyword or "").strip().lower()
-        if kw:
-            paths = [p for p in paths
-                     if kw in os.path.basename(p).lower()]
-        # 切换成"筛选"视图
-        self.list_title.config(text=T("搜索结果（含子目录）"))
-        self.list_info.config(text=f"关键字：{keyword or '（空）'}")
-        # ★ 关键字这里已经筛过了，别再让 FileList 按开关二次过滤
-        self.file_list.search_external = True
-        self._invalidate_tag_scope()
-        self._view_spec = {"kind": "paths", "paths": list(paths)}
-        self._page = 0
-        self._load_current_page()
-        self.set_status(
-            f"含子目录搜索：{len(paths)} 个结果")
 
     def toggle_dir_cache(self):
         self.dir_cache_enabled = not self.dir_cache_enabled
@@ -17468,28 +16356,11 @@ class FileTaggerApp:
 
     # ---- 空白处菜单用到的几个小动作（每个都单独兜底）----
 
-    def _clipboard_has_files(self):
-        """剪贴板里有没有"能粘贴的文件"（用来决定"粘贴"这一项灰不灰）。
+    def _clipboard_has_files(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板文件操作._clipboard_has_files(self, *a, **k)
 
-        ★★ 2026-10-07 注意：**本程序自己的剪贴板变量叫 `_clip`**
-          （不是 `_clip_files`）—— 它是 `{"paths": [...], "cut": bool}` 这样一个字典。
-          ★ 我第一版写成了 `_clip_files`，**那个名字根本不存在** →
-            `getattr(..., None)` 永远返回 `None` → "粘贴"这一项**永远是灰的**。
-            这是那种"不报错、就是不给你用"的静默失效。
-          ★ 现在按真名 `_clip` 判断，并且**两种形状都认**
-            （dict / list），免得以后改了形状又悄悄失效。
-        """
-        try:
-            cb = getattr(self, "_clip", None)
-            if not cb:
-                return False
-            if isinstance(cb, dict):
-                return bool(cb.get("paths"))
-            if isinstance(cb, (list, tuple, set)):
-                return len(cb) > 0
-            return False
-        except Exception:
-            return False
 
     def _select_all_files(self):
         """全选当前列表里的文件。
@@ -17513,16 +16384,11 @@ class FileTaggerApp:
         except Exception as _e:
             note_swallowed(T("全选失败"), _e, quiet=True)
 
-    def _open_in_explorer(self, path=None):
-        """在 Windows 资源管理器里打开某个目录。"""
-        try:
-            target = path or self._current_dir()
-            if not target:
-                return
-            import subprocess
-            subprocess.Popen(["explorer", str(target)])
-        except Exception as _e:
-            note_swallowed(T("在资源管理器里打开失败"), _e)
+    def _open_in_explorer(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板文件操作._open_in_explorer(self, *a, **k)
+
 
     def _current_dir(self):
         """★★ 问出"现在在哪个目录" —— **唯一来源**，别处不要自己猜。
@@ -17672,355 +16538,95 @@ class FileTaggerApp:
                 command=lambda cid=c["id"], n=c["name"]:
                     self.add_selection_to_category(cid, n))
 
-    def open_path(self, path):
-        """打开文件 / 文件夹。
+    def open_path(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板文件操作.open_path(self, *a, **k)
 
-        ★ v25 补丁：库里存的 UNC 网盘路径是小写的（norm 里做了
-          normcase），CloudDrive 这类网盘对大小写敏感时会报
-          WinError 1203「网络路径键入不正确」。先用目录缓存把大小写
-          还原成磁盘上的真名，再交给系统打开。
-        """
-        if not path:
-            return
-        # ★ v25 补丁2：库里的路径可能还指着「改名前」的网盘挂载，
-        #   先换成当前挂载名，再多试一遍，免得直接弹「打开失败」。
-        cands = []
-        for p0 in (path, remap_net_path(path)):
-            if not p0:
-                continue
-            try:
-                real = self.store.canonical_path(p0)
-            except Exception:
-                real = p0
-            for p in (real, p0):
-                if p and p not in cands:
-                    cands.append(p)
-        err = None
-        for p in cands:
-            try:
-                if sys.platform.startswith("win"):
-                    os.startfile(p)  # noqa
-                elif sys.platform == "darwin":
-                    subprocess.Popen(["open", p])
-                else:
-                    subprocess.Popen(["xdg-open", p])
-                return
-            except Exception as exc:
-                err = exc
-        hint = net_error_hint(err)
-        msg = str(err)
-        if hint:
-            msg = f"{msg}\n\n{hint}"
-        messagebox.showerror("打开失败", msg, parent=self.root)
 
-    def open_selected(self):
-        path = self.file_list.get_single_selection()
-        if not path:
-            return
-        self.open_path(path)
+    def open_selected(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板文件操作.open_selected(self, *a, **k)
 
-    def reveal_selected(self):
-        path = self.file_list.get_single_selection()
-        if not path:
-            return
-        folder = path if os.path.isdir(path) else os.path.dirname(path)
-        self.open_path(folder)
 
-    def clear_selected_tags(self):
-        paths = self.file_list.get_selection()
-        if not paths:
-            return
-        if not messagebox.askyesno("确认", f"清除所选 {len(paths)} 个文件的全部标签？"):
-            return
-        for path in paths:
-            self.store.clear_file_tags(path)
-        self.refresh_tags()
-        self.refresh_rows_tags()
+    def reveal_selected(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板文件操作.reveal_selected(self, *a, **k)
 
-    def remove_selected_tags(self):
-        """★★ v26（2026-10-01）：右键「去除文件上的标签…」。
 
-        把选中文件身上的标签全列出来，你勾哪些就去掉哪些，
-        确认一次才真的动手。标签本身不会被删掉。
-        """
-        paths = list(self.file_list.get_selection() or [])
-        if not paths:
-            messagebox.showinfo("去除标签", T("先选中文件。"), parent=self.root)
-            return
-        try:
-            dlg = RemoveFileTagsDialog(self.root, self, self.store, paths)
-            self.root.wait_window(dlg)
-            chosen = dlg.result
-        except Exception as exc:
-            messagebox.showerror("去除标签", "打不开窗口：%s" % exc,
-                                 parent=self.root)
-            return
-        if not chosen:
-            return
-        total = 0
-        # ★ 2026-10-06：撤销记录里要存**标签名**（id 会变、名字才是人看得懂的），
-        #   所以这里先把 id 翻成名字，再去删。
-        _name_of = {}
-        try:
-            for _tid in (chosen or []):
-                _row = self.store.tag_by_id(_tid)
-                if _row:
-                    _name_of[_tid] = _row["name"]
-        except Exception:
-            _name_of = {}
-        _hit = []
-        for p in paths:
-            try:
-                _n = self.store.remove_file_tag_ids(p, chosen)
-                total += _n
-                if _n:
-                    for _tid in (chosen or []):
-                        _nm = _name_of.get(_tid)
-                        if _nm:
-                            _hit.append((p, _nm))
-            except Exception as exc:
-                note_swallowed(T("去除标签失败：{x}", x=p), exc)
-        # 删完之后重新同步一下继承标签（父级还在的话该补回来）
-        try:
-            for p in paths:
-                fid = self.store._fid(p, create=False)
-                if fid is not None:
-                    self.store.resync_file(fid)
-        except Exception as exc:
-            note_swallowed(T("去除标签后同步失败"), exc)
-        self.refresh_tags()
-        self.refresh_rows_tags()
-        if _hit:
-            self.undo_record("tag_remove", _hit)
-        self.set_status("已从 %d 个文件上去掉 %d 个标签（共 %d 条）"
-                        % (len(paths), len(chosen), total))
+    def clear_selected_tags(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.clear_selected_tags(self, *a, **k)
 
-    def add_file_tags_to_box(self):
-        """★★ v26（2026-10-01）：右键「把标签全部加入标签盒」。
 
-        把选中文件身上的所有标签一次性全塞进标签盒，
-        方便你接下来拖到别的文件上。（不动任何数据，只是把标签放进盒子）
-        """
-        paths = list(self.file_list.get_selection() or [])
-        if not paths:
-            messagebox.showinfo("标签盒", T("先选中文件。"), parent=self.root)
-            return
-        try:
-            info = self.store.tags_for_paths(paths) or {}
-        except Exception as exc:
-            messagebox.showerror("标签盒", "读标签失败：%s" % exc,
-                                 parent=self.root)
-            return
-        want = {}
-        for p in paths:
-            for rec in (info.get(p) or []):
-                try:
-                    want[int(rec[0])] = rec[1]
-                except Exception:
-                    continue
-        if not want:
-            messagebox.showinfo("标签盒", T("这些文件上一个标签都没有。"),
-                                parent=self.root)
-            return
-        if not getattr(self, "tagbox", None):
-            try:
-                self.toggle_tagbox()
-            except Exception:
-                pass
-        box = getattr(self, "tagbox", None)
-        if box is None:
-            messagebox.showinfo("标签盒", T("标签盒打不开。"), parent=self.root)
-            return
-        try:
-            have = set(box.box_ids())
-        except Exception:
-            have = set()
-        added = 0
-        for tid, name in want.items():
-            if tid in have:
-                continue
-            try:
-                box.add_tag(tid, name)
-                added += 1
-            except Exception as exc:
-                note_swallowed(T("把标签放进标签盒失败"), exc)
-        try:
-            box.deiconify()
-            box.lift()
-        except Exception:
-            pass
-        self.set_status("已把 %d 个标签放进标签盒（%d 个本来就在里面）"
-                        % (added, len(want) - added))
+    def remove_selected_tags(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.remove_selected_tags(self, *a, **k)
 
-    def refresh_tags(self):
-        self.tag_thumb.reload(self.store)
 
-    def _on_tags_dropped(self, tag_names, x_root, y_root):
-        """★★ v26（2026-10-01）：一次拖**好几个**标签到文件上。
+    def add_file_tags_to_box(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.add_file_tags_to_box(self, *a, **k)
 
-        标签盒里多选了几个标签再往文件列表拖时走这里 ——
-        每一个够得着的文件，都会被打上这一批标签。
-        """
-        names = [n for n in (tag_names or []) if n]
-        if not names:
-            return
-        try:
-            left = self.file_list.winfo_rootx()
-            top = self.file_list.winfo_rooty()
-            right = left + self.file_list.winfo_width()
-            bottom = top + self.file_list.winfo_height()
-        except Exception:
-            return
-        if not (left <= x_root <= right and top <= y_root <= bottom):
-            self.set_status(T("把标签拖到文件列表上才能打标签"))
-            return
-        paths = list(self.file_list.get_selection() or [])
-        if not paths:
-            return
-        ok = 0
-        _hit = []          # ★ 2026-10-06：记撤销
-        for p in paths:
-            for nm in names:
-                try:
-                    self.store.add_tag_to_file(p, nm)
-                    ok += 1
-                    _hit.append((p, nm))
-                except Exception as exc:
-                    note_swallowed(T("批量打标签失败"), exc)
-        self.refresh_tags()
-        self.refresh_rows_tags()
-        if _hit:
-            self.undo_record("tag_add", _hit)
-        self.set_status("已给 %d 个文件打上 %d 个标签（共 %d 次）"
-                        % (len(paths), len(names), ok))
 
-    def _on_tag_dropped(self, tag_name, x_root, y_root):
-        try:
-            left = self.file_list.winfo_rootx()
-            top = self.file_list.winfo_rooty()
-            right = left + self.file_list.winfo_width()
-            bottom = top + self.file_list.winfo_height()
-        except Exception:
-            left = top = right = bottom = 0
+    def refresh_tags(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.refresh_tags(self, *a, **k)
 
-        inside = left <= x_root <= right and top <= y_root <= bottom
-        if not inside:
-            return
 
-        selected = self.file_list.get_selection()
-        target_path = self.file_list.get_path_at_y(y_root, x_root)
+    def _on_tags_dropped(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作._on_tags_dropped(self, *a, **k)
 
-        if target_path and target_path not in selected:
-            targets = [target_path]
-        elif selected:
-            targets = list(selected)
-        elif target_path:
-            targets = [target_path]
-        else:
-            return
 
-        added_auto = set()
-        _hit = []          # ★ 2026-10-06：记撤销
-        for path in targets:
-            info = self.store.add_tag_to_file(path, tag_name)
-            _hit.append((path, tag_name))
-            for a in info.get("ancestors") or []:
-                added_auto.add(a)
+    def _on_tag_dropped(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作._on_tag_dropped(self, *a, **k)
 
-        self.refresh_tags()
-        self.refresh_rows_tags()
-        if _hit:
-            self.undo_record("tag_add", _hit)
 
-        extra = ""
-        if added_auto:
-            extra = f"（附带上级：{'、'.join(sorted(added_auto))}）"
+    def _on_tag_right_click(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作._on_tag_right_click(self, *a, **k)
 
-        if len(targets) == 1:
-            self.set_status(
-                f"已给「{os.path.basename(targets[0])}」添加标签「{tag_name}」{extra}")
-        else:
-            self.set_status(
-                f"已给 {len(targets)} 个文件添加标签「{tag_name}」{extra}")
 
-    def _on_tag_right_click(self, event, tid, name):
-        m = tk.Menu(self, tearoff=0)
-        m.add_command(label=f"标签：{name}", state="disabled")
-        m.add_separator()
-        m.add_command(label=T("查看它的文件"),
-                      command=lambda: self.show_files_with_tag(tid, name))
-        m.add_separator()
-        m.add_command(label=T("重命名…"), command=lambda: self.rename_tag(tid))
-        m.add_command(label=T("更换颜色…"), command=lambda: self.recolor_tag(tid))
-        m.add_separator()
-        m.add_command(label=T("在星图里打开"), command=self.open_tag_tree)
-        m.tk_popup(event.x_root, event.y_root)
+    def _on_tag_double_click(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作._on_tag_double_click(self, *a, **k)
 
-    def _on_tag_double_click(self, tid, name):
-        self.show_files_with_tag(tid, name)
 
-    def show_files_with_tag(self, tid, name):
-        paths = self.store.find_files([name], match_all=True)
-        self.view_mode = "filter"
-        self.current_cat_id = None
-        self._cancel_recursive_scan(invalidate_cache=True)
-        self._search_return_state = None
-        self._clear_stats_filter()
-        self._reset_category_hidden_tags()
-        self.list_title.config(text=f"标签「{name}」的文件")
-        self.path_var.set(f"标签：{name}")
-        self.list_info.config(text=f"按标签：{name}")
-        self._invalidate_tag_scope()
-        self._view_spec = {"kind": "paths", "paths": paths}
-        self._page = 0
-        self._load_current_page()
-        self.sidebar.set_selected(None, None)
-        self.set_status(f"标签「{name}」→ {self._page_total} 个文件")
+    def show_files_with_tag(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.show_files_with_tag(self, *a, **k)
 
-    def rename_tag(self, tid):
-        row = None
-        for r in self.store.all_tags():
-            if r[0] == tid:
-                row = r
-                break
-        if row is None:
-            return
-        name = row[1]
-        new_name = SimpleInputDialog(self.root, "重命名标签", initial=name).result
-        if not new_name or new_name == name:
-            return
-        try:
-            self.store.rename_tag(tid, new_name)
-        except Exception as exc:
-            messagebox.showerror("错误", str(exc))
-            return
-        self.refresh_tags()
-        self.refresh_rows_tags()
 
-    def recolor_tag(self, tid):
-        color = "#3498db"
-        for r in self.store.all_tags():
-            if r[0] == tid:
-                color = r[2]
-                break
-        _rgb, hexv = colorchooser.askcolor(color=color, title=T("选择标签颜色"))
-        if not hexv:
-            return
-        self.store.set_tag_color(tid, hexv)
-        self.refresh_tags()
-        self.refresh_rows_tags()
+    def rename_tag(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.rename_tag(self, *a, **k)
 
-    def open_tag_tree(self):
-        # ★ v25 补丁42：把 app 也传进去 —— 星图要用它找到「标签盒」，
-        #   才能实现「Shift + 拖标签 → 拖进标签盒」和右键「放进标签盒」。
-        StarGraphEditor(self.root, self.store,
-                        on_saved=self._on_star_saved, app=self)
-        # 窗口关闭后整体刷新一次
-        self.refresh_tags()
-        self.refresh_rows_tags()
-        self.refresh_categories()
-        if self.view_mode == "cat" and self.current_cat_id:
-            self.show_category(self.current_cat_id)
+
+    def recolor_tag(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.recolor_tag(self, *a, **k)
+
+
+    def open_tag_tree(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.open_tag_tree(self, *a, **k)
+
 
     def _on_star_saved(self):
         """星图保存时立即刷新右侧缩略图和中间列表。"""
@@ -18070,116 +16676,29 @@ class FileTaggerApp:
         self.refresh_rows_tags()
         self.set_status(f"已为 {n} 个标签重新分配配色")
 
-    def export_tags_structure(self):
-        try:
-            EXPORT_DIR.mkdir(parents=True, exist_ok=True)
-            n = self.store.export_tags_structure(TAGS_FILE)
-        except Exception as exc:
-            messagebox.showerror("导出失败", str(exc), parent=self.root)
-            return
-        self.set_status(f"已导出 {n} 个标签结构到：{TAGS_FILE}")
-        messagebox.showinfo(
-            "导出成功",
-            f"已导出 {n} 个标签的结构（支持多父级）到：\n\n{TAGS_FILE}",
-            parent=self.root)
+    def export_tags_structure(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.export_tags_structure(self, *a, **k)
 
-    def export_file_tags(self):
-        try:
-            EXPORT_DIR.mkdir(parents=True, exist_ok=True)
-            n = self.store.export_file_tags(FILE_TAGS_FILE)
-        except Exception as exc:
-            messagebox.showerror("导出失败", str(exc), parent=self.root)
-            return
-        self.set_status(f"已导出 {n} 个文件的标签信息到：{FILE_TAGS_FILE}")
-        messagebox.showinfo(
-            "导出成功",
-            f"已导出 {n} 个文件的标签信息（仅手动标签）到：\n\n{FILE_TAGS_FILE}",
-            parent=self.root)
 
-    def import_tags_structure(self):
-        path = filedialog.askopenfilename(
-            title=T("选择标签结构文件"),
-            initialdir=str(EXPORT_DIR),
-            filetypes=[("JSON 文件", "*.json"), ("所有文件", "*.*")])
-        if not path:
-            return
-        if not messagebox.askyesno(
-                "确认导入",
-                "导入标签结构会：\n"
-                "  · 创建缺失的标签\n"
-                "  · 更新已存在标签的颜色\n"
-                "  · 根据文件里的 parents 重建图关系（支持多父级）\n"
-                "  · 导入完自动同步所有文件的标签链\n\n"
-                "已导入标签的原有关系会被重建。继续吗？",
-                parent=self.root):
-            return
-        try:
-            info = self.store.import_tags_structure(path, auto_resync=True)
-        except Exception as exc:
-            messagebox.showerror("导入失败", str(exc), parent=self.root)
-            return
-        self.refresh_tags()
-        self.refresh_rows_tags()
-        self.refresh_categories()
-        if self.view_mode == "cat" and self.current_cat_id:
-            self.show_category(self.current_cat_id)
+    def export_file_tags(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.export_file_tags(self, *a, **k)
 
-        resync = info.get("resync") or {}
-        added = resync.get("added", 0)
-        removed = resync.get("removed", 0)
-        files_affected = resync.get("files_affected", 0)
-        self.set_status(
-            f"标签结构已导入：新建 {info['created']}、更新 {info['updated']}、"
-            f"关联 {info['linked']}；同步影响 {files_affected} 个文件")
-        messagebox.showinfo(
-            "导入成功",
-            f"标签结构已导入：\n\n"
-            f"  文件中共有标签：{info['total_in_file']} 个\n"
-            f"  新建标签：{info['created']} 个\n"
-            f"  更新颜色：{info['updated']} 个\n"
-            f"  建立父子关系：{info['linked']} 条\n\n"
-            f"已自动同步所有文件的标签链：\n"
-            f"  受影响文件：{files_affected} 个\n"
-            f"  新增关联：{added} 条\n"
-            f"  移除关联：{removed} 条",
-            parent=self.root)
 
-    def import_file_tags(self):
-        path = filedialog.askopenfilename(
-            title=T("选择文件标签信息文件"),
-            initialdir=str(EXPORT_DIR),
-            filetypes=[("JSON 文件", "*.json"), ("所有文件", "*.*")])
-        if not path:
-            return
-        skip = messagebox.askyesno(
-            "是否跳过不存在的文件？",
-            "如果原路径的文件已经不存在，是否跳过？\n\n"
-            "  · 是 → 只导入磁盘上仍存在的文件（推荐）\n"
-            "  · 否 → 无论磁盘上是否存在都记录到数据库",
-            parent=self.root)
-        try:
-            info = self.store.import_file_tags(path, skip_missing=skip)
-        except Exception as exc:
-            messagebox.showerror("导入失败", str(exc), parent=self.root)
-            return
-        self.refresh_tags()
-        self.refresh_rows_tags()
-        self.refresh_categories()
-        if self.view_mode == "cat" and self.current_cat_id:
-            self.show_category(self.current_cat_id)
+    def import_tags_structure(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.import_tags_structure(self, *a, **k)
 
-        self.set_status(
-            f"文件标签信息已导入：{info['files']} 个文件、新增 {info['added_tags']} 条关联"
-            f"（跳过 {info['skipped']}）")
-        messagebox.showinfo(
-            "导入成功",
-            f"文件标签信息已导入：\n\n"
-            f"  文件中共有文件：{info['total_in_file']} 个\n"
-            f"  实际导入文件：{info['files']} 个\n"
-            f"  新增标签关联：{info['added_tags']} 条\n"
-            f"  跳过（不存在或无标签）：{info['skipped']} 个\n\n"
-            f"注意：导入只做添加，不会删除文件上已有的标签。",
-            parent=self.root)
+
+    def import_file_tags(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.import_file_tags(self, *a, **k)
+
 
     def open_export_dir(self):
         try:
@@ -18243,86 +16762,29 @@ class FileTaggerApp:
         return _面板缓存设置.change_data_dir(self, *a, **k)
 
             
-    def apply_filter(self):
-        selected_ids = self.tag_thumb.selected_ids
-        if not selected_ids:
-            messagebox.showinfo("提示",
-                                "请先在右侧标签星图缩略图里单击选择标签（Ctrl 可多选）")
-            return
-        name_map = {r[0]: r[1] for r in self.store.all_tags()}
-        names = [name_map[tid] for tid in selected_ids if tid in name_map]
-        if not names:
-            return
-        paths = self.store.find_files(names, match_all=self.match_all_var.get())
-        self.view_mode = "filter"
-        self.current_cat_id = None
-        self._cancel_recursive_scan(invalidate_cache=True)
-        self._search_return_state = None
-        self._clear_stats_filter()
-        self._reset_category_hidden_tags()
-        self.list_title.config(text=T("筛选结果"))
-        self.path_var.set("筛选结果")
-        self.list_info.config(text=T("筛选：") + " + ".join(names))
-        self._invalidate_tag_scope()
-        self._view_spec = {"kind": "paths", "paths": paths}
-        self._page = 0
-        self._load_current_page()
-        self.set_status(
-            f"筛选：{' + '.join(names)}    →  {self._page_total} 个结果")
+    def apply_filter(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_搜索过滤.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板搜索过滤.apply_filter(self, *a, **k)
 
-    def clear_filter(self):
-        self.load_directory(self.current_dir)
-        self.sidebar.set_selected("all", None)
-        self.tag_thumb.selected_ids.clear()
-        self.tag_thumb._redraw()
 
-    def scan_current_view_tags(self):
-        """对当前文件列表里显示的文件跑一遍自动标签规则。
-           在后台线程执行，主界面不卡。"""
-        paths = [r["path"] for r in self.file_list.rows]
-        if not paths:
-            messagebox.showinfo("提示", T("当前列表里没有文件"), parent=self.root)
-            return
-        self.log_output(f"手动扫描当前列表 {len(paths)} 个文件的标签")
-        self.begin_activity(f"为当前 {len(paths)} 个文件打标签")
+    def clear_filter(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_搜索过滤.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板搜索过滤.clear_filter(self, *a, **k)
 
-        def worker():
-            total = len(paths)
-            changed_all = 0
-            batch = 50
-            try:
-                for i in range(0, total, batch):
-                    chunk = paths[i:i + batch]
-                    try:
-                        changed_all += self.store.sync_auto_tags_for_paths(chunk)
-                    except Exception as e:
-                        self.log_problem(f"批次 {i} 失败：{e}", level="warn")
-                    self.log_progress(
-                        f"已处理 {min(i + batch, total)} / {total}"
-                        f"（累计更新 {changed_all}）")
-                self.log_output(
-                    f"当前列表扫描完成：{changed_all} 个文件被更新")
-            except Exception as exc:
-                self.log_problem(f"扫描失败：{exc}", level="error")
-            try:
-                self._ui_threadsafe(self._on_current_view_scan_done)
-            except Exception as exc:
-                note_swallowed(T("worker(_on_current_view_scan_done)：回主线程通知失败"),
-                               exc, level="warn")
 
-        threading.Thread(target=worker, daemon=True).start()
+    def scan_current_view_tags(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.scan_current_view_tags(self, *a, **k)
 
-    def _on_current_view_scan_done(self):
-        self.end_activity()
-        try:
-            self.refresh_tags()
-            self.refresh_rows_tags()
-            self.refresh_categories()
-            self.set_status(T("当前列表已重新打标签"))
-        except Exception as exc:
-            # ★★ 2026-10-03：原来这里只 print，错误完全不会显示给用户，
-            #   连日志面板都不进。改成走 log_problem，至少能在「🔔 问题」面板看见。
-            self.log_problem(f"扫描完成回调失败：{exc}", level="error")
+
+    def _on_current_view_scan_done(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_扫描索引.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板扫描索引._on_current_view_scan_done(self, *a, **k)
+
 
     def open_auto_rules(self):
         # 只打开对话框；要不要同步由用户自己按里面的按钮决定
@@ -18363,19 +16825,17 @@ class FileTaggerApp:
         if self.view_mode == "cat" and self.current_cat_id:
             self.show_category(self.current_cat_id)
 
-    def clear_hidden_tags(self):
-        try:
-            self.file_list.clear_hidden_tags()
-            self.set_status(T("已恢复全部被屏蔽的标签"))
-        except Exception as exc:
-            print(exc)
+    def clear_hidden_tags(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.clear_hidden_tags(self, *a, **k)
 
-    def clear_tag_filter(self):
-        try:
-            self.file_list._clear_tag_filter()
-            self.set_status(T("已清除标签筛选"))
-        except Exception as exc:
-            print(exc)
+
+    def clear_tag_filter(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_标签操作.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板标签操作.clear_tag_filter(self, *a, **k)
+
 
     # ==================================================================
     #  ★ v25：闲时任务（鼠标 / 键盘空闲够久 → 悄悄跑一遍）
@@ -18437,14 +16897,11 @@ class FileTaggerApp:
         except Exception:
             pass
 
-    def _any_scan_dialog_open(self):
-        try:
-            for w in self.root.winfo_children():
-                if isinstance(w, ScanProgressDialog):
-                    return True
-        except Exception:
-            pass
-        return False
+    def _any_scan_dialog_open(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_扫描索引.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板扫描索引._any_scan_dialog_open(self, *a, **k)
+
 
     def _check_idle_jobs(self):
         """到点了就悄悄跑一次（不弹窗、限速、你一回来就停）。"""
@@ -18618,96 +17075,23 @@ class FileTaggerApp:
             pass
         self._refresh_dialog_hints()
 
-    # ---------- 闲时：索引扫描 ----------
-    def _start_idle_index_job(self):
-        if INDEX_SCAN_EVENT.is_set():
-            return
-        INDEX_SCAN_EVENT.set()
-        self._idle_jobs_running.add("index")
-        try:
-            self.log_output(
-                "☁ 闲时任务：开始慢慢重扫索引根目录"
-                "（顺手把文件大小补全，列表里就不会再是「?」了）…")
-        except Exception:
-            pass
-        threading.Thread(target=self._idle_index_worker,
-                         daemon=True).start()
+    def _start_idle_index_job(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_扫描索引.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板扫描索引._start_idle_index_job(self, *a, **k)
 
-    def _idle_index_worker(self):
-        roots_done = 0
-        dirs = 0
-        files = 0
-        stopped = False
-        # ★ v25 补丁17：闲时扫描也优先走 CloudDrive2 本地接口。
-        #   以前这一趟是「隔着挂载盘一个个摸」，网盘要摸 20~30 分钟；
-        #   走 API 之后几分钟就完了，少折腾网盘（也少撞限流）。
-        api_client = None
-        try:
-            api_client, _why = cd_api_client_from_settings()
-            try:
-                self.log_output(T("☁ 闲时任务：") + _why)
-            except Exception:
-                pass
-        except Exception:
-            api_client = None
-        try:
-            try:
-                ids = [r["id"] for r in self.store.all_index_roots()
-                       if r.get("enabled")]
-            except Exception:
-                ids = []
-            for rid in ids:
-                if self._idle_seconds() < IDLE_STOP_WITHIN_SEC:
-                    stopped = True
-                    break
-                res = scan_index_roots(
-                    self.store, [rid],
-                    cancel_flag=(lambda: self._idle_seconds()
-                                 < IDLE_STOP_WITHIN_SEC),
-                    delay=IDLE_INDEX_PAUSE,
-                    api_client=api_client)
-                if res:
-                    _rid, _p, d, f, _err = res[0]
-                    dirs += d
-                    files += f
-                roots_done += 1
-        except Exception as _e:
-            note_swallowed(T("闲时任务：索引扫描失败"), _e)
-        finally:
-            try:
-                if api_client is not None:
-                    api_client.close()
-            except Exception:
-                pass
-            INDEX_SCAN_EVENT.clear()
-        try:
-            self._ui_threadsafe(self._on_idle_index_done,
-                                roots_done, dirs, files, stopped)
-        except Exception as exc:
-            note_swallowed(T("worker(_on_idle_index_done)：回主线程通知失败"),
-                           exc, level="warn")
 
-    def _on_idle_index_done(self, roots_done, dirs, files, stopped):
-        self._idle_jobs_running.discard("index")
-        try:
-            save_idle_settings(index_last=time.time())
-        except Exception:
-            pass
-        msg = (f"☁ 闲时任务：索引扫描跑完（{roots_done} 个根目录 / "
-               f"{dirs} 个目录 / {files} 个文件"
-               f"{'；你回来了，提前收工' if stopped else ''}）")
-        try:
-            self.log_output(msg)
-            self.set_status(msg)
-        except Exception:
-            pass
-        # 当前目录重新读一次本地缓存（新文件 / 大小立刻可见）
-        try:
-            if self.view_mode == "dir" and self.current_dir:
-                self.load_directory(self.current_dir)
-        except Exception:
-            pass
-        self._refresh_dialog_hints()
+    def _idle_index_worker(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_扫描索引.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板扫描索引._idle_index_worker(self, *a, **k)
+
+
+    def _on_idle_index_done(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_扫描索引.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板扫描索引._on_idle_index_done(self, *a, **k)
+
 
     def _refresh_dialog_hints(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_健康检查.py`
