@@ -9,6 +9,45 @@
 
 ---
 
+## ★★★ 第一次参与？从这里开始 / First time? Start here
+
+**★★★ 你**不需要**读那 3.7 万行。**
+
+**★★★ You do **not** need to read those 37,000 lines.**
+
+**★ 我知道那个主程序看起来吓人** —— 一个人写的、单文件、37,000 行。
+**★ 但这不代表"改东西很贵"** —— 我们做了**路标**：
+
+**★ I know the main file looks intimidating** — one person, one file,
+37,000 lines. **★ But that does not mean changes are expensive** — there are
+signposts:
+
+| 文件 / File | 里面是什么 / What's inside |
+|---|---|
+| ★★ **[`架构图.md`](文档-公开发布/架构图.md)** | **每个类/每个入口在第几行** —— 想改什么，翻到那一行 |
+| ★★ **[`改这里就行.md`](文档-公开发布/改这里就行.md)** | **最常见的 10 种改动**：改哪、怎么改、注意什么 |
+
+**★★★ 而且有三件事**一行主程序都不用碰****：
+
+**★★★ And three kinds of work touch none of it:**
+
+| 想做什么 / To do | 改哪儿 / Where | 门槛 / Level |
+|---|---|---|
+| ★★ **补翻译 / 加一门语言** | `语言/en_US.json`（**加一行就行**）| ★ **完全不用懂代码** |
+| ★★ **加个功能** | `插件/我的插件.py`（照抄示例）| ★★ 会一点 Python |
+| ★ **提个说清楚的 issue** | 用 issue 模板 | ★ **什么都不用会** |
+
+**★★ 一句话**：
+> **★ 这项目最缺的不是 PR，是"有人在用、有人说话"。**
+> **★ 你提一个说清楚的 issue，比提一个 PR 更有用。**
+
+**★★ In one line:**
+> **★ What this project lacks is not PRs — it is people using it and
+> speaking up.**
+> **★ A clear issue is worth more than a PR.**
+
+---
+
 ## ★ 目录 / Contents
 
 - [零、先读这段（很重要）](#零先读这段很重要--read-this-first)

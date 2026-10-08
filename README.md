@@ -254,6 +254,36 @@ AIxiede拆分开/程序分块/          ← 拆出来的模块 / extracted modul
 **This started as a personal project** written as one big file. It is being
 **split into modules step by step** (~4,000 lines extracted so far).
 
+### ★★★ 但你要改东西，**不用读那 3.7 万行** / But you don't have to read them
+
+**★ 说实在的**：一个 1.6 MB 的单文件，**谁看了都想走**。
+**★ 所以这里给了**路标**：**
+
+**★ Honestly**: a 1.6 MB single file **makes anyone want to leave**. **★ So
+here are signposts:**
+
+| 文件 / File | 里面是什么 / What's inside |
+|---|---|
+| ★★ **[`文档-公开发布/架构图.md`](文档-公开发布/架构图.md)** | **每个类、每个入口在第几行** —— 想改什么，翻到那一行 |
+| ★★ **[`文档-公开发布/改这里就行.md`](文档-公开发布/改这里就行.md)** | **最常见的 10 种改动**：改哪、怎么改、注意什么 |
+
+**★★★ 而且有三件事**一行主程序都不用碰****：
+
+**★★★ And three kinds of work touch none of it:**
+
+| 想做什么 / To do | 改哪儿 / Where |
+|---|---|
+| ★★ **补翻译 / 加一门语言** | `语言/en_US.json`（**加一行就行，不用懂代码**）|
+| ★★ **加个功能** | `插件/我的插件.py`（照抄 `插件/示例插件.py`）|
+| ★ **提个说清楚的 issue** | 用 issue 模板（**什么都不用会**）|
+
+**★★ 说句实话 / Honest note**：
+> **★ 这项目最缺的不是 PR，是"有人在用、有人说话"。**
+> **★ 你提一个说清楚的 issue，比提一个 PR 更有用。**
+>
+> **★ What this project lacks is not PRs — it is people using it and
+> speaking up.** **★ A clear issue is worth more than a PR.**
+
 ---
 
 ## ★★ 开发文档（**强烈建议看一眼**） / Dev docs (worth a look)
