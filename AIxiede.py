@@ -6111,6 +6111,66 @@ except Exception as _e:
     note_swallowed(T("搬出去的 面板_扫描索引.py 没找到"), _e)
 
 
+# ★★★ 「网盘维护」这组方法已搬到 `AIxiede拆分开/程序分块/面板_网盘维护.py`
+#   ★★ 方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_网盘维护 as _面板网盘维护
+    _面板网盘维护._set_app(sys.modules[__name__])
+    _HAS_PANEL_网盘维护 = True
+except Exception as _e:
+    _HAS_PANEL_网盘维护 = False
+    note_swallowed(T("搬出去的 面板_网盘维护.py 没找到"), _e)
+
+
+# ★★★ 「空闲任务」这组方法已搬到 `AIxiede拆分开/程序分块/面板_空闲任务.py`
+#   ★★ 方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_空闲任务 as _面板空闲任务
+    _面板空闲任务._set_app(sys.modules[__name__])
+    _HAS_PANEL_空闲任务 = True
+except Exception as _e:
+    _HAS_PANEL_空闲任务 = False
+    note_swallowed(T("搬出去的 面板_空闲任务.py 没找到"), _e)
+
+
+# ★★★ 「撤销」这组方法已搬到 `AIxiede拆分开/程序分块/面板_撤销.py`
+#   ★★ 方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_撤销 as _面板撤销
+    _面板撤销._set_app(sys.modules[__name__])
+    _HAS_PANEL_撤销 = True
+except Exception as _e:
+    _HAS_PANEL_撤销 = False
+    note_swallowed(T("搬出去的 面板_撤销.py 没找到"), _e)
+
+
+# ★★★ 「主题配色」这组方法已搬到 `AIxiede拆分开/程序分块/面板_主题配色.py`
+#   ★★ 方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_主题配色 as _面板主题配色
+    _面板主题配色._set_app(sys.modules[__name__])
+    _HAS_PANEL_主题配色 = True
+except Exception as _e:
+    _HAS_PANEL_主题配色 = False
+    note_swallowed(T("搬出去的 面板_主题配色.py 没找到"), _e)
+
+
 # ★★★ FileList 已拆到 `AIxiede拆分开/程序分块/FileList.py`（2026-10-08）
 #   ★★ 写法（错题本 #158）：① 直接 `from FileList import …`（不带包路径）
 #     ② `_set_app` 取别名 —— 模块名和类名同名时会跑到类上找
@@ -11487,39 +11547,11 @@ class FileTaggerApp:
             except Exception:
                 pass
 
-    def _fill_theme_menu(self, menu):
-        """★★ 把"现在有哪些皮肤"**重新列一遍**（每开一次菜单跑一次）。
+    def _fill_theme_menu(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_主题配色.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板主题配色._fill_theme_menu(self, *a, **k)
 
-        ★★ 为什么需要"每次重建"（实测踩出来的）：
-          · 菜单是**程序启动时**建的；
-          · 而插件是**建完菜单之后**才加载的 ——
-            插件注册的皮肤**在那时还不存在** → 菜单里**列不出来**。
-          · 实测：插件注册的配色**确实进了 `_THEMES`**（`apply_theme_names()`
-            能看到它），**但菜单里看不到** —— 因为菜单是"建的时候拍了个快照"。
-        ★ 修法：**每次点开菜单重新问一遍** ——
-          · 插件的皮肤自动出现
-          · 以后"运行时装皮肤"也自动出现
-          · 这段代码**永远不用改**（这就是"接口"的价值）
-        ★ 为什么先 `delete(0, "end")` 再建：
-          不删的话每开一次就**多一份**（菜单越来越长）。
-        """
-        try:
-            menu.delete(0, "end")
-        except Exception:
-            pass
-        try:
-            names = apply_theme_names()
-        except Exception:
-            names = [("light", "light"), ("dark", "dark")]
-        _ICON = {"light": "☀ ", "dark": "🌙 "}
-        for key, lbl in names:
-            try:
-                menu.add_radiobutton(
-                    label=_ICON.get(key, "🎨 ") + lbl,
-                    value=key, variable=self.theme_var,
-                    command=lambda k=key: self.set_theme(k))
-            except Exception:
-                pass
 
     def _theme_bg_spec(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_外观零件.py`
@@ -11527,65 +11559,11 @@ class FileTaggerApp:
         return _面板外观零件._theme_bg_spec(self, *a, **k)
 
 
-    def _apply_background(self):
-        """★★ **铺背景图**（用户要的"搞个图片当背景"）。
+    def _apply_background(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_主题配色.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板主题配色._apply_background(self, *a, **k)
 
-        ★ 什么时候调：
-          ① 启动时（`__init__` 里，界面建好之后）
-          ② 换皮肤时（皮肤可能带自己的背景图）
-          ③ 用户手动"选一张背景图"时
-
-        ★ 怎么铺：
-          · 用 `make_background_layer()` 铺在 **`self.root` 的最底层**
-          · 然后**把主界面那几块"抬上来"** ——
-            不然图会盖住 `paned`（因为 `place` 的层级可能比 `pack` 高）
-          ★ `layer.lower()` 已经压到底了，但 Tk 的 `place` / `pack`
-            **混用时层级不完全可靠** → 所以这里**再显式 `lift()` 一次**主块。
-
-        ★★ 失败兜底：图读不了（被删了/挪了）→
-          `make_background_layer` 会铺一块**兜底色**（不会露出一片白，
-          夜间模式下那会很难看 —— 用户报过好几次）。
-        """
-        path, mode, blur, _pa = self._theme_bg_spec()
-        # ★ 先把旧的背景层拆掉（换皮肤/换图时不能叠着）
-        try:
-            old = getattr(self, "_bg_layer", None)
-            if old is not None:
-                old.destroy()
-        except Exception:
-            pass
-        self._bg_layer = None
-        if not path:
-            return
-        try:
-            fallback = theme_get("win_bg")
-            layer = make_background_layer(self.root, path, mode, blur,
-                                          fallback_bg=fallback)
-            self._bg_layer = layer
-            if layer is None:
-                return
-            # ★ 把主界面抬到图上（不然图盖住内容）
-            for nm in ("_top_bar", "_top_bar2", "paned"):
-                try:
-                    w = getattr(self, nm, None)
-                    if w is not None:
-                        w.lift()
-                except Exception:
-                    pass
-            # ★ 状态栏也要抬（它在最底下那一行）
-            try:
-                for ch in self.root.winfo_children():
-                    if ch is not layer:
-                        try:
-                            # ★ 只抬"直接子控件"里不是背景层的那几个
-                            ch.lift()
-                        except Exception:
-                            pass
-            except Exception:
-                pass
-            self._apply_panel_blend()
-        except Exception as _e:
-            note_swallowed(T("铺背景图失败"), _e)
 
     def _apply_panel_blend(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_外观零件.py`
@@ -12001,47 +11979,11 @@ class FileTaggerApp:
             if m2 is not None:
                 out[(str(m2), idx)] = (getter, name)
         return out
-    def _refresh_menu_states(self):
-        """★ 把每个开关项的圆点和颜色刷成当前状态。
+    def _refresh_menu_states(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_主题配色.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板主题配色._refresh_menu_states(self, *a, **k)
 
-        ★ 什么时候调：
-          · 菜单要弹出来之前（`postcommand`，见菜单构造处）
-          · 任何一个开关切换之后
-        这样用户**打开菜单的那一瞬间**看到的就是真实状态。
-
-        ★★ 用**记下来的项序号**定位（`self._menu_state_map`），
-          不按 label 找 —— 因为本函数**会改 label**，
-          按 label 找的话刷一次之后就再也找不到了（踩过）。
-        """
-        try:
-            reg = getattr(self, "_menu_state_map", None) or []
-            reg2 = getattr(self, "_menu_state_map2", None) or []
-        except Exception:
-            return
-        for menu, items in ((getattr(self, "_m_switches", None), reg),
-                            (getattr(self, "_m_settings", None), reg2)):
-            if menu is None:
-                continue
-            for item in items:
-                # 兼容两种登记格式：3 元组用外层菜单，4 元组自带菜单
-                if len(item) == 4:
-                    idx, getter, name, menu_use = item
-                else:
-                    idx, getter, name = item
-                    menu_use = menu
-                try:
-                    on = bool(getter())
-                except Exception:
-                    continue
-                col = self.COLOR_ON if on else self.COLOR_OFF
-                try:
-                    menu_use.entryconfigure(
-                        idx,
-                        label="%s %s" % (self.DOT_ON if on else self.DOT_OFF,
-                                         name),
-                        foreground=col)
-                except Exception:
-                    continue
 
     def _tick_menu_states(self, *_a):
         """给菜单当 postcommand 用：弹出来之前先刷状态。"""
@@ -12604,59 +12546,17 @@ class FileTaggerApp:
         return _面板外观零件._style_sashes(self, *a, **k)
 
 
-    # ---------- ★★ 2026-10-06：皮肤（白天 / 夜间） ----------
-    def set_theme(self, name, save=True):
-        """换皮肤：整片界面立刻变。
+    def set_theme(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_主题配色.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板主题配色.set_theme(self, *a, **k)
 
-        用户要求：「写套夜间皮肤，现在这个不开灯有点闪」。
 
-        ★★ 2026-10-08 改成**支持任意已注册的皮肤**（用户要"预留自定义皮肤入口"）：
-          原来这里写的是 `if name not in ("light", "dark")` ——
-          **皮肤名硬编码**，以后加了自定义皮肤**会被这里打回去**（变回 light）。
-          → 改成问 `theme_has(name)`（它读 `_THEMES`）。
-          ★ 这样 `register_theme("my_skin", {...})` 一注册，
-            这里就**自动认得**，一行都不用改。
-        """
-        try:
-            if not theme_has(name):
-                name = "light"
-            self.set_status(T("正在换皮肤…"))
-            apply_theme(self.root, name)
-            # ★ 换完皮肤后，把「靠自己重画」的那几块重新画一遍 ——
-            #   它们不是普通控件，颜色是代码画上去的，扫控件扫不到。
-            for fn in (self._retheme_custom_parts,):
-                try:
-                    fn()
-                except Exception as _e:
-                    note_swallowed(T("换皮肤：重画自定义区块失败"), _e, quiet=True)
-            try:
-                if hasattr(self, "theme_var"):
-                    self.theme_var.set(name)
-            except Exception:
-                pass
-            if save:
-                try:
-                    save_ui_setting("theme", name)
-                except Exception as _e:
-                    note_swallowed(T("记住皮肤设置失败（下次打开可能变回白天）"), _e,
-                                   level="warn")
-            self.set_status("皮肤已切换：%s"
-                            % ("夜间 🌙（晚上不刺眼）" if name == "dark"
-                               else "白天 ☀"))
-            try:
-                self.log_output("🎨 已切换皮肤：%s"
-                                % ("夜间" if name == "dark" else "白天"))
-            except Exception:
-                pass
-            return True
-        except Exception as _e:
-            note_swallowed(T("换皮肤失败"), _e)
-            return False
+    def toggle_theme(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_主题配色.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板主题配色.toggle_theme(self, *a, **k)
 
-    def toggle_theme(self):
-        """一键在白天 / 夜间之间来回切。"""
-        cur = "dark" if THEME_NAME == "light" else "light"
-        self.set_theme(cur)
 
     def _retheme_custom_parts(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_外观零件.py`
@@ -14192,131 +14092,51 @@ class FileTaggerApp:
             return False
 
     def _undo_init(self, *a, **k):
-        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_撤销.py`
         #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
-        return _面板文件操作._undo_init(self, *a, **k)
+        return _面板撤销._undo_init(self, *a, **k)
+
 
 
     def _undo_save_soon(self, *a, **k):
-        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_撤销.py`
         #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
-        return _面板文件操作._undo_save_soon(self, *a, **k)
+        return _面板撤销._undo_save_soon(self, *a, **k)
+
 
 
     def undo_record(self, *a, **k):
-        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_撤销.py`
         #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
-        return _面板文件操作.undo_record(self, *a, **k)
+        return _面板撤销.undo_record(self, *a, **k)
 
 
-    def undo_do(self):
-        """★ 按 Ctrl+Z：把最后一条反着执行一遍。**要告诉用户撤了什么。**"""
-        try:
-            if not self._undo_stack:
-                self.set_status(T("没有可以撤销的操作了"))
-                return
-            rec = self._undo_stack[-1]
-        except Exception:
-            return
-        kind = rec.get("kind")
-        items = rec.get("items") or []
-        label = _undo_label(rec)
-        try:
-            res = self._undo_apply(kind, items)
-            # ★ 兼容两种返回：新的三元组 / 老的二元组
-            if isinstance(res, tuple) and len(res) >= 3:
-                ok, msg, failed = res[0], res[1], (res[2] or [])
-            else:
-                ok, msg, failed = res[0], res[1], []
-        except Exception as _e:
-            note_swallowed(T("撤销失败"), _e)
-            messagebox.showwarning("撤销没成功",
-                                   "这一步没能撤销：\n\n%s" % _e,
-                                   parent=self.root)
-            return
-        if not ok:
-            # ★ 撤不了就**如实说**，并且把这条从记录本里拿掉
-            #   （免得用户每次按都失败，以为是程序坏了）
-            self._undo_stack.pop()
-            self._undo_save_soon()
-            self._undo_update_btn()
-            messagebox.showwarning(
-                "撤销没成功",
-                "这一步撤不回来了。\n\n%s\n\n"
-                "（已经把它从「可撤销」列表里去掉，免得每次按都失败）" % msg,
-                parent=self.root)
-            self.set_status(T("撤销失败：{x}", x=msg))
-            self.log_problem(T("撤销失败：{x}（{y}）", x=label, y=msg), level="warn")
-            return
-        # ★★ 2026-10-07 新增：**半成功必须当面说清楚**。
-        #   背景（错题本 #14 / 待清算第 2 条）：用户报「撤销：本地正常，网盘不行」。
-        #   原来的代码只判「全失败」—— 删了 3 个、只回来 1 个时，
-        #   ok>0 就当成功报"已撤销：把 3 项从回收站还原"，
-        #   **用户以为都回来了，其实桌上还少两个** —— 这就是"骗人"。
-        #   现在：只要有失败项，就**弹窗把"哪几个没回来"列清楚**。
-        if failed:
-            try:
-                detail = "\n".join("   · " + str(x) for x in failed[:8])
-                more = ("\n   …还有 %d 项" % (len(failed) - 8)
-                        if len(failed) > 8 else "")
-                messagebox.showwarning(
-                    "撤销只成功了一部分",
-                    "这一批里**有几项没能撤销**：\n\n%s%s\n\n"
-                    "★ 上面列出来的那些**没有恢复**，"
-                    "请自己确认一下它们还在不在。\n\n"
-                    "（这条撤销记录已经从列表里去掉 —— 再按一次也不会有更多效果）"
-                    % (detail, more),
-                    parent=self.root)
-            except Exception:
-                pass
-            try:
-                self.log_problem(
-                    "撤销只成功一部分：%s —— 失败项：%s"
-                    % (label, "；".join(str(x) for x in failed[:5])),
-                    level="warn")
-            except Exception:
-                pass
-            # 半成功：挪进重做栈没意义（还有东西没回来），直接丢掉这条
-            self._undo_stack.pop()
-            self._undo_save_soon()
-            self._undo_update_btn()
-            self.set_status(T("已撤销（部分）：{x}", x=msg))
-            return
-        # 成功：从「可撤销」挪到「可重做」
-        self._undo_stack.pop()
-        self._undo_redo_stack.append(rec)
-        self._undo_save_soon()
-        self._undo_update_btn()
-        if msg:
-            self.set_status(T("已撤销：{x}（{y}）", x=label, y=msg))
-        else:
-            self.set_status(T("已撤销：{x}", x=label))
-        try:
-            self.log_output(T("↶ 已撤销：{x}", x=label))
-        except Exception:
-            pass
+
+    def undo_do(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_撤销.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板撤销.undo_do(self, *a, **k)
+
 
     def _undo_apply(self, *a, **k):
-        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_撤销.py`
         #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
-        return _面板文件操作._undo_apply(self, *a, **k)
+        return _面板撤销._undo_apply(self, *a, **k)
+
 
 
     def _undo_update_btn(self, *a, **k):
-        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_撤销.py`
         #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
-        return _面板文件操作._undo_update_btn(self, *a, **k)
+        return _面板撤销._undo_update_btn(self, *a, **k)
 
 
-    def on_undo_key(self, event=None):
-        """Ctrl+Z 的入口（在输入框里打字时不抢键）。"""
-        try:
-            if self._focus_is_input():
-                return None
-        except Exception:
-            pass
-        self.undo_do()
-        return "break"
+
+    def on_undo_key(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_撤销.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板撤销.on_undo_key(self, *a, **k)
+
 
     def _do_new_folder(self):
         """在当前文件夹里新建一个文件夹（名字重复就自动加 (2)、(3)…）。"""
@@ -14627,24 +14447,11 @@ class FileTaggerApp:
         except Exception as _e:
             note_swallowed(T("切换网盘浏览模式失败"), _e)
 
-    def _update_net_btn(self):
-        try:
-            idx = (getattr(self, "net_browse_mode", "index") == "index")
-            # ★★ v26：**width 别按「字符数」硬算 —— 中文字/emoji 会不够宽。**
-            #   用户反馈：「右下角『网盘:索引』显示不全，『引』字有部分被隐藏」。
-            #   实测：tk scaling=2.0 下这个按钮的 `width=9` 是按
-            #   **9 个西文字符**量出来的，而 `🧭 网盘:索引` 里
-            #   emoji 和汉字都比西文字符宽 —— 结果**文字右边被切掉**。
-            #   现在改成 **width=0（表示由内容自己决定）**，
-            #   让 ttk 按真实文字宽度算，绝对不会切。
-            if getattr(self, "_status_icons_mode", False):
-                txt = "🧭索" if idx else "🧭真"
-                self._net_btn.config(text=txt, width=4)
-            else:
-                self._net_btn.config(
-                    text=T("🧭 网盘:索引") if idx else T("🧭 网盘:真实"), width=0)
-        except Exception:
-            pass
+    def _update_net_btn(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_网盘维护.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板网盘维护._update_net_btn(self, *a, **k)
+
 
     def _refresh_places(self):
         """「常用位置」下拉：盘符 + 桌面/下载/文档 + 你收藏的 + 索引根目录。"""
@@ -15658,148 +15465,17 @@ class FileTaggerApp:
 
 
     def _apply_net_root_fixes(self, *a, **k):
-        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_扫描索引.py`
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_网盘维护.py`
         #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
-        return _面板扫描索引._apply_net_root_fixes(self, *a, **k)
+        return _面板网盘维护._apply_net_root_fixes(self, *a, **k)
 
 
-    def _do_heal_net_paths(self):
-        """☁ 把库里指向「失效的旧网盘挂载名」的记录改成当前挂载名。
 
-        症状：网盘（CloudDrive 这类）改名 / 重装系统后重新挂载，
-        双击网盘文件没反应或报错，只有本地文件能打开；
-        重建索引也不管用（索引只补目录缓存，改不了文件表里的路径）。
+    def _do_heal_net_paths(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_网盘维护.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板网盘维护._do_heal_net_paths(self, *a, **k)
 
-        ★ 2026-10-03 重写：**先把「打算怎么改」摆给你看，你确认了再动**。
-          现挂载名不再是死写在代码里的，而是程序自己
-          「拿库里几个真实文件去几个候选挂载上试探」认出来的。
-        """
-        _ensure_net_aliases_loaded()
-        self.begin_activity("正在检查网盘挂载名…（会去网盘点几个文件看看，稍等）")
-        try:
-            plan = self.store.plan_net_heal()
-        except Exception as exc:
-            self.end_activity()
-            messagebox.showerror("检查失败", str(exc), parent=self.root)
-            return
-        self.end_activity()
-        roots = list(getattr(self.store, "last_net_roots", []) or [])
-
-        if not plan:
-            messagebox.showinfo(
-                "修复网盘路径",
-                "库里存的文件路径，用的挂载名现在**都还连得上** —— "
-                "没有需要修的东西。\n\n"
-                "如果你现在双击网盘文件确实打不开，请先确认：\n"
-                "  · 网盘客户端（CloudDrive2）在运行、已经登录；\n"
-                "  · 这个网盘在 CloudDrive2 里处于「已挂载」状态。",
-                parent=self.root)
-            return
-
-        lines = []
-        todo_n = 0
-        for item in plan:
-            lines.append("  · 旧挂载名（现在连不上）：%s" % item["old"])
-            lines.append("      库里有多少条：%d 条" % item["count"])
-            if item["new"]:
-                lines.append("      程序认出的现挂载名：%s" % item["new"])
-                lines.append("      怎么认出来的：%s" % item["how"])
-                todo_n += item["count"]
-            else:
-                lines.append("      程序**没认出来** → 这次不动它（宁可不动，也不能改错）")
-            lines.append("")
-        if roots:
-            lines.append("另外，索引里还挂着一个连不上的旧目录：")
-            for r in roots:
-                if r["action"] == "delete":
-                    lines.append("  · %s（新的已经在索引里了 → 建议删掉这一条）"
-                                 % r["path"])
-                else:
-                    lines.append("  · %s → 改成 %s" % (r["path"], r["new"]))
-            lines.append("")
-
-        if todo_n <= 0:
-            messagebox.showinfo(
-                "修复网盘路径",
-                "找到连不上的旧挂载名，但**没能认出现在换成哪个挂载名了**，"
-                "所以这次一条都没改（改错路径会把标签弄丢，宁可不改）。\n\n"
-                + "\n".join(lines) +
-                "\n请先确认网盘客户端在运行、网盘已挂载，然后再点一次这个菜单。",
-                parent=self.root)
-            return
-
-        if not messagebox.askyesno(
-                "修复网盘路径（先看清单）",
-                "打算这样改：\n\n" + "\n".join(lines) +
-                "\n一共要改 %d 条文件路径。\n\n"
-                "改完之后这些文件的标签就恢复正常了，也能双击打开\n"
-                "（标签本身不会丢，只是路径换了写法）。\n\n"
-                "现在就改吗？" % todo_n,
-                parent=self.root):
-            return
-
-        self.begin_activity("正在修复网盘路径…")
-        try:
-            n = self.store.heal_net_paths(plan=plan)
-        except Exception as exc:
-            self.end_activity()
-            messagebox.showerror("修复失败", str(exc), parent=self.root)
-            return
-        root_done = []
-        if roots:
-            try:
-                root_done = self._apply_net_root_fixes(roots)
-            except Exception as _e:
-                note_swallowed(T("修复网盘路径：处理索引根目录失败"), _e)
-        self.end_activity()
-
-        rep = getattr(self.store, "last_net_report", {}) or {}
-        learned = [d for d in rep.get("done", []) if d.get("how") == "自动认出"]
-        self.log_output("网盘路径修复：改了 %d 条%s" %
-                        (n, ("，跳过多余 %d 条" % rep.get("skipped"))
-                         if rep.get("skipped") else ""))
-        self._last_cat_refresh_ts = 0.0
-        try:
-            self.refresh_categories()
-            self.refresh_tags()
-        except Exception:
-            pass
-        try:
-            if self.view_mode == "cat" and self.current_cat_id:
-                self.show_category(self.current_cat_id)
-            elif self.view_mode == "all":
-                self.show_all_files()
-            elif self.view_mode == "filter":
-                self._load_current_page()
-            else:
-                self.load_directory(self.current_dir)
-        except Exception:
-            pass
-
-        if n:
-            extra = ""
-            if learned:
-                extra += "\n\n★ 程序顺便记下了新的挂载名对照关系：\n" + "\n".join(
-                    "   %s  →  %s" % (d["old"], d["new"]) for d in learned) + \
-                    "\n（以后网盘再改名，程序会自己认、不用再点这个菜单）"
-            if root_done:
-                extra += "\n\n索引根目录也顺手处理了：\n" + "\n".join(
-                    "   " + x for x in root_done)
-            if rep.get("skipped"):
-                extra += ("\n\n有 %d 条没改：新路径上已经有记录了（撞车），"
-                          "硬改会把标签弄丢，所以跳过了。" % rep["skipped"])
-            self.set_status(f"修复网盘路径：改了 {n} 条")
-            messagebox.showinfo(
-                "修复完成",
-                "已把 %d 条文件路径换成现在的网盘挂载名。\n\n"
-                "现在双击这些网盘文件应该能正常打开了。%s" % (n, extra),
-                parent=self.root)
-        else:
-            self.set_status(T("修复网盘路径：没有需要修的"))
-            messagebox.showinfo(
-                "修复网盘路径",
-                "没有需要修复的记录（可能刚才那次已经改过了）。",
-                parent=self.root)
 
     # ---------- ★ v25 补丁5：自检（启动时悄悄跑一次，也能手动点）----------
     def toggle_marquee_anywhere(self):
@@ -15834,128 +15510,17 @@ class FileTaggerApp:
         except Exception:
             pass
 
-    def _do_prune_orphan_dirs(self):
-        """🧹 清理索引里的「幽灵目录」（网盘里已经删掉的目录留下的空壳）。
+    def _do_prune_orphan_dirs(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_网盘维护.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板网盘维护._do_prune_orphan_dirs(self, *a, **k)
 
-        ★ 只删目录缓存（列表用的那份），**不动 files 表、绝不动标签**。
-        """
-        roots = []
-        try:
-            for r in self.store.all_index_roots():
-                p = str(r["path"])
-                try:
-                    if is_remote_path(p):
-                        roots.append(p)
-                except Exception:
-                    pass
-        except Exception as exc:
-            messagebox.showerror("清理幽灵目录", "读索引根失败：%s" % exc,
-                                 parent=self.root)
-            return
-        if not roots:
-            messagebox.showinfo(
-                "清理幽灵目录",
-                "没有网盘索引根，没什么可清的。\n\n"
-                "（这个功能是给「网盘里删掉的目录还留在索引里」用的）",
-                parent=self.root)
-            return
-        if not messagebox.askyesno(
-                "清理幽灵目录",
-                "要清理这些索引根里的「幽灵目录」吗？\n\n"
-                + "\n".join("  · " + p for p in roots)
-                + "\n\n说明：幽灵目录 = 网盘里已经删掉、但索引里还留着空壳的目录"
-                  "（点开就报「目录读不到」的那种）。\n"
-                  "**只清目录缓存，你的标签一个字都不会动。**",
-                parent=self.root):
-            return
-        self.begin_activity("清理幽灵目录…")
-        total_dirs = 0
-        total_rows = 0
-        for p in roots:
-            n_dirs, n_rows = prune_orphan_dir_cache(self.store, p)
-            total_dirs += n_dirs
-            total_rows += n_rows
-            self.log_output(f"清理幽灵目录：{p} → 清掉 {n_dirs} 个目录（{n_rows} 行）")
-        self.end_activity()
-        self.set_status(f"清理幽灵目录：共清掉 {total_dirs} 个目录（{total_rows} 行）")
-        messagebox.showinfo(
-            "清理幽灵目录",
-            f"清理完成 ✓\n\n清掉 {total_dirs} 个幽灵目录，共 {total_rows} 行目录缓存。\n"
-            + ("（没有发现幽灵目录，索引是干净的）\n" if total_dirs == 0 else "")
-            + "\n标签、分类、文件记录都没动。",
-            parent=self.root)
 
-    def _do_expire_net_dir_cache(self):
-        """☁ 让 CloudDrive2 忘掉网盘的目录缓存（下次读的就是最新的）。
+    def _do_expire_net_dir_cache(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_网盘维护.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板网盘维护._do_expire_net_dir_cache(self, *a, **k)
 
-        为什么需要：为了让「反复扫索引」变快，CloudDrive2 自己的目录缓存
-        有效期被设成了 10 分钟（原来是 40 秒）。这期间它给你的目录列表是
-        缓存里的 —— 你在网盘里刚加/删的东西可能要等一会儿才出现。
-        点这个菜单就立刻把缓存清掉，下次扫描 / 浏览读的就是最新的。
-        """
-        client, why = cd_api_client_from_settings()
-        if client is None:
-            messagebox.showwarning(
-                "让网盘缓存过期",
-                "没连上 CloudDrive2，所以清不了。\n\n" + why
-                + "\n\n（在「界面 → 📚 索引管理…」窗口里可以填令牌）",
-                parent=self.root)
-            return
-        try:
-            roots = []
-            try:
-                for r in self.store.all_index_roots():
-                    p = str(r["path"])
-                    try:
-                        if is_remote_path(p):
-                            roots.append(p)
-                    except Exception:
-                        pass
-            except Exception:
-                pass
-            if not roots:
-                messagebox.showinfo("让网盘缓存过期", T("没有网盘索引根。"),
-                                    parent=self.root)
-                return
-            if not messagebox.askyesno(
-                    "让网盘缓存过期",
-                    "让 CloudDrive2 忘掉这些网盘目录的缓存吗？\n\n"
-                    + "\n".join("  · " + p for p in roots)
-                    + "\n\n（清掉之后，下次扫描 / 浏览读的就是网盘上最新的内容，"
-                      "第一遍会慢一点，属正常）",
-                    parent=self.root):
-                return
-            self.begin_activity("正在让网盘目录缓存过期…")
-            ok = 0
-            for p in roots:
-                cd = None
-                try:
-                    cd = client.cd_path_of(p)
-                except Exception:
-                    cd = None
-                if not cd:
-                    continue
-                try:
-                    client.stub.ForceExpireDirCache(
-                        _cd_pb.FileRequest(path=cd), timeout=60,
-                        metadata=client._md())
-                    ok += 1
-                    self.log_output(f"已让目录缓存过期：{cd}")
-                except Exception as exc:
-                    self.log_problem(f"让 {cd} 缓存过期失败：{str(exc)[:120]}",
-                                     level="warn")
-            self.end_activity()
-            self.set_status(f"网盘目录缓存已过期（{ok}/{len(roots)}）")
-            messagebox.showinfo(
-                "让网盘缓存过期",
-                f"处理完成：{ok} / {len(roots)} 个网盘根已让缓存过期。\n\n"
-                "现在去扫索引或浏览网盘，读到的就是最新的了。",
-                parent=self.root)
-        finally:
-            try:
-                client.close()
-            except Exception:
-                pass
 
     def _run_selfcheck(self, manual=False):
         """🩺 自检：查孤立标签 / 重复路径 / 坏指针 / 网盘与索引盘还在不在。
@@ -16034,98 +15599,17 @@ class FileTaggerApp:
             else:
                 self.log_output(T("启动自检通过 ✓（用时 {x} 秒）", x=secs))
 
-    # ---------- ★ 修复重复文件记录（老版本 UNC 路径大小写遗留问题）----------
-    def _do_merge_duplicate_paths(self):
-        """🧹 合并「同一个文件存了两条记录」的历史遗留问题。
+    def _do_merge_duplicate_paths(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_网盘维护.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板网盘维护._do_merge_duplicate_paths(self, *a, **k)
 
-        症状：自动规则/手工明明打了标签，中间列表的标签列却不显示；
-        标签库里双击跳转，跳出来的文件也不显示标签。
-        原因：老版本对网盘 UNC 路径没做小写归一，同一个文件存了两条
-        记录（原始大小写 / 全小写），标签只挂在其中一条上，
-        而界面查标签统一用 norm()（小写），所以只看到没标签的那条。
-        """
-        try:
-            stat = self.store.merge_duplicate_paths(apply=False)
-        except Exception as exc:
-            messagebox.showerror("检查失败", str(exc), parent=self.root)
-            return
-        if not (stat.get("groups") or stat.get("renamed")):
-            messagebox.showinfo(
-                "修复重复文件记录",
-                "没有发现重复的文件记录，也没有写法不规范（大小写不一致）\n"
-                "的路径，不需要修复。",
-                parent=self.root)
-            return
-        if not messagebox.askyesno(
-                "修复重复文件记录",
-                f"发现 {stat['groups']} 组「同一个文件存了两条记录」：\n\n"
-                f"  · 要合并掉的重复记录：{stat['removed']} 条\n"
-                f"  · 要并过去的标签关联：{stat['moved_tags']} 条\n"
-                f"  · 要并过去的分类归属：{stat['moved_cats']} 条\n"
-                f"  · 要改写成规范路径（大小写归一）：{stat['renamed']} 条\n\n"
-                f"合并后，这些文件上的标签就能正常显示了。\n"
-                f"建议先关掉其它正在写库的窗口，然后再点「是」。",
-                parent=self.root):
-            return
-        self.begin_activity("正在合并重复的文件记录…")
-        self.log_output(
-            f"修复重复文件记录：{stat['groups']} 组 / {stat['removed']} 条")
 
-        def worker():
-            st = None
-            try:
-                st = self.store.merge_duplicate_paths(apply=True)
-                self.log_output(
-                    f"合并完成：删除重复记录 {st['removed']} 条，"
-                    f"搬迁标签 {st['moved_tags']} 条，"
-                    f"改写规范路径 {st['renamed']} 条")
-            except Exception as exc:
-                self.log_problem(f"合并重复记录失败：{exc}", level="error")
-            try:
-                self._ui_threadsafe(self._on_merge_duplicates_done, st)
-            except Exception as exc:
-                note_swallowed(T("worker(_on_merge_duplicates_done)：回主线程通知失败"),
-                               exc, level="warn")
+    def _on_merge_duplicates_done(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_网盘维护.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板网盘维护._on_merge_duplicates_done(self, *a, **k)
 
-        threading.Thread(target=worker, daemon=True).start()
-
-    def _on_merge_duplicates_done(self, stat):
-        """修复重复记录跑完后的界面刷新。"""
-        self.end_activity()
-        if stat is None:
-            messagebox.showerror("修复失败",
-                                 "合并重复记录时出错，详见下方日志。",
-                                 parent=self.root)
-            return
-        self._last_cat_refresh_ts = 0.0
-        try:
-            self.refresh_categories()
-            self.refresh_tags()
-        except Exception:
-            pass
-        # 当前视图重新载入一次（标签列马上变正常）
-        try:
-            if self.view_mode == "cat" and self.current_cat_id:
-                self.show_category(self.current_cat_id)
-            elif self.view_mode == "all":
-                self.show_all_files()
-            elif self.view_mode == "filter":
-                self._load_current_page()
-            else:
-                self.load_directory(self.current_dir)
-        except Exception:
-            pass
-        self.set_status(
-            f"修复重复文件记录：删除 {stat['removed']} 条重复记录")
-        messagebox.showinfo(
-            "修复完成",
-            f"已合并 {stat['groups']} 组重复的文件记录：\n\n"
-            f"  · 删除重复记录：{stat['removed']} 条\n"
-            f"  · 搬迁标签关联：{stat['moved_tags']} 条\n"
-            f"  · 搬迁分类归属：{stat['moved_cats']} 条\n"
-            f"  · 改写规范路径：{stat['renamed']} 条\n\n"
-            f"同一个文件现在只剩一条记录了，标签应该都能正常显示。",
-            parent=self.root)
 
     def _cancel_recursive_scan(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_扫描索引.py`
@@ -16837,29 +16321,11 @@ class FileTaggerApp:
         return _面板标签操作.clear_tag_filter(self, *a, **k)
 
 
-    # ==================================================================
-    #  ★ v25：闲时任务（鼠标 / 键盘空闲够久 → 悄悄跑一遍）
-    # ==================================================================
-    def _setup_idle_jobs(self):
-        """挂上「用户有没有在动」的探针 + 定时检查（每 30 秒看一眼）。"""
-        self._last_input_ts = time.monotonic()
-        self._idle_jobs_running = set()
-        for seq in ("<Any-KeyPress>", "<Any-ButtonPress>", "<Motion>",
-                    "<MouseWheel>", "<Button-4>", "<Button-5>"):
-            try:
-                self.root.bind_all(seq, self._note_input, add="+")
-            except Exception:
-                pass
-        self._idle_tick_job = None
-        try:
-            cfg = load_idle_settings()
-            if cfg["rules_enabled"] or cfg["index_enabled"]:
-                self.log_output(
-                    "☁ 闲时任务已开启：鼠标 / 键盘空闲够久会自动跑一次"
-                    "（在「自动标签规则」/「索引管理」窗口里可以关掉）")
-        except Exception:
-            pass
-        self._idle_tick()
+    def _setup_idle_jobs(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_空闲任务.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板空闲任务._setup_idle_jobs(self, *a, **k)
+
 
     def _note_input(self, event=None):
         """任何鼠标 / 键盘动作都算「人在」。（很轻，只记一个时间戳）"""
@@ -16868,34 +16334,23 @@ class FileTaggerApp:
         except Exception:
             pass
 
-    def _idle_seconds(self):
-        try:
-            return time.monotonic() - self._last_input_ts
-        except Exception:
-            return 0.0
+    def _idle_seconds(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_空闲任务.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板空闲任务._idle_seconds(self, *a, **k)
 
-    def _idle_tick(self):
-        try:
-            self._check_idle_jobs()
-        except Exception:
-            pass
-        try:
-            self._idle_tick_job = self.root.after(30000, self._idle_tick)
-        except Exception:
-            self._idle_tick_job = None
 
-    def _refresh_idle_state(self):
-        """对话框里改了「闲时自动跑」设置后调用（写日志 + 下次 tick 生效）。"""
-        try:
-            cfg = load_idle_settings()
-            self.log_output(
-                f"☁ 闲时任务设置：自动标签规则 "
-                f"{'开' if cfg['rules_enabled'] else '关'}"
-                f"（空闲 {cfg['rules_minutes']} 分钟） / 索引扫描 "
-                f"{'开' if cfg['index_enabled'] else '关'}"
-                f"（空闲 {cfg['index_minutes']} 分钟）")
-        except Exception:
-            pass
+    def _idle_tick(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_空闲任务.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板空闲任务._idle_tick(self, *a, **k)
+
+
+    def _refresh_idle_state(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_空闲任务.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板空闲任务._refresh_idle_state(self, *a, **k)
+
 
     def _any_scan_dialog_open(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_扫描索引.py`
@@ -16903,29 +16358,11 @@ class FileTaggerApp:
         return _面板扫描索引._any_scan_dialog_open(self, *a, **k)
 
 
-    def _check_idle_jobs(self):
-        """到点了就悄悄跑一次（不弹窗、限速、你一回来就停）。"""
-        cfg = load_idle_settings()
-        idle = self._idle_seconds()
-        if idle < 60:
-            return
-        busy = (int(getattr(self, "_activity_count", 0)) > 0
-                or INDEX_SCAN_EVENT.is_set()
-                or self._any_scan_dialog_open()
-                or bool(self._idle_jobs_running))
-        if busy:
-            return
-        now = time.time()
-        if (cfg["rules_enabled"]
-                and idle >= cfg["rules_minutes"] * 60
-                and now - cfg["rules_last"] >= IDLE_RULES_GAP_SEC
-                and self._idle_rules_todo()):
-            self._start_idle_rules_job()
-            return
-        if (cfg["index_enabled"]
-                and idle >= cfg["index_minutes"] * 60
-                and now - cfg["index_last"] >= IDLE_INDEX_GAP_SEC):
-            self._start_idle_index_job()
+    def _check_idle_jobs(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_空闲任务.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板空闲任务._check_idle_jobs(self, *a, **k)
+
 
     def _auto_rule_scopes(self):
         """闲时跑自动标签规则要用的范围（启用 + 填了作用范围的规则）。"""
@@ -16946,134 +16383,35 @@ class FileTaggerApp:
                     scopes.append(s)
         return scopes
 
-    def _idle_rules_todo(self):
-        """闲时跑自动标签规则有没有活可干（有可用范围，或勾了文件名规则）。"""
-        try:
-            if self.store.get_auto_name_rule_tag_ids():
-                return True
-        except Exception:
-            pass
-        return bool(self._idle_rule_scopes_safe())
+    def _idle_rules_todo(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_空闲任务.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板空闲任务._idle_rules_todo(self, *a, **k)
 
-    def _idle_rule_scopes_safe(self, log=False):
-        """★ v25：闲时跑用的范围 —— 把「和本地索引/记录对不上」的范围剔除。
 
-        手动扫描前会弹窗确认（范围写错会把旧标签清掉），
-        闲时是悄悄跑的，不能弹窗，所以这里直接跳过对不上的范围。
-        """
-        scopes = []
-        skipped = []
-        for s in self._auto_rule_scopes():
-            try:
-                n = self.store.scope_known_file_count(s)
-            except Exception:
-                n = 0
-            if n:
-                scopes.append(s)
-            else:
-                skipped.append(s)
-        if skipped and log:
-            try:
-                self.log_output(
-                    "☁ 闲时任务：跳过 " + str(len(skipped)) +
-                    " 个「已知文件 0 个」的作用范围（和索引写法对不上，"
-                    "建议到「自动标签规则」里点「✔ 检查」看一眼）：" +
-                    " ; ".join(skipped[:3]))
-            except Exception:
-                pass
-        return scopes
+    def _idle_rule_scopes_safe(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_空闲任务.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板空闲任务._idle_rule_scopes_safe(self, *a, **k)
 
-    # ---------- 闲时：自动标签规则 ----------
-    def _start_idle_rules_job(self):
-        self._idle_jobs_running.add("rules")
-        try:
-            self.log_output(T("☁ 闲时任务：开始按自动标签规则慢慢跑一遍…"))
-        except Exception:
-            pass
-        threading.Thread(target=self._idle_rules_worker,
-                         daemon=True).start()
 
-    def _idle_rules_worker(self):
-        """① 应用文件名规则；② 按启用规则的「作用范围」扫描打标签。
+    def _start_idle_rules_job(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_空闲任务.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板空闲任务._start_idle_rules_job(self, *a, **k)
 
-        ★ 限速 + 每批检查「你回来了没有」：一回来立刻收工。
-        """
-        total = 0
-        changed = 0
-        stopped = False
-        try:
-            try:
-                n_name = len(self.store.get_auto_name_rule_tag_ids())
-            except Exception:
-                n_name = 0
-            if n_name:
-                try:
-                    changed += int(
-                        self.store.resync_all_file_tags_with_name(
-                            pause=IDLE_RULES_PAUSE,
-                            cancel=(lambda: self._idle_seconds()
-                                    < IDLE_STOP_WITHIN_SEC)) or 0)
-                except Exception as _e:
-                    note_swallowed(T("闲时任务：同步文件名的标签链失败"), _e)
-            for scope in self._idle_rule_scopes_safe(log=True):
-                if self._idle_seconds() < IDLE_STOP_WITHIN_SEC:
-                    stopped = True
-                    break
-                try:
-                    paths = list(self.store.files_under_scope(scope)
-                                 .get("paths") or [])
-                except Exception:
-                    paths = []
-                for i in range(0, len(paths), IDLE_RULES_CHUNK):
-                    if self._idle_seconds() < IDLE_STOP_WITHIN_SEC:
-                        stopped = True
-                        break
-                    chunk = paths[i:i + IDLE_RULES_CHUNK]
-                    try:
-                        with self.store.bulk():
-                            changed += int(
-                                self.store.sync_auto_tags_for_paths(chunk)
-                                or 0)
-                    except Exception as _e:
-                        note_swallowed(T("闲时任务：给一批文件打自动标签失败"), _e)
-                    total += len(chunk)
-                    try:
-                        time.sleep(IDLE_RULES_PAUSE)
-                    except Exception:
-                        pass
-                if stopped:
-                    break
-        except Exception:
-            pass
-        try:
-            self._ui_threadsafe(self._on_idle_rules_done,
-                                total, changed, stopped)
-        except Exception as exc:
-            note_swallowed(T("worker(_on_idle_rules_done)：回主线程通知失败"),
-                           exc, level="warn")
 
-    def _on_idle_rules_done(self, total, changed, stopped):
-        self._idle_jobs_running.discard("rules")
-        try:
-            save_idle_settings(rules_last=time.time())
-        except Exception:
-            pass
-        msg = (f"☁ 闲时任务：自动标签规则跑完（处理 {total} 个文件，"
-               f"{changed} 个文件的标签有变化"
-               f"{'；你回来了，提前收工' if stopped else ''}）")
-        try:
-            self.log_output(msg)
-            self.set_status(msg)
-        except Exception:
-            pass
-        try:
-            self.refresh_tags()
-            self.refresh_rows_tags()
-            self.refresh_categories()
-            self._invalidate_tag_scope()
-        except Exception:
-            pass
-        self._refresh_dialog_hints()
+    def _idle_rules_worker(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_空闲任务.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板空闲任务._idle_rules_worker(self, *a, **k)
+
+
+    def _on_idle_rules_done(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_空闲任务.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板空闲任务._on_idle_rules_done(self, *a, **k)
+
 
     def _start_idle_index_job(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_扫描索引.py`
