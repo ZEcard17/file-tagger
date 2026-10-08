@@ -10767,9 +10767,9 @@ except Exception as _e:
 #     等爱发电主页建好，**改成那个链接就行**（一处改，全生效）。
 #   ★★ 为什么要有这个按钮（跟版权声明同一个理由）：
 #     **下载 exe 的人不会去看 README，但他会点「关于」。**
-_SPONSOR_URL = "https://gitee.com/zecard/file-tagger/blob/main/SPONSOR.md"
+_SPONSOR_URL = "https://gitee.com/zecard/weibian/blob/main/SPONSOR.md"
 
-_REPO_URL = "https://github.com/ZEcard17/file-tagger"
+_REPO_URL = "https://github.com/ZEcard17/weibian"
 
 _CREDITS_TEXT = """\
 版权与来源 / Copyright and Provenance

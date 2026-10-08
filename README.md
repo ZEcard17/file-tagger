@@ -1,6 +1,6 @@
 # 韦编文件管理器 (File Tagger)
 
-> ★ **改名说明**：本程序原名「文件标签管理器」（发到 v27）；已改名为 **韦编文件管理器**（英文名 **Weibian**），**版本从 v1.0 重新开始**。旧版本仍在 [Releases](https://github.com/ZEcard17/file-tagger/releases) 里。
+> ★ **改名说明**：本程序原名「文件标签管理器」（发到 v27）；已改名为 **韦编文件管理器**（英文名 **Weibian**），**版本从 v1.0 重新开始**。旧版本仍在 [Releases](https://github.com/ZEcard17/weibian/releases) 里。
 
 ## ★★★ 先说清楚：这个程序是谁写的 / Who actually wrote this
 
@@ -122,8 +122,8 @@ not remember what it wrote yesterday and will never come to claim credit.
 
 | 从哪儿下 / Mirror | 链接 / Link | 适合 / Best for |
 |---|---|---|
-| ★ **Gitee** | **[文件标签管理器.exe](https://gitee.com/zecard/file-tagger/releases/download/v26/文件标签管理器.exe)** | ★ **国内用户 / users in China** |
-| **GitHub** | **[FileTagger-v26.exe](https://github.com/ZEcard17/file-tagger/releases/download/v26/FileTagger-v26.exe)** | 国外 / rest of the world |
+| ★ **Gitee** | **[Weibian-v1.0.exe](https://gitee.com/zecard/weibian/releases/download/v1.0/Weibian-v1.0.exe)**（国内快） |
+| **GitHub** | **[Weibian-v1.0.exe](https://github.com/ZEcard17/weibian/releases/download/v1.0/Weibian-v1.0.exe)** |
 
 **（93 MB，双击就跑，不用装 Python）**
 **（93 MB, double-click and run — no Python needed）**
@@ -136,8 +136,8 @@ not remember what it wrote yesterday and will never come to claim credit.
 **★★★ Antivirus may flag it** — this is a common PyInstaller problem,
 not an actual virus (**the full source is in this repo, read it yourself**).
 
-详见 [Releases 页面的"已知问题"](https://gitee.com/zecard/file-tagger/releases)。
-See "Known issues" on the [Releases page](https://github.com/ZEcard17/file-tagger/releases).
+详见 [Releases 页面的"已知问题"](https://gitee.com/zecard/weibian/releases)。
+See "Known issues" on the [Releases page](https://github.com/ZEcard17/weibian/releases).
 
 ### ★ 方式二：从源码跑 / Option 2: run from source
 
