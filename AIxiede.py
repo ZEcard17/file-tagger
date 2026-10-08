@@ -12184,73 +12184,10 @@ class FileTaggerApp:
         #     第 1 行：收起侧栏 / 目录框 / 浏览 / 上一级 / 刷新 / 后退 / 前进
         #     第 2 行：位置（盘符 + 常用位置 + ⭐）
         #   这样哪一行都不会溢出，每个控件都完整可见。
-        self._top_bar = ttk.Frame(self.root, padding=(10, 8, 10, 0))
-        self._top_bar.pack(fill="x")
-
-        self.toggle_btn = ttk.Button(self._top_bar, text="◀", width=3,
-                                     command=self.toggle_sidebar)
-        self.toggle_btn.pack(side="left", padx=(0, 6))
-
-        ttk.Label(self._top_bar, text=T("目录")).pack(side="left", padx=(0, 6))
-        self.path_var = tk.StringVar()
-        entry = ttk.Entry(self._top_bar, textvariable=self.path_var)
-        # ★ 不再 fill="x", expand=True —— 那样它会把后面的按钮全挤出去。
-        #   给一个够用的固定宽度（宽度单位是字符数），后面的按钮就都有位置。
-        entry.pack(side="left", fill="x", expand=True)
-        entry.bind("<Return>", lambda e: self.load_directory(
-            self._clean_path_input(self.path_var.get())))
-
-        # ★ 这几个按钮从右往左排，保证它们在窗口变窄时**最后**才被影响
-        ttk.Button(self._top_bar, text=T("刷新"), command=self.refresh_all).pack(
-            side="right", padx=(4, 0))
-        self._nav_fwd_btn = ttk.Button(self._top_bar, text=T("前进 ▶"), width=7,
-                                       command=self.go_forward)
-        self._nav_fwd_btn.pack(side="right", padx=(4, 0))
-        self._nav_back_btn = ttk.Button(self._top_bar, text=T("◀ 后退"), width=7,
-                                        command=self.go_back)
-        self._nav_back_btn.pack(side="right", padx=(6, 0))
-        ttk.Button(self._top_bar, text=T("上一级"), command=self.go_up).pack(
-            side="right", padx=4)
-        ttk.Button(self._top_bar, text=T("浏览…"), command=self.choose_dir).pack(
-            side="right", padx=(6, 0))
-
-        # ---- 第 2 行：位置（盘符 / 常用位置 / ⭐）----
-        self._top_bar2 = ttk.Frame(self.root, padding=(10, 2, 10, 4))
-        self._top_bar2.pack(fill="x")
-        ttk.Label(self._top_bar2, text=T("位置")).pack(side="left", padx=(38, 4))
-        self._drive_var = tk.StringVar()
-        self._drive_cbo = ttk.Combobox(self._top_bar2, textvariable=self._drive_var,
-                                       width=6, state="readonly")
-        self._drive_cbo.pack(side="left")
-        self._drive_cbo.bind("<<ComboboxSelected>>", self._on_drive_pick)
-
-        self._place_var = tk.StringVar()
-        self._place_cbo = ttk.Combobox(self._top_bar2, textvariable=self._place_var,
-                                       width=22, state="readonly")
-        self._place_cbo.pack(side="left", padx=(4, 0))
-        self._place_cbo.bind("<<ComboboxSelected>>", self._on_place_pick)
-        ttk.Button(self._top_bar2, text=T("⭐ 收藏当前位置"), width=14,
-                   command=self._add_bookmark).pack(side="left", padx=(6, 0))
-
-        # ★ 日志面板先 pack（在状态栏上方）
-        self._build_log_panel()
-
-        # ★ v25 补丁4：把「被吞掉的异常」接到日志面板上。
-        #   以前 except: pass 的地方出错没人知道；现在这类提示会
-        #   出现在「🔔 问题」面板 + 状态栏，方便查「点了没反应」。
-        global _SWALLOW_SINK
-        _SWALLOW_SINK = self.log_problem
-        # ★★ 2026-10-05「先加说话」：额外装一道「出错必留痕」的保险。
-        #   用户抱怨「卡死 / 显示不全 / 改着改着功能没了」，根子之一是
-        #   六百多处「出错装没事」。上面这个 sink 只有**主动登记**的地方
-        #   才会走；这里再补两手，让**没登记的**也能被看见：
-        #     ① 后台线程里没被抓住的出错（线程崩了界面还在，最像「卡死」）
-        #     ② 主循环里没被抓住的出错
-        #   两手都只「记一笔」，绝不改变程序原有行为。
-        try:
-            self._install_error_spy()
-        except Exception as _e:
-            note_swallowed(T("装「出错必留痕」保险失败"), _e, quiet=True)
+        # ★★★ 顶部这两行抽成单独方法了（2026-10-08）——
+        #   原来 `_build_ui` 485 行，翻起来费劲。
+        self._ui_top_toolbar_row1()
+        self._ui_top_toolbar_row2()
 
         # 状态栏
         status_bar = ttk.Frame(self.root)
@@ -12661,6 +12598,91 @@ class FileTaggerApp:
             pass
 
         self.root.after(150, self._init_sash)
+
+    def _ui_top_toolbar_row1(self):
+        """从 `_build_ui` 里抽出来的一节（2026-10-08）。
+
+        ★ 原来 `_build_ui` 是个 485 行的巨型装配方法，
+          按**控件分组**抽成小方法 —— 这样「哪块界面归哪段代码」一眼对上。
+
+        ★ 本节：顶部工具栏第 1 行（收起侧栏 / 目录框 / 浏览 / 上一级 / 刷新 / 后退 / 前进）
+        """
+        self._top_bar = ttk.Frame(self.root, padding=(10, 8, 10, 0))
+        self._top_bar.pack(fill="x")
+
+        self.toggle_btn = ttk.Button(self._top_bar, text="◀", width=3,
+                                     command=self.toggle_sidebar)
+        self.toggle_btn.pack(side="left", padx=(0, 6))
+
+        ttk.Label(self._top_bar, text=T("目录")).pack(side="left", padx=(0, 6))
+        self.path_var = tk.StringVar()
+        entry = ttk.Entry(self._top_bar, textvariable=self.path_var)
+        # ★ 不再 fill="x", expand=True —— 那样它会把后面的按钮全挤出去。
+        #   给一个够用的固定宽度（宽度单位是字符数），后面的按钮就都有位置。
+        entry.pack(side="left", fill="x", expand=True)
+        entry.bind("<Return>", lambda e: self.load_directory(
+            self._clean_path_input(self.path_var.get())))
+
+        # ★ 这几个按钮从右往左排，保证它们在窗口变窄时**最后**才被影响
+        ttk.Button(self._top_bar, text=T("刷新"), command=self.refresh_all).pack(
+            side="right", padx=(4, 0))
+        self._nav_fwd_btn = ttk.Button(self._top_bar, text=T("前进 ▶"), width=7,
+                                       command=self.go_forward)
+        self._nav_fwd_btn.pack(side="right", padx=(4, 0))
+        self._nav_back_btn = ttk.Button(self._top_bar, text=T("◀ 后退"), width=7,
+                                        command=self.go_back)
+        self._nav_back_btn.pack(side="right", padx=(6, 0))
+        ttk.Button(self._top_bar, text=T("上一级"), command=self.go_up).pack(
+            side="right", padx=4)
+        ttk.Button(self._top_bar, text=T("浏览…"), command=self.choose_dir).pack(
+            side="right", padx=(6, 0))
+
+    def _ui_top_toolbar_row2(self):
+        """从 `_build_ui` 里抽出来的一节（2026-10-08）。
+
+        ★ 原来 `_build_ui` 是个 485 行的巨型装配方法，
+          按**控件分组**抽成小方法 —— 这样「哪块界面归哪段代码」一眼对上。
+
+        ★ 本节：顶部工具栏第 2 行（位置：盘符 + 常用位置 + ⭐ 收藏）
+        """
+        # ---- 第 2 行：位置（盘符 / 常用位置 / ⭐）----
+        self._top_bar2 = ttk.Frame(self.root, padding=(10, 2, 10, 4))
+        self._top_bar2.pack(fill="x")
+        ttk.Label(self._top_bar2, text=T("位置")).pack(side="left", padx=(38, 4))
+        self._drive_var = tk.StringVar()
+        self._drive_cbo = ttk.Combobox(self._top_bar2, textvariable=self._drive_var,
+                                       width=6, state="readonly")
+        self._drive_cbo.pack(side="left")
+        self._drive_cbo.bind("<<ComboboxSelected>>", self._on_drive_pick)
+
+        self._place_var = tk.StringVar()
+        self._place_cbo = ttk.Combobox(self._top_bar2, textvariable=self._place_var,
+                                       width=22, state="readonly")
+        self._place_cbo.pack(side="left", padx=(4, 0))
+        self._place_cbo.bind("<<ComboboxSelected>>", self._on_place_pick)
+        ttk.Button(self._top_bar2, text=T("⭐ 收藏当前位置"), width=14,
+                   command=self._add_bookmark).pack(side="left", padx=(6, 0))
+
+        # ★ 日志面板先 pack（在状态栏上方）
+        self._build_log_panel()
+
+        # ★ v25 补丁4：把「被吞掉的异常」接到日志面板上。
+        #   以前 except: pass 的地方出错没人知道；现在这类提示会
+        #   出现在「🔔 问题」面板 + 状态栏，方便查「点了没反应」。
+        global _SWALLOW_SINK
+        _SWALLOW_SINK = self.log_problem
+        # ★★ 2026-10-05「先加说话」：额外装一道「出错必留痕」的保险。
+        #   用户抱怨「卡死 / 显示不全 / 改着改着功能没了」，根子之一是
+        #   六百多处「出错装没事」。上面这个 sink 只有**主动登记**的地方
+        #   才会走；这里再补两手，让**没登记的**也能被看见：
+        #     ① 后台线程里没被抓住的出错（线程崩了界面还在，最像「卡死」）
+        #     ② 主循环里没被抓住的出错
+        #   两手都只「记一笔」，绝不改变程序原有行为。
+        try:
+            self._install_error_spy()
+        except Exception as _e:
+            note_swallowed(T("装「出错必留痕」保险失败"), _e, quiet=True)
+
 
     def _style_sashes(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_外观零件.py`
