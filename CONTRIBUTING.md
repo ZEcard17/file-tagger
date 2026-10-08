@@ -11,15 +11,15 @@
 
 ## ★★★ 第一次参与？从这里开始 / First time? Start here
 
-**★★★ 你**不需要**读完整个主程序（1.6 万行，拆成 54 个模块）。**
+**★★★ 你**不需要**读完整个主程序（1.6 万行，拆成 53 个模块）。**
 
-**★★★ You do **not** need to read the whole main file** (16k lines, 54 modules).**
+**★★★ You do **not** need to read the whole main file** (16k lines, 53 modules).**
 
-**★ 我知道那个主程序看起来吓人** —— 一个人写的、原来 37,000 行单文件（★ 现在已拆成 54 个模块，主程序 1.6 万行）。
+**★ 我知道那个主程序看起来吓人** —— 一个人写的、原来 37,000 行单文件（★ 现在已拆成 53 个模块，主程序 1.6 万行）。
 **★ 但这不代表"改东西很贵"** —— 我们做了**路标**：
 
 **★ I know the main file looks intimidating** — one person, one file,
-37,000 lines originally (**now 54 modules, 16k-line main file**). **★ But that does not mean changes are expensive** — there are
+37,000 lines originally (**now 53 modules, 16k-line main file**). **★ But that does not mean changes are expensive** — there are
 signposts:
 
 | 文件 / File | 里面是什么 / What's inside |
@@ -64,7 +64,7 @@ signposts:
 
 ### ★ 这个项目有什么特别的 / What makes this project unusual
 
-**★★ 它是个"从零长起来的个人项目"** —— 主程序**曾经 3.7 万行在一个文件里**（★ 现在拆成 54 个模块，主程序 1.6 万行）。
+**★★ 它是个"从零长起来的个人项目"** —— 主程序**曾经 3.7 万行在一个文件里**（★ 现在拆成 53 个模块，主程序 1.6 万行）。
 这不是好习惯，但**已经这样了**，现在正在**慢慢拆**。
 
 **★★ It is a personal project that grew from scratch** — the main program is

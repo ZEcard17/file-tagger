@@ -28,7 +28,7 @@ was written, character by character, by an AI.**
 > **这个程序里有**两部分**劳动，谁也替不了谁：**
 >
 > · **人的那部分** —— 想法、审美、判断、坚持（★ 还有"半夜发现不对，第二天重来"）
-> · **AI 的那部分** —— 3 万多行代码、54 个文件、150 条错题本、每一次重构
+> · **AI 的那部分** —— 3 万多行代码、53 个文件、150 条错题本、每一次重构
 >
 > **★ 缺了任何一半，这程序都不存在。**
 >
@@ -41,7 +41,7 @@ was written, character by character, by an AI.**
 > **Two kinds of labour went into this, and neither substitutes for the other:**
 >
 > · **The human's part** — the idea, the taste, the judgement, the persistence
-> · **The AI's part** — 30k+ lines of code across 54 files, a 150-entry error log, every refactor
+> · **The AI's part** — 30k+ lines of code across 53 files, a 150-entry error log, every refactor
 >
 > **★ Remove either half and this program does not exist.**
 >
@@ -233,7 +233,7 @@ errors**.)
 
 ```
 AIxiede.py                      ← 主程序 / main program (16k lines)
-AIxiede拆分开/程序分块/          ← 拆出来的模块 / extracted modules (54)
+AIxiede拆分开/程序分块/          ← 拆出来的模块 / extracted modules (53)
     TagStore.py                    数据层 / data layer (tags, files, categories)
     i18n.py                        多语言框架 / i18n framework
     _单位换算.py                    byte / speed formatting
@@ -251,16 +251,16 @@ AIxiede拆分开/程序分块/          ← 拆出来的模块 / extracted modul
 **★ 为什么主程序 3.7 万行 / Why it used to be one 37k-line file**：这是个**从零长起来的个人项目**，
 最早就是「一个文件写完」的习惯。
 **★★★ 2026-10-08：已经拆完了** —— 主程序从 **37,247 行砍到 16,357 行**（少 **56%**），
-拆成 **54 个模块**：
+拆成 **53 个模块**：
 · **13 个独立类**（`FileList` / `PreviewPane` / `StarGraphEditor` / `TagBox` …）
 · **24 个功能组**（菜单构建 / UI构建 / 标签操作 / 文件操作 / 扫描索引 / 日志状态 / 撤销 / 主题配色 / 导航 / 快捷键 …）
-· **17 个原有模块**（`TagStore` 数据层 / `i18n` 多语言 / 各种对话框 …）
+· **16 个原有模块**（`TagStore` 数据层 / `i18n` 多语言 / 各种对话框 …）
 ★ **界面和功能一模一样**，只是代码分开放了。
 
 **This started as a personal project** written as one big file. It is being
 **split into modules step by step** (~4,000 lines extracted so far).
 
-### ★★★ 但你要改东西，**不用读那 3.7 万行** / But you don't have to read them (now split into 54 modules; the main file is 16k lines)
+### ★★★ 但你要改东西，**不用读那 3.7 万行** / But you don't have to read them (now split into 53 modules; the main file is 16k lines)
 
 **★ 说实在的**：一个 1.6 MB 的单文件，**谁看了都想走**。
 **★ 所以这里给了**路标**：**
