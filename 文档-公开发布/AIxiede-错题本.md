@@ -63,7 +63,7 @@
 | **八、早期坑** | #32 ~ #37 | 拖拽失效、路径错乱、拆文件拆坏… |
 | **九、模式 / 元问题** | #38 ~ #40 | 出错被吞掉的规模、存了读不回来、"同一个病根反复出现" |
 | **十、更早的坑** | #41 ~ #46 | `@staticmethod` 缩进、`disk I/O error`、**整个文件贴给 AI**、标签盒算宽… |
-| **十一、🦟 跳蚤** | #47 ~ #177 | 小但烦人的：字号改不了、夜间还白、不跟手、字被压扁、星图… |
+| **十一、🦟 跳蚤** | #47 ~ #178 | 小但烦人的：字号改不了、夜间还白、不跟手、字被压扁、星图… |
 
 ### 按时间检索
 
@@ -4851,6 +4851,61 @@ bug ②  `_on_cat_counts_ready()` 把 `_last_cat_refresh_ts` **清成 0** ——
 ✗ `AIXIEDE_DATA_DIR`          ← 环境变量
 ✗ `%LOCALAPPDATA%\AIxiede`    ← ★★★ 数据目录（改了像标签全丢）
 ✗ `FileTaggerApp`             ← 内部类名
+```
+
+---
+
+## #178 ★★★ 用 PowerShell 发 HTTP 请求**带中文** → 全变成 `?`
+
+**时间**：2026-10-08 · **现状**：✅ 已修（改成用 Python 发）
+**★ 现象**：改 GitHub / Gitee 的仓库描述，发出去的中文变成问号：
+```
+Gitee 描述（改之前就是坏的）:
+   ??????? -- ?????????? Windows ??(Python + Tkinter,AGPL-3.0)
+★ 我改完之后 GitHub 也变成了:
+   ??????? -- ???????????????? Windows ????(Python + Tkinter,AGPL-3.0)
+```
+★★★ **注意这个"传染性"** —— 我本来是想**修** Gitee 的乱码，
+   结果**把好好的 GitHub 也弄乱了**。
+
+**★★★ 真因**：
+```powershell
+# ❌ 这么写，中文一定变 `?`
+$body = @{ description = "韦编文件管理器 …" } | ConvertTo-Json
+Invoke-RestMethod -Uri ... -Body $body -ContentType "application/json"
+```
+· `ConvertTo-Json` 的输出是**字符串**，`Invoke-RestMethod` 再按
+  **系统 ANSI 代码页**（中文 Windows 是 GBK）编码成字节 →
+  ★ 而 HTTP 头声明的是 `application/json`（默认 UTF-8）→
+  **接收端按 UTF-8 解 GBK 字节** → 解不出来 → 变成 `?`。
+
+**★ 正确做法（两条任选）**：
+```python
+# ✔ 用 Python 发（推荐）—— json.dumps 默认 ensure_ascii，且整体 UTF-8 编码
+body = json.dumps(data).encode("utf-8")
+r.add_header("Content-Type", "application/json; charset=utf-8")
+```
+```powershell
+# ✔ 或者坚持用 PowerShell：手工转字节
+$bytes = [System.Text.Encoding]::UTF8.GetBytes($json)
+Invoke-RestMethod ... -Body $bytes
+```
+
+**★★★ 判据（最值钱的一条）**：
+```
+**发出去的 HTTP 请求带中文，不要用 PowerShell 的 ConvertTo-Json** ——
+  ① 它按 ANSI 编码，中文必坏
+  ② ★★ **坏得安静**：HTTP 200、"成功"，只有拿回来一看才发现是 `?`
+  ③ ★★★ **发完要"重新拉一遍"复核**，别信自己刚发出去的那份
+     （我这次就是这么发现 GitHub 也被我弄坏了）
+```
+
+**★ 顺带记 Gitee 的另一个坑**：
+```
+★★ `PATCH /repos/{owner}/{repo}` **必须带 `name`** ——
+   只发 `{"description": ...}` 会报 `400 {"messages":["name is missing"]}`
+   ★ 光看这一句会以为"Gitee 不支持改描述"，其实是**参数没给全**。
+→ 正确: `{"name": "weibian", "path": "weibian", "description": ...}`
 ```
 
 ---
