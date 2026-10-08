@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # ==========================================================================
-#  文件标签管理器 (File Tagger Manager)
+#  韦编文件管理器 (Weibian) —— ★ 原名「文件标签管理器」
 #  --------------------------------------------------------------------------
 #  版权所有 (c) 2026 510722199905170360
 #
@@ -26,7 +26,7 @@
 #      AI 只是"打字快的那双手"。
 # ==========================================================================
 """
-文件标签管理器 v26
+韦编文件管理器 v1.0
 ==================
 
    ★ 说明：下面只留**最近 3 条**更新记录。
@@ -436,7 +436,7 @@ def privacy_report(folder=None, exe=None):
     lines = []
     try:
         folder = folder or _HERE
-        exe = exe or os.path.join(_APP_DIR, "文件标签管理器.exe")
+        exe = exe or os.path.join(_APP_DIR, "韦编文件管理器.exe")
         bad_files = privacy_find_private_files(folder)
         if bad_files:
             lines.append("★ 程序目录里有 %d 个数据文件（**绝对不要打包**）："
@@ -5160,7 +5160,16 @@ class Tooltip:
 
     def __init__(self, widget, text, delay=600):
         self.widget = widget
-        self.text = str(text or "")
+        # ★★★ 2026-10-08 修一个**看得见的丑**（用户截图抓到的）：
+        #   原来这里写的是 `self.text = str(text or "")` ——
+        #   ★ 而悬浮球那边传的是 **lambda**（想让它"每次现取"，因为文字会变）→
+        #     `str(lambda)` = `<function FloatingBall.build.<locals>.<lambda> at 0x...>`
+        #   ★★★ **屏幕上真的显示了这串 Python 地址**（截图证据）。
+        #   → 判据：**`Tooltip` 要同时接受"字符串"和"函数"**：
+        #     · 字符串  → 直接用
+        #     · 可调用  → **弹之前才调它**（★ 这样"会变的文字"能取到最新的）
+        self._text_src = text
+        self.text = "" if callable(text) else str(text or "")
         self.delay = int(delay)
         self._after_id = None
         self._win = None
@@ -5189,6 +5198,12 @@ class Tooltip:
             self._after_id = None
 
     def _show(self):
+        # ★★ 文字可能是"函数"（会变的那种）→ **弹之前才现取**（错题本 #174）
+        if callable(self._text_src):
+            try:
+                self.text = str(self._text_src() or "")
+            except Exception:
+                self.text = ""
         if self._win is not None or not self.text:
             return
         try:
@@ -10845,7 +10860,7 @@ class FileTaggerApp:
     def __init__(self, root, ui_scale=DEFAULT_UI_SCALE):
         self.root = root
         self.ui_scale = float(ui_scale)
-        self.root.title("文件标签管理器 v26 (2026-10-03)")
+        self.root.title("韦编文件管理器 v1.0")
         # ★★ 2026-10-07 改：**默认最大化打开**（用户要求）★★
         #   用户原话：「我用这个都是放到最大用的，所以我想默认一打开就是
         #   窗口最大化的，因为窗口化能看到的东西在我们人眼里实在有限，
@@ -16281,7 +16296,66 @@ def _i18n_check_cli():
     print("=" * 66)
 
 
+def _sweep_mei_leftovers():
+    """★★★ 清掉"本程序"上次留下的 `_MEIxxxx` 临时目录（错题本 #175）。
+
+    ★ 为什么要它：打包成 **onefile** 的 exe，每次启动都要把 94 MB
+      解压到 `%TEMP%\\_MEIxxxx\\`。**正常退出会自己删掉**，但：
+        · 程序被强杀（任务管理器结束 / 崩溃 / 断电）
+        · 或"解压到一半失败"
+      → 就会**留下一个空壳目录**。攒多了之后，
+      PyInstaller 会报 **`Failed to create parent directory structure.`**
+      ★ 用户真遇到过（就是我造成的 —— 我测试时反复强杀）。
+
+    ★★ 安全边界（**这条最重要**）：
+      · 只删 `%TEMP%` 下**名字以 `_MEI` 开头**的目录
+      · **绝不删当前进程正在用的那个**（`sys._MEIPASS`）
+      · 删不掉就跳过（可能被别的实例占用）—— **绝不报错、绝不阻塞**
+      · 只在**打包版**里做（源码跑没有 `_MEI`）
+    """
+    try:
+        if not getattr(sys, "frozen", False):
+            return
+    except Exception:
+        return
+    try:
+        cur = os.path.abspath(getattr(sys, "_MEIPASS", "") or "")
+    except Exception:
+        cur = ""
+    try:
+        tmp = os.environ.get("TEMP") or os.environ.get("TMP") or ""
+        if not tmp or not os.path.isdir(tmp):
+            return
+    except Exception:
+        return
+    try:
+        for name in os.listdir(tmp):
+            if not name.startswith("_MEI"):
+                continue
+            full = os.path.join(tmp, name)
+            # ★ 不许碰"当前这个进程正在用的"
+            if cur and os.path.abspath(full) == cur:
+                continue
+            if not os.path.isdir(full):
+                continue
+            try:
+                shutil.rmtree(full, ignore_errors=True)
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+
 def main():
+    # ★★★ 2026-10-08 先清掉上次留下的 `_MEI` 空壳（错题本 #175）★★★
+    #   ★ 必须**最先做** —— 因为"解压失败"是在**程序代码跑起来之前**
+    #     PyInstaller 的启动器就已经干的事了；
+    #     所以这一次的清，是**为了下一次**能顺利解压。
+    #   ★★ 只清自己的、绝不碰别人的（详见函数里的安全边界说明）。
+    try:
+        _sweep_mei_leftovers()
+    except Exception:
+        pass
     # ★★★ 2026-10-08 **初始化多语言**（读设置里的语言 → 设翻译表）★★★
     #   ★ 放在这里的原因：**所有依赖都齐了** ——
     #     `load_ui_setting` 定义好了、`i18n` 也已经导入。

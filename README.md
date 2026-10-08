@@ -1,4 +1,6 @@
-# 文件标签管理器 (File Tagger)
+# 韦编文件管理器 (File Tagger)
+
+> ★ **改名说明**：本程序原名「文件标签管理器」（发到 v27）；已改名为 **韦编文件管理器**（英文名 **Weibian**），**版本从 v1.0 重新开始**。旧版本仍在 [Releases](https://github.com/ZEcard17/file-tagger/releases) 里。
 
 ## ★★★ 先说清楚：这个程序是谁写的 / Who actually wrote this
 

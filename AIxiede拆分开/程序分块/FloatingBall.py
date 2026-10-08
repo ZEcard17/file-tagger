@@ -524,6 +524,16 @@ class FloatingBall:
             self.canvas.bind("<Button-3>", self._on_right)
             # ★ 悬停提示（不占地方，鼠标放上去才出）
             try:
+                # ★★★ 2026-10-08 修一个**看得见的丑**（用户截图截图抓到）：
+                #   ★ 原来这里传的是 **lambda**，而 `Tooltip` 当时只收字符串 ——
+                #     它内部 `str(text)` →
+                #     `<function FloatingBall.build.<locals>.<lambda> at 0x...>`
+                #   ★★★ **屏幕上真的显示了这串 Python 地址**。
+                #   → 两头都修了（错题本 #174）：
+                #     · `Tooltip` 改成**同时接受字符串和函数**（弹之前才现取）
+                #     · ★ 这里**保持传函数** —— 因为球的提示文字**会变**
+                #       （网速/内存/硬盘的数字每秒在动），
+                #       传字符串的话**永远停在创建那一刻的值**。
                 Tooltip(self.canvas, lambda: self._tooltip_text())
             except Exception:
                 pass
