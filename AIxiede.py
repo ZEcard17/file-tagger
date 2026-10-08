@@ -10938,6 +10938,14 @@ class FileTaggerApp:
         self.dir_cache_enabled = True
         self._cat_refresh_running = False
         self._last_cat_refresh_ts = 0.0
+        # ★★★ 2026-10-08 新增：**"还在开机"标记**（错题本 #176）。
+        #   ★ 为什么要它：`refresh_categories()` 被**很多地方**调用
+        #     （开机、切分类、切皮肤、加标签…），
+        #     而"开机那一次"和"用户操作那一次"**该有不同的表现** ——
+        #     · 开机那次：**静默**（别弹活动条，不然用户以为开机慢是它造成的）
+        #     · 用户操作那次：**显示「统计分类中…（x/y）」**（要进度感）
+        #   ★ 开机流程走完（`__init__` 末尾）会把它设回 False。
+        self._booting = True
 
         # ★ 日志面板
         self._log_panel_visible = False
@@ -11014,14 +11022,27 @@ class FileTaggerApp:
         self.load_directory(self.current_dir)
 
         # ★★ 2026-01-26：初始化文件树
+        # ★★★ 2026-10-08 **改成"等界面出来之后再建"**（用户报"开机像卡住"）★★★
+        #   ★ 真因（**用 cProfile 量出来的**，不是猜的）：
+        #     `refresh_file_tree` 在开机路径里要 **10.58 秒** ——
+        #     `_add_tree_node` 对**每个盘符根**都要 `os.listdir` 一遍，
+        #     再把**盘符下所有一级目录**都建成树节点。
+        #     实测 `nt.listdir` 被调 **82 次 / 2.07 秒**，
+        #     再加上建树节点的 Tk 调用 → **整个 `app.__init__` 12.6 秒**。
+        #   ★★ 更糟的是：这些目录里如果有**网盘目录**（CloudDrive），
+        #     每次 `listdir` 都要走网络 → 还会更慢。
+        #   ★ 修法：**用 `root.after` 把它挪到"界面已经显示出来之后"** ——
+        #     用户先看到界面（能点、能滚），树在后台补上。
+        #     ★ 判据：**开机路径上只留"不建它界面就是空的"那部分**，
+        #       "能晚一步"的一律 `after` 延后。
+        #   ★ 失败兜底：里面自己 try，坏了大不了没有树（不影响用）。
         try:
-            self.sidebar.refresh_file_tree()
+            self.root.after(120, self._deferred_build_file_tree)
         except Exception:
             pass
 
         # ★ v25：闲时任务（鼠标 / 键盘空闲够久 → 悄悄跑一次）
         self._setup_idle_jobs()
-
         # ★ v25 补丁5：等界面出来 3 秒后，后台悄悄自检一次
         #   （查孤立标签 / 重复路径 / 坏指针 / 网盘与索引盘还在不在）。
         #   正常就写一行「自检通过」，有问题才进「🔔 问题」面板。
@@ -11038,6 +11059,122 @@ class FileTaggerApp:
                 self._run_selfcheck, False))
         except Exception as _e:
             note_swallowed(T("安排启动自检失败"), _e)
+
+        # ★★★ 2026-10-08：**开机流程到此结束**（错题本 #176）——
+        #   设回 `_booting = False`，之后用户操作触发的统计
+        #   才会显示「统计分类中…（x/y）」进度条。
+        self._end_boot()
+
+    def _deferred_build_file_tree(self):
+        """★★★ 延后建左侧「文件树」（错题本 #176）。
+
+        ★ 为什么要延后 + 挪到后台（**cProfile 量出来的**）：
+          原来这句在 `__init__` 里同步跑 —— 实测 **10.58 秒**：
+            · `_add_tree_node` 对**每个盘符根**都 `os.listdir` 一遍，
+              再把**盘符下所有一级目录**都建成树节点
+            · 实测 `nt.listdir` **82 次 / 2.07 秒**，
+              加上 Tk 建节点 → **整个 `app.__init__` 12.6 秒**
+            · ★★ 这些目录里如果有**网盘目录**（CloudDrive），
+              每次 `listdir` 还要走网络 → 更慢
+
+        ★★★ 试过一次"只 `after` 延后"—— **不够**：
+          实测 `app 建完` 从 12.6 秒降到 2.7 秒，
+          但**界面第一次响应时卡了 11.5 秒**（只是把卡顿从开机挪到了下一帧）。
+          → 判据：**"慢"要挪进**线程**，不是挪到"下一帧"。**
+          （`after` 只是"排队"，活儿还是在主线程干。）
+
+        ★ 正确的分工：
+          · **后台线程**：只做"纯磁盘/纯数据"的部分 ——
+            算出"要显示哪些根、每个根下面有哪些一级目录"（**不碰 Tk**）
+          · **主线程**：拿现成的清单**建树节点**（Tk 调用必须在主线程）
+
+        ★ 失败兜底：整个包 try —— 建不起来就**没有树**，
+          绝不影响程序启动（用户最怕的就是"打不开"）。
+        """
+        try:
+            # ★ 第一步：把"要读的路径"算出来（很快，纯数据）
+            roots = self.sidebar._get_root_paths()
+        except Exception as _e:
+            note_swallowed(T("取文件树根路径失败（左栏可能没有目录树）"), _e)
+            return
+
+        def worker():
+            """★ 后台线程：**只列目录，绝不碰 Tk**。"""
+            plan = []
+            try:
+                for r in roots:
+                    kids = []
+                    try:
+                        for name in os.listdir(r):
+                            cp = os.path.join(r, name)
+                            # ★ 用 scandir 的判据太麻烦，还是 isdir ——
+                            #   但这里**在后台线程**，慢也不挡界面
+                            try:
+                                if os.path.isdir(cp):
+                                    kids.append((name, cp))
+                            except Exception:
+                                continue
+                    except Exception:
+                        pass
+                    kids.sort(key=lambda x: x[0].lower())
+                    plan.append((r, kids))
+            except Exception:
+                pass
+            # ★ 交回主线程去建（Tk 只能在主线程碰）
+            try:
+                self._ui_threadsafe(self._apply_file_tree_plan, plan)
+            except Exception:
+                pass
+
+        try:
+            threading.Thread(target=worker, daemon=True).start()
+        except Exception as _e:
+            note_swallowed(T("启动文件树后台线程失败"), _e)
+
+    def _apply_file_tree_plan(self, plan):
+        """★ 主线程：拿后台算好的清单**建树节点**（错题本 #176）。
+
+        ★ 为什么分成两步：`os.listdir` 走磁盘（可能走网盘，慢），
+          必须在后台；而 `Treeview.insert` 是 Tk 调用，**必须在主线程**。
+          → 判据：**"算"和"画"分开** —— 算是后台的活，画是主线程的活。
+        """
+        try:
+            self.sidebar._file_tree.delete(
+                *self.sidebar._file_tree.get_children())
+            self.sidebar._tree_tag_ids = {}
+            self.sidebar._tree_chain_nodes = set()
+            for root_path, kids in plan:
+                display = self.sidebar._tree_root_display(root_path)
+                node_id = self.sidebar._file_tree.insert(
+                    "", "end", text=display, values=[root_path], open=False)
+                self.sidebar._tree_tag_ids[root_path] = node_id
+                for name, child_path in kids:
+                    cid = self.sidebar._file_tree.insert(
+                        node_id, "end", text=name, values=[child_path],
+                        open=False)
+                    self.sidebar._tree_tag_ids[child_path] = cid
+                    # ★ 二级插占位符 —— 点开时才懒加载（跟原来一致）
+                    self.sidebar._file_tree.insert(cid, "end", text="",
+                                                   values=[""])
+            try:
+                self.sidebar._expand_current_chain([p for p, _k in plan])
+            except Exception:
+                pass
+        except Exception as _e:
+            note_swallowed(T("建文件树失败（左栏可能没有目录树）"), _e)
+
+    def _end_boot(self):
+        """★★★ 开机流程正式结束（错题本 #176）。
+
+        ★ 干什么：把 `_booting` 设回 False ——
+          **之后**任何 `refresh_categories()`（用户切分类 / 切皮肤…）
+          触发统计时，**才会显示「统计分类中…（x/y）」**；
+          开机那次是静默的（不弹活动条）。
+        ★ 为什么要单独一个"结束点"：因为 `__init__` 里
+          **所有事情都排完之后**才算"开完机" ——
+          早一刻设 False，开机尾巴上那几次调用就又会弹活动条了。
+        """
+        self._booting = False
 
     # ---------------- 菜单栏 ----------------
     def _build_menu(self):
@@ -13720,6 +13857,28 @@ class FileTaggerApp:
         except Exception:
             pass
 
+    def _update_activity_text(self, text):
+        """★★★ 只换「正在忙」那行字，不动计数/不动栈（错题本 #176）。
+
+        ★ 为什么要单独一个方法：
+          `begin_activity` 是**配对**用的（`+1` 计数、往栈里压）——
+          而"进度从 1/3 变成 2/3"**不是新开一个任务**，
+          只是**同一个任务的文字变了**。
+          ★★ 错的写法：再调一次 `begin_activity` → 计数变 2、
+             栈里两条 → `end_activity` 只减一次 → **活动条永远不消失**。
+          ★ 判据：**要改"正在忙"的显示，用这个；要"新开一个任务"，用 begin。**
+        """
+        try:
+            if self._activity_texts:
+                self._activity_texts[-1] = text
+            # ★ 顺手把栈里那条也改了（end_activity 报"耗时 N 秒"时用的是它）
+            if self._activity_stack:
+                _name, _t0 = self._activity_stack[-1]
+                self._activity_stack[-1] = (text, _t0)
+            self._refresh_activity_ui()
+        except Exception:
+            pass
+
     def _start_spinner(self):
         if self._spinner_job is not None:
             return
@@ -14653,9 +14812,30 @@ class FileTaggerApp:
         except Exception:
             pass
         # 后台慢慢算准确数字（有 5 分钟冷却，不会每次都跑）
-        self._bg_refresh_category_counts()
+        # ★★★ 2026-10-08：**开机那一次静默**（错题本 #176）——
+        #   开机路径上不要弹「统计分类中…」活动条，
+        #   否则用户会以为"是它把开机拖慢的"（其实慢在别处）。
+        #   ★ 判据：**开机时只显示"真的挡着用户的事"**，
+        #     "后台慢慢算"这种一律安静地做。
+        self._bg_refresh_category_counts(
+            reason="boot" if getattr(self, "_booting", False) else "auto")
 
-    def _bg_refresh_category_counts(self):
+    def _bg_refresh_category_counts(self, reason="auto"):
+        """★★★ 后台统计每个分类有多少文件（错题本 #176）。
+
+        ★★ 2026-10-08 改了两处（都是用户报"统计分类中…卡 12 秒"查出来的）：
+
+        ① **不再"开机就弹活动条"**。
+           `begin_activity` 会让右下角显示「统计分类中…」+ 转圈；
+           而它以前是在 `__init__` 里被 `refresh_categories()` 触发的 ——
+           ★★ 结果那 12 秒里**一直挂着"统计分类中"**，
+              而用户看到的其实是**整个开机过程**（建界面 / 建文件树都在里头）。
+           → 现在让**调用方自己决定**要不要显示（`reason="boot"` 时静默）。
+
+        ② **进度带 x/y**（用户要的"有进度感"）——
+           以前只说「统计分类中…」，不知道还要多久；
+           现在改成「统计分类中…（2/3）」，**能看到在动**。
+        """
         if getattr(self, "_cat_refresh_running", False):
             return
         # ★ 冷却：5 分钟内不重复算（除非用户主动点"刷新"清掉时间戳）
@@ -14664,7 +14844,12 @@ class FileTaggerApp:
             return
         self._last_cat_refresh_ts = time.time()
         self._cat_refresh_running = True
-        self.begin_activity("统计分类中…")
+        # ★★★ "开机那一次"不显示活动条 ——
+        #   因为那 12 秒里用户看到的其实是**开机过程**，
+        #   挂个"统计分类中"只会让人以为"是统计把开机拖慢了"。
+        show = (reason != "boot")
+        if show:
+            self.begin_activity(T("统计分类中…"))
         self.log_output(T("开始后台统计分类计数"))
 
         def worker():
@@ -14683,6 +14868,17 @@ class FileTaggerApp:
                 total = len(cats)
                 self.log_progress(f"分类统计开始，共 {total} 个分类")
                 for i, c in enumerate(cats, 1):
+                    # ★★★ 进度感（用户要的"能看到在动"）—— 错题本 #176
+                    #   以前只说「统计分类中…」，用户不知道还要多久；
+                    #   现在每次进一个分类就更新成「统计分类中…（2/3）」。
+                    #   ★ 分类少（3 个）时效果一般，但**分类多的时候很有用**。
+                    #   ★ 只在"显示活动条"那一次更新（开机那次是静默的）。
+                    if show:
+                        try:
+                            self._update_activity_text(
+                                T("统计分类中…（{i}/{n}）", i=i, n=total))
+                        except Exception:
+                            pass
                     try:
                         cid = c.get("id") if isinstance(c, dict) else None
                         cname = c.get("name", "") if isinstance(c, dict) else str(c)
@@ -14722,7 +14918,17 @@ class FileTaggerApp:
 
     def _on_cat_counts_ready(self):
         self._cat_refresh_running = False
-        self._last_cat_refresh_ts = 0.0
+        # ★★★ 2026-10-08 修一个**冷却形同虚设**的 bug（错题本 #176）：
+        #   原来这里写的是 `self._last_cat_refresh_ts = 0.0` ——
+        #   ★ 而 `_bg_refresh_category_counts` 的判据是
+        #     `time.time() - last < 300`（5 分钟内不重算）。
+        #   ★★★ 把它清成 0 之后，`time.time() - 0` 是**十七亿秒** →
+        #      冷却**永远不成立** → 下次谁一调 `refresh_categories()`
+        #      （切分类、切皮肤、加标签…**很多地方都调**）就**又算一遍**。
+        #   ★ 正确做法：**算完记下"刚算过"的时间**，冷却才真的生效。
+        #     ★ 判据：**"冷却时间戳"要往后写、不能往前清** ——
+        #       清成 0 等于"上次是一九七〇年算的"，那还冷却什么。
+        self._last_cat_refresh_ts = time.time()
         self.end_activity()
         try:
             self.sidebar.set_categories(self.store.all_categories())
