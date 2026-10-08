@@ -558,39 +558,6 @@ class QuickPreview:
             pass
 
 
-# ★★★ HoverPreview 已拆到 `AIxiede拆分开/程序分块/HoverPreview.py`（2026-10-08 第 3 批）
-#   ★ 主程序启动时把「自己」交给它（`_set_app`）——
-#     两边**不在开头互相 import**（那会打不开，见模块里的说明）。
-try:
-    # ★★ 注意两点写法（都是踩出来的）：
-    #   ① `sys.path` 里加的是「程序分块」**目录**，
-    #      所以是 `from HoverPreview import …`，
-    #      **不是** `from AIxiede拆分开.程序分块.HoverPreview import …`
-    #      （项目根不在 sys.path 里 → 找不到包）
-    #   ② `_set_app` 要**取个别名**（`as _fk_XXX`）——
-    #      ★ 因为模块名和类名**同名**，`HoverPreview._set_app` 会变成
-    #        "在**类**上找 _set_app" → AttributeError（我第二版这么错的）
-    from HoverPreview import HoverPreview, _set_app as _fk_HoverPreview
-    _fk_HoverPreview(sys.modules[__name__])
-    _HAS_HOVERPREVIEW = True
-except Exception as _e:
-    _HAS_HOVERPREVIEW = False
-    note_swallowed(T("拆出去的 HoverPreview.py 没找到，已退回内置简易版"), _e)
-    class HoverPreview:  # ★ 兜底：没模块也不崩，只是没这个功能
-        def __init__(self, *a, **k):
-            pass
-
-        def on_motion(self, *a, **k):
-            pass
-
-        def on_leave(self, *a, **k):
-            pass
-
-        def set_enabled(self, *a, **k):
-            pass
-
-
-
 # ---------- 兜底（★ 但注意：它会吃掉错误，所以要专门测"用的哪一份"）----------
 def _fallback():
     g = globals()
