@@ -158,7 +158,11 @@ def _fill():
         try:
             _v = getattr(_APP, _n, None)
             if _v is not None:
-                g[_n] = _Borrowed(_n) if _n in _MUTABLE else _v
+                # ★★★ 一律包代理（错题本 #168）：
+                #   模块的桩可能跑在**主程序还没定义这个名字**之前，
+                #   所以「启动时取快照」必然借不到。
+                #   ★ 代理是**读的时候才现取**，什么时候定义都不影响。
+                g[_n] = _Borrowed(_n)
         except Exception:
             pass
 

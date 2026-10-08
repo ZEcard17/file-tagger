@@ -23,6 +23,108 @@ import tkinter.font as tkfont
 from tkinter import ttk, messagebox, filedialog, colorchooser
 
 # ---------- 要向主程序借的名字（先占位，挂上后填真身） ----------
+class _Borrowed:
+    """★★ 借「会变的东西」的代理（★ 每次读回主程序现取）。
+
+    ★★★ `__call__` 不能少（错题本 #160）：**函数也会被借**，
+      少了它 `T("…")` 直接 TypeError，而且**会被上层 except 吞掉**。
+    """
+
+    def __init__(self, name, default=None):
+        object.__setattr__(self, "_n", name)
+        object.__setattr__(self, "_d", default)
+
+    def _v(self):
+        if _APP is not None:
+            try:
+                return getattr(_APP, object.__getattribute__(self, "_n"))
+            except Exception:
+                pass
+        return object.__getattribute__(self, "_d")
+
+    def __call__(self, *a, **k):
+        return self._v()(*a, **k)
+
+    def __getattr__(self, k):
+        return getattr(self._v(), k)
+
+    def __getitem__(self, k):
+        return self._v()[k]
+
+    def __setitem__(self, k, v):
+        self._v()[k] = v
+
+    def __iter__(self):
+        return iter(self._v())
+
+    def __len__(self):
+        return len(self._v())
+
+    def __bool__(self):
+        return bool(self._v())
+
+    def __eq__(self, o):
+        return self._v() == o
+
+    def __ne__(self, o):
+        return self._v() != o
+
+    def __lt__(self, o):
+        return self._v() < o
+
+    def __le__(self, o):
+        return self._v() <= o
+
+    def __gt__(self, o):
+        return self._v() > o
+
+    def __ge__(self, o):
+        return self._v() >= o
+
+    def __hash__(self):
+        return hash(self._v())
+
+    def __str__(self):
+        return str(self._v())
+
+    def __repr__(self):
+        return repr(self._v())
+
+    def __int__(self):
+        return int(self._v())
+
+    def __float__(self):
+        return float(self._v())
+
+    def __index__(self):
+        return int(self._v())
+
+    def __contains__(self, x):
+        return x in self._v()
+
+    def __add__(self, o):
+        return self._v() + o
+
+    def __radd__(self, o):
+        return o + self._v()
+
+    def __mul__(self, o):
+        return self._v() * o
+
+    def get(self, *a, **k):
+        return self._v().get(*a, **k)
+
+    def keys(self):
+        return self._v().keys()
+
+    def values(self):
+        return self._v().values()
+
+    def items(self):
+        return self._v().items()
+
+
+_MISS = object()   # 哨兵：区分「取不到」和「取到 None」
 _NEED = ['BOLD', 'FONT', 'UI_FONT_SIZE', 'note_swallowed', 'save_ui_setting', 'messagebox']
 _SIBLINGS = ['AutoNameRulesDialog', 'CategoryDialog', 'CategoryHiddenTagsDialog', 'CategoryItem', 'CategorySidebar', 'CategoryTagLinkDialog', 'PreviewPane', 'RemoveFileTagsDialog', 'ScanProgressDialog', 'ShortcutDialog', 'SimpleInputDialog', 'TagBoxGridDialog', 'TagBoxPicker', 'TagPickerDialog', 'UIScaleDialog']
 _APP = None
@@ -49,9 +151,13 @@ def _fill():
     g = globals()
     for _n in _NEED:
         try:
-            _v = getattr(_APP, _n, None)
-            if _v is not None:
-                g[_n] = _v
+            # ★★★ 用哨兵 + 代理（错题本 #168）
+            # ★★★ 无条件装上代理（错题本 #168 v3）：
+            #   当时**没有这个值**（主程序还没定义到那一行）也照样装 ——
+            #   代理是**读的时候**才回主程序取，所以什么时候定义都不影响。
+            #   ★ 这就是"代理"和"快照"的根本区别：
+            #     快照必须"当场有"，代理只要"用的时候有"。
+            g[_n] = _Borrowed(_n)
         except Exception:
             pass
 
