@@ -5976,6 +5976,51 @@ except Exception as _e:
     note_swallowed(T("搬出去的 面板_插件挂载.py 没找到"), _e)
 
 
+# ★★★ 「日志状态」这组方法已搬到 `AIxiede拆分开/程序分块/面板_日志状态.py`
+#   ★★ 方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_日志状态 as _面板日志状态
+    _面板日志状态._set_app(sys.modules[__name__])
+    _HAS_PANEL_日志状态 = True
+except Exception as _e:
+    _HAS_PANEL_日志状态 = False
+    note_swallowed(T("搬出去的 面板_日志状态.py 没找到"), _e)
+
+
+# ★★★ 「健康检查」这组方法已搬到 `AIxiede拆分开/程序分块/面板_健康检查.py`
+#   ★★ 方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_健康检查 as _面板健康检查
+    _面板健康检查._set_app(sys.modules[__name__])
+    _HAS_PANEL_健康检查 = True
+except Exception as _e:
+    _HAS_PANEL_健康检查 = False
+    note_swallowed(T("搬出去的 面板_健康检查.py 没找到"), _e)
+
+
+# ★★★ 「预览控制」这组方法已搬到 `AIxiede拆分开/程序分块/面板_预览控制.py`
+#   ★★ 方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_预览控制 as _面板预览控制
+    _面板预览控制._set_app(sys.modules[__name__])
+    _HAS_PANEL_预览控制 = True
+except Exception as _e:
+    _HAS_PANEL_预览控制 = False
+    note_swallowed(T("搬出去的 面板_预览控制.py 没找到"), _e)
+
+
 # ★★★ FileList 已拆到 `AIxiede拆分开/程序分块/FileList.py`（2026-10-08）
 #   ★★ 写法（错题本 #158）：① 直接 `from FileList import …`（不带包路径）
 #     ② `_set_app` 取别名 —— 模块名和类名同名时会跑到类上找
@@ -12857,185 +12902,23 @@ class FileTaggerApp:
         return _面板面板布局._layout_right_panes(self, *a, **k)
 
 
-    def _preview_index(self):
-        """预览窗格在 paned 里排第几（没显示就返回 -1）。"""
-        try:
-            panes = [str(p) for p in self.paned.panes()]
-            return panes.index(str(self.preview_frame))
-        except Exception:
-            return -1
+    def _preview_index(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_预览控制.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板预览控制._preview_index(self, *a, **k)
 
-    def toggle_preview(self):
-        """★ v25 补丁8：显示 / 隐藏右侧预览窗格（默认隐藏、宽度可拖、会记住）。
 
-        ★★ 2026-10-07 补：**跟 `toggle_sidebar` 一样，先把现状钉住**。
-          用户报「点右侧区域标签库开关、预览开关应该还是这样」——
-          意思是**右侧这两个开关也有"比例被重置"的毛病**。
-          ★ 原来这里：
-            · 关的时候**自己算了一遍宽度**（那段 `_preview_index()` 的逻辑），
-              但它只在 `idx >= 0` 且算出来 120~2000 之间才记 —— **容易漏**；
-            · 开的时候只 `_layout_right_panes()`，**没有"先记住现状"这一步**。
-          ★ 现在统一：**开头先 `_remember_pane_now()`**（一次记全三个面板），
-            关 / 开都受益，代码也少一大段。
-        """
-        try:
-            # ★ 先把"现在各面板的宽度"钉住（关 / 开都用得上）
-            try:
-                self._remember_pane_now()
-            except Exception:
-                pass
-            # ★★ 2026-10-07：标记"**正在重排分区**" —— 重排会把 sashpos
-            #   改成 Tk 自己的值（实测 320→395），而本方法结尾安排的
-            #   `after(400, _save_pane_sizes)` 会**如实记下那个错值**，
-            #   把用户拖的宽度覆盖掉。
-            #   → 重排期间不写盘（`_save_pane_sizes` 里会检查这个标记）。
-            #   ★ 700 毫秒后才解除 —— 要比那个 400 毫秒的延迟保存晚。
-            try:
-                self._pane_rearranging = True
-                self.root.after(700, lambda: setattr(self, "_pane_rearranging", False))
-            except Exception:
-                pass
-            if self.preview_frame.winfo_ismapped():
-                # ★ 补丁41：先改状态，再按新状态整体重排（不要单独 forget，
-                #   免得出现「forget 了但状态没跟上」的不一致）
-                self._preview_visible = False
-                self._reinsert_tag_frame()
-                self._preview_btn.config(text=T("📄 预览 ▲"))
-                # ★★ 2026-10-07：**关也要把宽度摆回去** —— 全撤重加之后 Tk
-                #   会把剩下的面板重新分，别的面板宽度就被挤动了
-                #   （实测：关标签库，分类库 320 → 395）。
-                try:
-                    self.root.update_idletasks()
-                except Exception:
-                    pass
-                self._restore_pane_widths()
-                try:
-                    self.root.after(60, self._restore_pane_widths)
-                except Exception:
-                    pass
-                self.set_status(T("预览窗格：已隐藏"))
-            else:
-                # ★ v25 补丁41：这里原来是 paned.insert(idx, ...) 按序号硬塞。
-                #   实测 ttk.PanedWindow 的 insert 索引**不能超过当前面板数**，
-                #   而序号又是按「最终应该有 4 个面板」算的 —— 于是只要此刻
-                #   少挂了一个面板就直接抛 "Slave index 2 out of bounds"，
-                #   被 except 吞掉之后表现就是「点预览没反应」。
-                #   现在统一走 _reinsert_tag_frame()：全撤掉、按正确顺序
-                #   重加一遍，永远不可能越界。
-                self._preview_visible = True
-                self._reinsert_tag_frame()
-                self._preview_btn.config(text=T("📄 预览 ▼"))
-                self.set_status(T("预览窗格：已显示（选中文件即可预览，拖分隔线调宽度）"))
-                # ★ 跟分类库一样：**等 Tk 把布局算完再摆宽度**，并补一次
-                #   （踩过：`paned.add()` 之后立刻 `sashpos()` 会被夹成 0）
-                try:
-                    self.root.update_idletasks()
-                except Exception:
-                    pass
-                # ★★★ 2026-10-07 **顺序：先让它摆右边比例，最后拿记住的值盖** ★★★
-                #   `_layout_right_panes()` 是"按当前 sashpos 反推"摆的 ——
-                #   而全撤重加之后 sashpos 已经是 Tk 的值（实测分类库 320→395），
-                #   **所以它会把用户拖的宽度推回去**。
-                #   → 让它先摆（它管"预览/标签库占多少"），
-                #     **最后 `_restore_pane_widths()` 拿记下来的值盖一遍**，
-                #     它才是最终说话的那个。
-                self._layout_right_panes()
-                self._restore_pane_widths()
-                try:
-                    self.root.after(120, self._restore_pane_widths)
-                except Exception:
-                    pass
-            save_ui_setting("preview_visible", self._preview_visible)
-        except Exception as _e:
-            note_swallowed(T("切换预览窗格失败"), _e)
+    def toggle_preview(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_预览控制.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板预览控制.toggle_preview(self, *a, **k)
 
-    def toggle_taglib(self):
-        """★ v25 补丁8：显示 / 隐藏右侧的「标签库（星图缩略图）」整列。
 
-        ★★ 2026-10-07 补：**跟 `toggle_sidebar` / `toggle_preview` 一样，
-          开头先把现状钉住**。
-          ★ 原来这里**关的时候一行都没记宽度**（对比 `toggle_preview` 还记了
-            一点）→ 用户拉好标签库宽度、关一次、再开就**回到默认值**。
-        """
-        try:
-            # ★ 先把"现在各面板的宽度"钉住
-            try:
-                self._remember_pane_now()
-            except Exception:
-                pass
-            # ★★ 2026-10-07：标记"**正在重排分区**" —— 重排会把 sashpos
-            #   改成 Tk 自己的值（实测 320→395），而本方法结尾安排的
-            #   `after(400, _save_pane_sizes)` 会**如实记下那个错值**，
-            #   把用户拖的宽度覆盖掉。
-            #   → 重排期间不写盘（`_save_pane_sizes` 里会检查这个标记）。
-            #   ★ 700 毫秒后才解除 —— 要比那个 400 毫秒的延迟保存晚。
-            try:
-                self._pane_rearranging = True
-                self.root.after(700, lambda: setattr(self, "_pane_rearranging", False))
-            except Exception:
-                pass
-            if self.tag_frame.winfo_ismapped():
-                # ★ 补丁41：同 toggle_preview —— 改状态 + 整体重排
-                self._taglib_visible = False
-                self._reinsert_tag_frame()
-                self._taglib_btn.config(text=T("🔖 标签库 ▲"))
-                # ★★ 2026-10-07：**关也要把宽度摆回去** —— 全撤重加之后 Tk
-                #   会把剩下的面板重新分，别的面板宽度就被挤动了
-                #   （实测：关标签库，分类库 320 → 395）。
-                try:
-                    self.root.update_idletasks()
-                except Exception:
-                    pass
-                self._restore_pane_widths()
-                try:
-                    self.root.after(60, self._restore_pane_widths)
-                except Exception:
-                    pass
-                self.set_status(T("标签库：已隐藏"))
-            else:
-                # ★ v25 补丁41：**这里原来是 self.paned.add(...)，
-                #   那是「追加到最后一位」—— 但标签库本该排在
-                #   「分类库│文件列表│预览窗格│标签库」的第 4 位。
-                #   于是关掉预览、再开标签库，标签库就跑到预览窗格
-                #   该在的位置上了；接着 _layout_right_panes 按固定
-                #   序号去挪分隔条，越界 → 日志里那条
-                #   「切换预览窗格失败：TclError: Slave index 2 out of bounds」。
-                #   现在改成按**正确的次序**插进去（和初始化时的顺序一致）。
-                # ★★ 2026-10-07 修「标签库关开之后宽度变 0 / 面板消失」★★
-                #   **顺序错了**：原来是
-                #       self._reinsert_tag_frame()      # ← 这时读到的还是 False！
-                #       self._taglib_visible = True     # ← 才设 True（太晚）
-                #   → `_reinsert_tag_frame()` 里按 `_taglib_visible` 判断要不要插，
-                #     读到 False → **标签库根本没被插回去**（实测：panes 里没有它，
-                #     而 visible 标志已经是 True —— 两边不一致）。
-                #   ✅ 必须**先设标志、再重排**（`toggle_sidebar` 就是这么写的，
-                #     所以它是好的）。
-                self._taglib_visible = True
-                self._reinsert_tag_frame()
-                self._taglib_btn.config(text=T("🔖 标签库 ▼"))
-                self.set_status(T("标签库：已显示"))
-                # ★ 等 Tk 算完布局再摆宽度（理由同 toggle_preview）
-                try:
-                    self.root.update_idletasks()
-                except Exception:
-                    pass
-                # ★★★ 2026-10-07 **顺序：先摆右边比例，最后拿记住的值盖** ★★★
-                #   理由同 `toggle_preview` —— `_layout_right_panes()` 会
-                #   按 Tk 重排后的 sashpos（395）把用户拖的 320 推回去。
-                self._layout_right_panes()
-                self._restore_pane_widths()
-                try:
-                    self.root.after(120, self._restore_pane_widths)
-                except Exception:
-                    pass
-            save_ui_setting("taglib_visible", self._taglib_visible)
-            # ★ 2026-10-03：宽度变了也记一下
-            try:
-                self.root.after(400, self._save_pane_sizes)
-            except Exception:
-                pass
-        except Exception as _e:
-            note_swallowed(T("切换标签库显示失败"), _e)
+    def toggle_taglib(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_预览控制.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板预览控制.toggle_taglib(self, *a, **k)
+
 
     def _reinsert_tag_frame(self):
         """★ v25 补丁41：把右侧面板按正确顺序摆好。
@@ -13389,92 +13272,23 @@ class FileTaggerApp:
         except Exception:
             pass
 
-    # ---------------- ★★ 2026-10-06：空格快速预览（Quick Look）----------------
-    def _quick_preview_init(self):
-        """开机时把「快速预览」准备好（不弹窗，只建对象）。"""
-        try:
-            self.quick_preview = QuickPreview(self)
-        except Exception as _e:
-            self.quick_preview = None
-            note_swallowed(T("快速预览没建起来（空格键会没反应）"), _e, quiet=True)
+    def _quick_preview_init(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_预览控制.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板预览控制._quick_preview_init(self, *a, **k)
 
-    def toggle_quick_preview(self):
-        """菜单 / 空格键都走这里。
 
-        ★★ 2026-10-07 修「快速预览没有开关的设置，只有开」（用户报）：
-          查证结果：**开关功能本身是好的**（实测 is_open 能 关→开→关→开）。
-          ★ 真正的原因有两个：
-            ① 菜单名字叫「快速预览（**空格键**）」—— 看着像"快捷键说明"，
-               **不像一个能开能关的开关**。→ 已改名「快速预览窗」，
-               并且它现在**带状态圆点**（绿=开着 / 红=关着）。
-            ② **没选中文件时点它，什么都不发生** ——
-               `QuickPreview.open()` 里只有一句
-               `set_status(T("先选中一个文件……"))`，
-               而状态栏那行字很小、很容易没注意 →
-               **用户以为"点了没反应、只能开"**。
-               → 现在改成**弹一个明确的提示框**，告诉他要先选文件。
-        """
-        qp = getattr(self, "quick_preview", None)
-        if qp is None:
-            messagebox.showinfo(
-                "快速预览",
-                "快速预览没能启用。\n\n"
-                "（多半是程序内部出了点小问题，不影响其它功能。）",
-                parent=self.root)
-            return
-        # ★ 要"开"之前先检查：有没有选中文件 —— 没选就明确告诉他
-        try:
-            _will_open = not qp.is_open()
-        except Exception:
-            _will_open = False
-        if _will_open:
-            try:
-                _cur = qp._current_path()
-            except Exception:
-                _cur = None
-            if not _cur:
-                messagebox.showinfo(
-                    "快速预览",
-                    "先**在文件列表里点一个文件**，再用快速预览。\n\n"
-                    "（也可以直接按空格键 —— 一样要先选中文件）",
-                    parent=self.root)
-                try:
-                    self.set_status(T("快速预览：先在列表里点一个文件"))
-                except Exception:
-                    pass
-                return
-        try:
-            qp.toggle()
-        except Exception as _e:
-            note_swallowed(T("快速预览开关失败"), _e)
-            messagebox.showwarning("快速预览", "打不开预览窗：%s" % _e,
-                                   parent=self.root)
-        # ★ 开关完刷一下菜单圆点（让"绿/红"立刻反映真实状态）
-        try:
-            self._refresh_menu_states()
-        except Exception:
-            pass
+    def toggle_quick_preview(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_预览控制.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板预览控制.toggle_quick_preview(self, *a, **k)
 
-    def on_quick_preview_key(self, event=None):
-        """★ 空格键入口。
 
-        ★★ 两个务必：
-          ① **正在输入框里打字时不能抢空格** —— 否则你在搜索框打不出空格，
-             这是最容易被骂的那种 bug。所以先问 `_focus_is_input()`。
-          ② **快速预览窗开着的时候，空格归它管**（用来关窗）。
-             如果这里也响应，就会「关了又开」，来回抽搐。
-        """
-        try:
-            if self._focus_is_input():
-                return None
-        except Exception:
-            pass
-        qp = getattr(self, "quick_preview", None)
-        if qp is not None and qp.is_open():
-            # 预览窗自己绑了空格（负责关掉），这里不再插手
-            return None
-        self.toggle_quick_preview()
-        return "break"
+    def on_quick_preview_key(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_预览控制.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板预览控制.on_quick_preview_key(self, *a, **k)
+
 
     # ---------- ★ v25 补丁26：标签盒（整条横在窗口底部，可开关） ----------
     def _build_tagbox(self):
@@ -13551,13 +13365,11 @@ class FileTaggerApp:
             messagebox.showerror("标签盒", "打不开勾选窗口：%s" % exc,
                                  parent=self.root)
 
-    def toggle_hover_preview(self):
-        """★ 补丁27：鼠标悬停预览 开 / 关。"""
-        try:
-            self.hover.toggle()
-        except Exception as exc:
-            messagebox.showerror("悬停预览", "切换失败：%s" % exc,
-                                 parent=self.root)
+    def toggle_hover_preview(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_预览控制.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板预览控制.toggle_hover_preview(self, *a, **k)
+
 
     def _open_cache_settings(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_缓存设置.py`
@@ -13856,67 +13668,11 @@ class FileTaggerApp:
         #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
         return _面板面板布局._view_info_text(self, *a, **k)
 
-    def set_status(self, text):
-        # ★★ 2026-10-03：**后台线程也能直接调**（之前只在主线程用）。
-        #   原因：log_problem → set_status 这条路会在 _stuck_watchdog
-        #   （后台线程，每秒跑一次）里被触发，self.status.config 直接
-        #   在后台线程碰 Tk 控件，关窗瞬间偶发 -1073741819 崩溃。
-        #   现在：先看是不是主线程，不在主线程就走 _ui_threadsafe 包一下。
-        if (threading.current_thread() is not threading.main_thread()
-                and getattr(self, "_ui_threadsafe", None) is not None
-                and not APP_CLOSING):
-            try:
-                self._ui_threadsafe(self.set_status, text)
-                return
-            except Exception:
-                pass     # 主程序关了 / 信箱满了 —— 退回去按原代码继续（再撞死也比丢字好）
-        # ★★ v25 补丁42：**状态栏文字太长会把右边那排按钮挤出窗口。**
-        #   用户反馈：「最下面那一行经常因为『统计分类中』左边黑灰文字
-        #   重复又太长，导致有不少按钮被挤掉了不显示」。
-        #   原因：self.status 是个没宽度上限的 ttk.Label，左边文字越长，
-        #   它占的地方越大；右边那 7 个按钮是 pack(side="right") 的，
-        #   位置被挤到窗口外面去了。
-        #   修法：**按窗口实际宽度动态算能放多少字**（不是写死一个数）——
-        #   窗口窄就少显示几个字，窗口宽就多显示。超出的部分进「📋 输出」。
-        t = str(text or "")
-        if len(t) > 6:
-            try:
-                avail = self._status_avail_px()
-                if avail > 0:
-                    # 用真字体量一次：这段文字要多少像素
-                    f = tkfont.Font(family=FONT, size=UI_FONT_SIZE)
-                    if f.measure(t) > avail:
-                        # 逐字砍到放得下（两端夹逼，很快就出来）
-                        lo, hi = 1, len(t)
-                        while lo < hi:
-                            mid = (lo + hi + 1) // 2
-                            if f.measure(t[:mid] + "…") <= avail:
-                                lo = mid
-                            else:
-                                hi = mid - 1
-                        t = t[:max(1, lo)] + "…"
-                        try:
-                            self.log_output(str(text))   # 全文进输出面板
-                        except Exception:
-                            pass
-            except Exception:
-                # 量不出来就退回「按字数硬截」
-                if len(t) > 58:
-                    t = t[:57] + "…"
-        try:
-            self.status.config(text=t)
-        except Exception:
-            pass
-        # ★ v25 补丁10：把「当前视图信息」显示在状态栏消息的**右边**。
-        #   （以前是塞到标签条最右端；用户要求挪到这儿。）
-        #   ★ 补丁42：它也必须**按剩余宽度截断** —— 实测它单独能占
-        #     423 像素，正好把最左边那两个按钮（网盘 / 标签盒）顶出窗口。
-        try:
-            info = self._view_info_text(text)
-            if info is not None:
-                self._view_info_lbl.config(text=self._fit_view_info(info))
-        except Exception:
-            pass
+    def set_status(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_日志状态.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板日志状态.set_status(self, *a, **k)
+
 
     def _fit_view_info(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_面板布局.py`
@@ -14017,21 +13773,11 @@ class FileTaggerApp:
         return _面板面板布局._status_avail_px(self, *a, **k)
 
 
-    def toggle_tagbar(self):
-        """★ v25 补丁7：显示 / 隐藏标签条（默认隐藏）。
+    def toggle_tagbar(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_预览控制.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板预览控制.toggle_tagbar(self, *a, **k)
 
-        标签条现在是**整条底部面板**（横跨整个窗口，和「🔔 问题 / 📋 输出」
-        一样），不再挤在文件列表那一列里。
-        """
-        try:
-            vis = not getattr(self.file_list, "tagbar_visible", False)
-            self.file_list.set_tagbar_visible(vis)
-            self._tagbar_btn.config(
-                text=T("🏷 标签条 ▼") if vis else T("🏷 标签条 ▲"))
-            self.set_status(T("标签条：已显示") if vis
-                            else "标签条：已隐藏（点右下角「🏷 标签条」再看）")
-        except Exception as _e:
-            note_swallowed(T("切换标签条显示失败"), _e)
 
     def _pack_tagbar(self, visible):
         """★ v25 补丁7：把标签条当成「整条底部面板」显示 / 收起。
@@ -14052,150 +13798,41 @@ class FileTaggerApp:
         except Exception as _e:
             note_swallowed(T("显示/隐藏底部标签条失败"), _e)
 
-    # ---------------- ★ 日志面板 ----------------
-    def _build_log_panel(self):
-        self._log_panel = ttk.Frame(self.root)
-        # 初始不显示
+    def _build_log_panel(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_健康检查.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板健康检查._build_log_panel(self, *a, **k)
 
-        nb = ttk.Notebook(self._log_panel)
-        nb.pack(fill="both", expand=True, padx=4, pady=(4, 2))
 
-        self._log_nb = nb
+    def _toggle_log_panel(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_健康检查.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板健康检查._toggle_log_panel(self, *a, **k)
 
-        # 输出页
-        f_out = ttk.Frame(nb)
-        nb.add(f_out, text=T("输出"))
-        self._text_output = tk.Text(
-            f_out, wrap="none", width=48, height=10, font=("Consolas", UI_FONT_SIZE),
-            bg=theme_get("panel_bg2"), fg=theme_get("fg"), borderwidth=0,
-            highlightthickness=0,
-            # ★ 2026-10-07 加行距（用户报「行高比字矮、字挤在一起」）：
-            #   Tk Text 默认 spacing1/spacing3 都是 0 ——
-            #   也就是"字多高就占多高"，**一点喘气空间都没有**。
-            #   实测 Consolas 14 的 linespace = 25，紧贴着看就很挤。
-            #   上下各留 2 像素，整片就松快了。
-            spacing1=2, spacing3=2)
-        sb1 = ttk.Scrollbar(f_out, orient="vertical",
-                            command=self._text_output.yview)
-        self._text_output.configure(yscrollcommand=sb1.set)
-        sb1.pack(side="right", fill="y")
-        self._text_output.pack(side="left", fill="both", expand=True)
-        self._text_output.configure(state="disabled")
 
-        # 问题页
-        f_prob = ttk.Frame(nb)
-        nb.add(f_prob, text=T("问题"))
-        self._text_problems = tk.Text(
-            f_prob, wrap="none", width=48, height=10, font=("Consolas", UI_FONT_SIZE),
-            bg=theme_get("panel_bg"), fg=theme_get("fg"), borderwidth=0,
-            highlightthickness=0, spacing1=2, spacing3=2)
-        sb2 = ttk.Scrollbar(f_prob, orient="vertical",
-                            command=self._text_problems.yview)
-        self._text_problems.configure(yscrollcommand=sb2.set)
-        sb2.pack(side="right", fill="y")
-        self._text_problems.pack(side="left", fill="both", expand=True)
-        self._text_problems.configure(state="disabled")
-        self._text_problems.tag_configure("warn", foreground=theme_get("warn"))
-        self._text_problems.tag_configure("error", foreground=theme_get("danger"))
-        self._text_problems.tag_configure("info", foreground=theme_get("accent"))
+    def _show_log_panel(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_健康检查.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板健康检查._show_log_panel(self, *a, **k)
 
-        # 进度页
-        f_prog = ttk.Frame(nb)
-        nb.add(f_prog, text=T("进度"))
-        self._text_progress = tk.Text(
-            f_prog, wrap="none", width=48, height=10, font=("Consolas", UI_FONT_SIZE),
-            bg=theme_get("panel_bg"), fg=theme_get("fg"), borderwidth=0,
-            highlightthickness=0, spacing1=2, spacing3=2)
-        sb3 = ttk.Scrollbar(f_prog, orient="vertical",
-                            command=self._text_progress.yview)
-        self._text_progress.configure(yscrollcommand=sb3.set)
-        sb3.pack(side="right", fill="y")
-        self._text_progress.pack(side="left", fill="both", expand=True)
-        self._text_progress.configure(state="disabled")
 
-        # 底部：清空 / 关闭
-        bottom = ttk.Frame(self._log_panel)
-        bottom.pack(fill="x", padx=4, pady=(0, 4))
-        ttk.Button(bottom, text=T("清空当前"), width=10,
-                   command=self._clear_current_log_tab).pack(side="left")
-        ttk.Button(bottom, text=T("复制全部"), width=10,
-                   command=self._copy_current_log_tab).pack(side="left",
-                                                            padx=(4, 0))
-        ttk.Button(bottom, text=T("▲ 收起"), width=8,
-                   command=self._hide_log_panel).pack(side="right")
+    def _hide_log_panel(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_健康检查.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板健康检查._hide_log_panel(self, *a, **k)
 
-    def _toggle_log_panel(self, which="output"):
-        if self._log_panel_visible:
-            self._hide_log_panel()
-            return
-        self._show_log_panel(which)
 
-    def _show_log_panel(self, which="output"):
-        try:
-            self._log_panel.pack(fill="x", side="bottom",
-                                 before=self.status.master)
-        except Exception:
-            try:
-                self._log_panel.pack(fill="x", side="bottom")
-            except Exception:
-                return
-        self._log_panel_visible = True
-        try:
-            idx = {"output": 0, "problems": 1, "progress": 2}.get(which, 0)
-            self._log_nb.select(idx)
-        except Exception:
-            pass
-        try:
-            self._output_btn.config(text=T("📋 输出 ▼"))
-        except Exception:
-            pass
+    def _clear_current_log_tab(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_健康检查.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板健康检查._clear_current_log_tab(self, *a, **k)
 
-    def _hide_log_panel(self):
-        try:
-            self._log_panel.pack_forget()
-        except Exception:
-            pass
-        self._log_panel_visible = False
-        try:
-            self._output_btn.config(text=T("📋 输出 ▲"))
-        except Exception:
-            pass
 
-    def _clear_current_log_tab(self):
-        try:
-            idx = self._log_nb.index(self._log_nb.select())
-        except Exception:
-            idx = 0
-        widget = (self._text_output, self._text_problems,
-                  self._text_progress)[idx]
-        try:
-            widget.configure(state="normal")
-            widget.delete("1.0", "end")
-            widget.configure(state="disabled")
-        except Exception:
-            pass
-        if idx == 1:
-            self._problem_count = 0
-            self._update_problem_badge()
-        if idx == 0:
-            self._output_lines = 0
-        if idx == 2:
-            self._progress_lines = 0
+    def _copy_current_log_tab(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_健康检查.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板健康检查._copy_current_log_tab(self, *a, **k)
 
-    def _copy_current_log_tab(self):
-        try:
-            idx = self._log_nb.index(self._log_nb.select())
-        except Exception:
-            idx = 0
-        widget = (self._text_output, self._text_problems,
-                  self._text_progress)[idx]
-        try:
-            content = widget.get("1.0", "end")
-            self.root.clipboard_clear()
-            self.root.clipboard_append(content)
-            self.set_status(T("已复制到剪贴板"))
-        except Exception:
-            pass
 
     def _append_to_text(self, widget, text, tag=None):
         try:
@@ -14225,34 +13862,11 @@ class FileTaggerApp:
             return False
         return True
 
-    # ---------- ★★ 2026-10-03：后台线程「回主线程」的安全通道 ----------
-    def _ui_threadsafe(self, fn, *a):
-        """从**后台线程**把一件事交回主线程做 —— 绝不卡住、绝不丢。
+    def _ui_threadsafe(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_日志状态.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板日志状态._ui_threadsafe(self, *a, **k)
 
-        ★ 为什么不能用 self.root.after()：实测（在假家目录里把程序跑起来，
-          用真鼠标真点击测的时候发现的）后台线程调 `root.after()` 会在
-          tkinter 内部的 createcommand 上**卡死** —— Tcl 解释器同一时刻
-          只允许一个线程碰它；主线程正在事件循环里的时候，后台线程这一步
-          就可能永远等下去（线程还活着，但永远不会返回）。
-
-          卡住的后果特别隐蔽、也特别烦：
-            · `_bg_scan_worker`（后台扫目录）干完活要 root.after 回一句
-              「扫完了」—— 这步一卡，主程序里「正在扫描」那个标记
-              （_bg_scan_running_dir）就**永远挂着**，
-              于是**以后打开任何没有缓存的文件夹都不会再扫，列表一直空着**。
-            · log_output 也一样，卡一次就少一批日志。
-          （实测就是这么复现的：新目录永远停在「首次扫描中…」。）
-
-        ★ 现在改成走「信箱」：后台线程只往一个 Python 列表里塞东西
-          （加锁，不碰 Tcl，绝不会卡）；主线程每 60 毫秒把信箱取空。
-        """
-        if APP_CLOSING or getattr(self, "_closing", False):
-            return
-        try:
-            with self._ui_queue_lock:
-                self._ui_queue.append((fn, a))
-        except Exception:
-            pass
 
     def _ui_poll(self):
         """（主线程）把后台线程塞进「信箱」的活儿干一遍。
@@ -14293,143 +13907,41 @@ class FileTaggerApp:
         except Exception:
             pass
 
-    def log_output(self, text):
-        line = f"[{self._now_str()}] {text}"
-        self._output_lines += 1
-        if not self._ui_alive():
-            return
-        try:
-            self._ui_threadsafe(self._append_to_text, self._text_output, line)
-        except Exception as exc:
-            # ★★ 2026-10-03：之前 except: pass，_ui_threadsafe 失败就静默丢日志。
-            #   改成至少记一笔 warn，方便排查「为什么某段日志没出现」。
-            note_swallowed(T("log_output：回主线程写「输出」面板失败"), exc,
-                           level="warn")
+    def log_output(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_日志状态.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板日志状态.log_output(self, *a, **k)
 
-    def log_progress(self, text):
-        line = f"[{self._now_str()}] {text}"
-        self._progress_lines += 1
-        if not self._ui_alive():
-            return
-        try:
-            self._ui_threadsafe(self._append_to_text, self._text_progress, line)
-        except Exception as exc:
-            note_swallowed(T("log_progress：回主线程写「进度」面板失败"), exc,
-                           level="warn")
 
-    def log_problem(self, text, level="warn"):
-        """level: warn / error / info"""
-        line = f"[{self._now_str()}] {text}"
-        self._problem_count += 1
-        # ★★ 2026-10-06：顺手记进「用法记录」（听诊器）。
-        #   ★ 放在 `_ui_alive()` 检查**前面** —— 关窗那一刻报的问题
-        #     也得记上（那正是最容易出问题的时候）。
-        #   ★★ 但**要防重复记**：`note_swallowed` 也会把同一件事弹到
-        #     「问题」面板、从而走到这里。不防的话同一个错会被记两次，
-        #     汇总出来的次数直接翻倍（实测踩到了）。
-        #     判据：这条 text 是不是刚从 note_swallowed 过来的。
-        try:
-            if not self._log_problem_is_echo(text):
-                _usage_note("problem", text, level=level,
-                            extra=self._usage_view_hint())
-        except Exception:
-            pass
-        if not self._ui_alive():
-            return
-        # ★★ 2026-10-07 修「**问题按钮的颜色/数字第一次变化有延迟**」（用户报）★★
-        #   ★ 真因（实测量出来的）：
-        #     `_update_problem_badge` 原来**只走 `_ui_threadsafe`**（信箱），
-        #     而主线程**每 60 毫秒**才把信箱取空一次 →
-        #     所以点出一个错之后，**按钮上的数字要等最多 60ms 才变**。
-        #     实测：
-        #       立刻(5ms 后) → text 还是「问题 1」（**没变**）
-        #       120ms 后    → 才变成「问题 2」
-        #     ★ 用户看到的"延迟"就是这个。
-        #
-        #   ★ 修法：**如果当前就在主线程，直接改，立刻生效**；
-        #     只有真从后台线程来的时候才走信箱（那时必须走，见
-        #     `_ui_threadsafe` 的说明：后台线程碰 Tcl 会卡死）。
-        #     ★ 这也是本程序里已有的写法（搜 `current_thread() is
-        #       threading.main_thread` 能找到同样的判断）。
-        _on_main = False
-        try:
-            _on_main = (threading.current_thread()
-                        is threading.main_thread())
-        except Exception:
-            _on_main = False
-        try:
-            self._ui_threadsafe(self._append_to_text, self._text_problems,
-                                line, level)
-            if _on_main:
-                # ★ 就在主线程 —— 立刻刷，别等那 60 毫秒
-                self._update_problem_badge()
-                try:
-                    self._text_problems.see("end")
-                except Exception:
-                    pass
-            else:
-                self._ui_threadsafe(self._update_problem_badge)
-        except Exception as exc:
-            note_swallowed(T("log_problem：回主线程写「问题」面板失败"), exc,
-                           level="warn")
-        try:
-            self.set_status(f"⚠ {text}")
-        except Exception:
-            pass
+    def log_progress(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_日志状态.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板日志状态.log_progress(self, *a, **k)
 
-    def _usage_view_hint(self):
-        """★ 2026-10-06：记下「出错时用户在看哪个视图」。
 
-        ★★ 只返回**视图种类**这种非隐私信息，绝不带路径 / 文件名 / 标签名。
-           （外面查到的血泪教训：带路径的日志用户不敢发给别人看。）
-        """
-        try:
-            vm = str(getattr(self, "view_mode", "") or "")
-            m = {"dir": "文件夹", "cat": "分类", "all": T("全部文件")}
-            base = m.get(vm, vm or "未知")
-            if getattr(self, "net_browse_mode", "") == "real":
-                base += "+网盘实时"
-            return base
-        except Exception:
-            return ""
+    def log_problem(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_日志状态.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板日志状态.log_problem(self, *a, **k)
 
-    def _log_problem_is_echo(self, text):
-        """★ 2026-10-06：判断这条「问题」是不是刚从 note_swallowed 弹过来的。
 
-        为什么要这个：`note_swallowed` 出错时会调 `log_problem` 把话弹到
-        「问题」面板 —— 于是**同一件事走了两条路进用法记录**，
-        汇总出来的次数会翻倍（实测：一次错误记成 2 条）。
+    def _usage_view_hint(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_健康检查.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板健康检查._usage_view_hint(self, *a, **k)
 
-        ★★ 这里踩了一次，写清楚：**不能去读账本文件来判断**。
-           因为 `note_swallowed` 只是把记录塞进**内存缓冲**，
-           要等攒够 20 条或过 5 秒才落盘。而 log_problem 是**紧接着**
-           被调用的 —— 那时候磁盘上根本没有那条 swallow 记录，
-           拿文件去比对永远比不着（实测：还是记重了）。
 
-           正确的判据在**内存**里：`note_swallowed` 更新过的
-           `_SWALLOW_LAST`（"刚才谁在哪儿报的"）。拿它比一下就行。
-        """
-        try:
-            t = str(text or "")
-            if not t:
-                return False
-            last = _SWALLOW_LAST.get("where") or ""
-            if last and t.startswith(str(last) + "："):
-                return True
-            return False
-        except Exception:
-            # ★ 判不出来就当**不是**回声（宁可多记一条，也别把真问题漏了）
-            return False
+    def _log_problem_is_echo(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_健康检查.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板健康检查._log_problem_is_echo(self, *a, **k)
 
-    def _update_problem_badge(self):
-        try:
-            n = self._problem_count
-            if n > 0:
-                self._problem_btn.config(text=T("🔔 问题 {n}", n=n))
-            else:
-                self._problem_btn.config(text=T("🔔 问题 0"))
-        except Exception:
-            pass
+
+    def _update_problem_badge(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_健康检查.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板健康检查._update_problem_badge(self, *a, **k)
+
 
     # ---------------- ★ 卡顿检测 ----------------
     def _heartbeat_tick(self):
@@ -14452,82 +13964,26 @@ class FileTaggerApp:
         except Exception:
             pass
 
-    def _stuck_watchdog(self):
-        """★ 盯着「界面卡了多久」。**报一笔这件事本身不许拖慢界面。**"""
-        while True:
-            try:
-                time.sleep(1.0)
-                # ★ v25 补丁18：窗口开始关了 → 这个线程立刻收工。
-                if not self._ui_alive():
-                    return
-                now = time.time()
-                # ★★ 2026-10-06：时间戳现在来自「打卡线程」（见 _heartbeat_start）——
-                #   它不依赖界面闲不闲，所以「切文件切得快」不会再被误判。
-                gap = now - float(_HEART.get("stamp", now) or now)
-                if gap >= 3.0 and not _HEART.get("reported"):
-                    # ★ 正在扫索引 / 后台比对目录时，界面短暂卡一下是正常的
-                    try:
-                        if INDEX_SCAN_EVENT.is_set():
-                            continue
-                        if getattr(self, "_bg_scan_running_dir", None):
-                            continue
-                    except Exception:
-                        pass
-                    _HEART["reported"] = True
-                    msg = (f"界面无响应 {gap:.1f} 秒"
-                           f"（可能正在做重活；点右下角「问题」查看日志）")
-                    # ★★ 关键：**只排队，不直接动手** ——
-                    #   直接 self.log_problem(...) 是主线程的活儿（还碰 Tk），
-                    #   界面正忙的时候干这个 = 火上浇油（实测一次要 1.36 秒）。
-                    _bg_post(self.log_problem, msg, "warn")
-                    _bg_post(self.log_output, msg)
-            except Exception:
-                pass
+    def _stuck_watchdog(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_健康检查.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板健康检查._stuck_watchdog(self, *a, **k)
+
 
 
 
     def _install_error_spy(self, *a, **k):
-        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_插件挂载.py`
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_健康检查.py`
         #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
-        return _面板插件挂载._install_error_spy(self, *a, **k)
+        return _面板健康检查._install_error_spy(self, *a, **k)
 
 
-    def _startup_health_check(self):
-        """开机后轻轻看一眼「有没有在偷偷出错」。
 
-        故意做得非常轻：只读内存里的计数，不碰数据库、不扫盘。
-        也故意**不打扰用户** —— 只写进「问题」面板，点开才看细节。
+    def _startup_health_check(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_健康检查.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板健康检查._startup_health_check(self, *a, **k)
 
-        ★★ 2026-10-06：顺手**按用户的缓存设置清一次旧缓存**（后台线程，
-           绝不拖慢启动）。清理规则见「界面 → 📥 网盘预览缓存设置」。
-        """
-        # ★ 先丢一个后台线程去清缓存（不阻塞开机）
-        try:
-            import threading as _th
-
-            def _clean():
-                try:
-                    msg = _cache_clean_old()
-                    if msg and "不用清" not in msg and "很干净" not in msg:
-                        self.log_problem(T("缓存清理：") + msg, level="info")
-                except Exception:
-                    pass
-
-            _th.Thread(target=_clean, daemon=True, name="缓存清理").start()
-        except Exception:
-            pass
-
-        try:
-            rep = swallowed_report()
-            if not rep:
-                return
-            total = sum(n for _, n in rep)
-            self.log_problem(
-                f"本次启动发现 {len(rep)} 类「没吭声的小毛病」（共 {total} 次）。"
-                f"多半不影响使用，但会积少成多 —— 需要时把这清单发我。",
-                level="info")
-        except Exception:
-            pass
 
     def show_health_report(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_帮助关于.py`
@@ -14535,60 +13991,24 @@ class FileTaggerApp:
         return _面板帮助关于.show_health_report(self, *a, **k)
 
 
-    def dump_swallowed_report(self):
-        """把「哪些地方在偷偷出错」整理成人话，供排查用。
-
-        用户可能想要一份能直接发出去的清单（他自己看不懂代码，
-        所以输出必须是中文说法 + 次数）。
-        """
-        try:
-            rep = swallowed_report()
-            if not rep:
-                return "程序到目前为止没有发现「偷偷出错」的地方。"
-            out = ["以下地方出过错（次数越多越值得查）：", ""]
-            for name, n in rep[:60]:
-                out.append(f"  · {name} —— {n} 次")
-            if len(rep) > 60:
-                out.append(f"  …还有 {len(rep) - 60} 类")
-            return "\n".join(out)
-        except Exception as e:
-            return f"整理清单时出错：{e}"
+    def dump_swallowed_report(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_健康检查.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板健康检查.dump_swallowed_report(self, *a, **k)
 
 
-    # ---------------- ★ 右下角活动指示器 ----------------
-    def begin_activity(self, text="处理中…"):
-        """开始一个后台任务，右下角显示转圈动画。"""
-        try:
-            self._activity_count += 1
-            self._activity_texts.append(text or "处理中…")
-            self._activity_stack.append((text or "处理中…", time.time()))
-            self._refresh_activity_ui()
-            self._start_spinner()
-            self.log_progress(f"▶ 开始：{text}")
-        except Exception:
-            pass
 
-    def end_activity(self):
-        """结束一个后台任务；计数归零后自动隐藏。"""
-        try:
-            if self._activity_count > 0:
-                self._activity_count -= 1
-            if self._activity_texts:
-                self._activity_texts.pop()
-            name, t0 = ("?", time.time())
-            if self._activity_stack:
-                name, t0 = self._activity_stack.pop()
-            dt = time.time() - t0
-            if dt >= 1.0:
-                self.log_progress(f"✓ 完成：{name}（{dt:.1f} 秒）")
-            else:
-                self.log_progress(f"✓ 完成：{name}")
-            if dt >= 3.0:
-                self.log_problem(
-                    f"「{name}」耗时 {dt:.1f} 秒（偏慢）", level="warn")
-            self._refresh_activity_ui()
-        except Exception:
-            pass
+    def begin_activity(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_日志状态.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板日志状态.begin_activity(self, *a, **k)
+
+
+    def end_activity(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_日志状态.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板日志状态.end_activity(self, *a, **k)
+
 
     def _refresh_activity_ui(self):
         try:
@@ -16805,24 +16225,11 @@ class FileTaggerApp:
         except Exception:
             pass
 
-    # ---------- ★ v24：标签条作用范围（当前页 / 整个视图）----------
-    def _invalidate_tag_scope(self):
-        """基础视图换了 / 标签变了 → 整库标签统计作废。"""
-        self._tag_scope_cache = None
-        self._tag_scope_cache_key = None
-        self._tag_scope_scan_key = None
-        # 注意：不清 _tag_scope_inflight —— 同一个视图正在统计时不要重复开线程
-        self._tag_filter_base_spec = None
-        try:
-            self.file_list.set_tag_scope_stats(None)
-        except Exception:
-            pass
-        # 当前若在「整个视图」范围，顺手重新统计（异步，避免打断视图切换）
-        if getattr(self.file_list, "tag_scope", "page") == "view":
-            try:
-                self.root.after(1, self._start_tag_scope_scan)
-            except Exception:
-                pass
+    def _invalidate_tag_scope(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_日志状态.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板日志状态._invalidate_tag_scope(self, *a, **k)
+
 
     def _tag_base_spec(self):
         """标签筛选前的原始视图规格（没在筛选时就是当前视图）。"""
@@ -19302,23 +18709,11 @@ class FileTaggerApp:
             pass
         self._refresh_dialog_hints()
 
-    def _refresh_dialog_hints(self):
-        """刷一下打开着的「自动标签规则」/「索引管理」里的闲时信息。"""
-        try:
-            children = list(self.root.winfo_children())
-        except Exception:
-            return
-        for w in children:
-            if not isinstance(w, (AutoTagRulesDialog, IndexManagerDialog)):
-                continue
-            try:
-                w._refresh_idle_hint()
-            except Exception:
-                pass
-            try:
-                w._reload()
-            except Exception:
-                pass
+    def _refresh_dialog_hints(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_健康检查.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板健康检查._refresh_dialog_hints(self, *a, **k)
+
 
     def on_close(self):
         # ★ v25 补丁14：关窗前先把「还在排队的后台扫描」掐掉 ——
