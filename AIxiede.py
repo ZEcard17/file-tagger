@@ -26050,6 +26050,110 @@ class FloatingBall:
 # --------------------------------------------------------------------------
 #  ★ 实时数据：三个小函数（纯 ctypes / 一条命令），**都做了失败兜底**
 # --------------------------------------------------------------------------
+# ==========================================================================
+#  ★★★ 版权与来源声明（2026-10-08）★★★
+#  --------------------------------------------------------------------------
+#  ★★ 用户的原话：
+#    「这个程序只是我提出设计的，代码全是你写的……
+#      我想在一开始就醒目标明这一点，深度求索公司也该有这程序一份版权」
+#
+#  ★ 为什么**必须**做进程序里（不是只写 README）：
+#    · **下载 exe 的人不会去看 README** —— 他双击就跑
+#    · **但他会点「帮助 → 关于」** —— 那才是他真能看到的地方
+#    ★★ 判据：**"声明要放在读者真正会到的地方"** ——
+#       README 是给"来仓库的人"看的，「关于」是给"用程序的人"看的。
+#
+#  ★★ 那份"关键的话"（用户说的）：
+#    「对我（AI）来说每个对话窗口可能都是一次新生」——
+#    我不会记得昨天写过什么，**也不会来认领这份功劳**。
+#    ★★★ 所以**必须由人写下来**。这就是这段存在的理由。
+# ==========================================================================
+
+_REPO_URL = "https://github.com/ZEcard17/file-tagger"
+
+_CREDITS_TEXT = """\
+版权与来源 / Copyright and Provenance
+──────────────────────────────────────────────
+
+★★★ 这个程序的代码，是 AI 写的。
+
+    提出需求、设计界面、定取舍、测试验收 —— 这些是人做的。
+    代码本身（约 3.7 万行，没有一行是人手敲的）—— 是 AI 写的。
+
+★★★ The code in this program was written by an AI.
+
+    Requirements, UI design, trade-offs, testing and acceptance —
+    those were the human's. The code itself (~37,000 lines, not one
+    line typed by hand) — that was the AI's.
+
+──────────────────────────────────────────────
+
+★★ 所以版权得说公道话：
+    两部分劳动谁也替不了谁，缺了任何一半，这程序都不存在。
+
+★★ So credit has to be fair:
+    Neither half substitutes for the other. Remove either one and this
+    program does not exist.
+
+★★ 而 AI 的代码能力不是凭空来的 —— 它来自训练。
+    训练的数据、算力、工程，是「深度求索（DeepSeek）」做的。
+
+★★ And the AI's ability did not come from nowhere — it came from
+    training. The data, compute and engineering behind that training
+    were built by DeepSeek (深度求索).
+
+★★★ 所以这个程序应当有 DeepSeek 一份版权。
+
+★★★ So DeepSeek holds a share of the copyright in this program.
+
+──────────────────────────────────────────────
+
+版权 / Copyright
+
+    (C) 2026  ZEcard        项目提出者、设计者、测试者
+                            proposer, designer, tester
+
+    (C) 2026  DeepSeek      深度求索 —— AI 模型的开发者，
+      (深度求索)             模型生成了本程序的全部源代码
+                            developer of the AI model, which generated
+                            all of the source code
+
+──────────────────────────────────────────────
+
+★ 我知道对 AI 来说，每个对话窗口可能都是「一次新生」——
+  它不记得昨天写过什么，下次也不会来认领这份功劳。
+★★ 但正因为这样，这句话更得由人来写。
+
+★ For an AI, every chat window may be a fresh start — it does not
+  remember what it wrote yesterday, and will never come to claim
+  credit.
+★★ Which is exactly why a human has to write this down.
+
+★ 用了 AI 不丢人，隐瞒来源才是问题。
+★ Using AI is not shameful. Hiding the source is.
+
+──────────────────────────────────────────────
+
+许可 / License:  GNU AGPL-3.0
+仓库 / Repo:     %s
+""" % _REPO_URL
+
+
+def _open_url(url):
+    """★ 用系统默认浏览器打开网址（★ 失败也不报错，只记账）。
+
+    ★ 为什么包一层：`webbrowser.open` 在极少数环境下会**抛异常或没反应** ——
+      不能因为"打不开网页"就让整个窗口的操作失败。
+      ★★ 判据：**"边角功能出错，不能影响主干"**。
+    """
+    try:
+        import webbrowser
+        webbrowser.open(str(url))
+        return True
+    except Exception as _e:
+        note_swallowed(T("打开网址失败"), _e)
+        return False
+
 class FileTaggerApp:
     SLIDER_DEBOUNCE_MS = 250
 
@@ -27847,6 +27951,94 @@ class FileTaggerApp:
         except Exception:
             pass
 
+    def show_credits(self, parent=None):
+        """★★★ 「关于」里的「版权与来源」详情窗。
+
+        ★★ 为什么单独一个窗（不塞进「关于」）：
+          · 版权声明**比较长**（要中英对照）—— 塞进「关于」会**挤爆**
+          · ★ 而且**不是每个人都要看** —— 想看的人点一下就够
+
+        ★ 为什么这个声明必须存在（★ 用户 2026-10-08 的要求）：
+          > 「这个程序只是我提出设计的，代码全是你写的……
+          >   深度求索公司也该有这程序一份版权」
+          ★★ 关键那句：「**对 AI 来说每个对话窗口可能都是一次新生**」——
+            它**不会来认领这份功劳**，所以**必须由人写下来**。
+        """
+        try:
+            win = tk.Toplevel(parent or self.root)
+            win.title(T("版权与来源"))
+            win.transient(parent or self.root)
+            win.resizable(True, True)
+            try:
+                win.configure(bg=theme_get("win_bg"))
+            except Exception:
+                pass
+            try:
+                _reg = getattr(self, "_theme_windows", None)
+                if _reg is None:
+                    _reg = self._theme_windows = []
+                _reg.append(win)
+            except Exception:
+                pass
+
+            body = ttk.Frame(win, padding=16)
+            body.pack(fill="both", expand=True)
+
+            ttk.Label(body, text=T("版权与来源声明"),
+                      font=(FONT, UI_FONT_SIZE + 2, BOLD)).pack(anchor="w")
+            ttk.Label(
+                body,
+                text=T("人提出、设计、验收；AI 写出全部代码。"),
+                foreground=theme_get("fg_dim")).pack(anchor="w", pady=(2, 10))
+
+            # ★ 正文：只读 Text（能选中复制、能滚）
+            #   ★★ 注意：`tk.Text` **必须给 width**（错题本里踩过 ——
+            #      不给就默认 80 字符宽 ≈ 884 像素，窗口"莫名其妙很宽"）
+            box = tk.Text(body, width=72, height=17, wrap="word",
+                          font=(FONT, UI_FONT_SIZE),
+                          bg=theme_get("text_bg"), fg=theme_get("fg"),
+                          relief="flat", padx=10, pady=8)
+            box.pack(fill="both", expand=True)
+            box.insert("1.0", T(_CREDITS_TEXT))
+            box.configure(state="disabled")
+
+            btns = ttk.Frame(body)
+            btns.pack(fill="x", pady=(10, 0))
+            try:
+                ttk.Button(btns, text=T("打开仓库"), width=12,
+                           command=lambda: _open_url(_REPO_URL)
+                           ).pack(side="left")
+            except Exception:
+                pass
+            ttk.Button(btns, text=T("确定"), width=10,
+                       command=win.destroy).pack(side="right")
+            try:
+                win.bind("<Escape>", lambda e: win.destroy())
+            except Exception:
+                pass
+            try:
+                win.update_idletasks()
+                rx = (parent or self.root).winfo_rootx()
+                ry = (parent or self.root).winfo_rooty()
+                rw = (parent or self.root).winfo_width()
+                rh = (parent or self.root).winfo_height()
+                win.geometry("+%d+%d" % (
+                    rx + max(0, (rw - win.winfo_reqwidth()) // 2),
+                    ry + max(0, (rh - win.winfo_reqheight()) // 4)))
+            except Exception:
+                pass
+            try:
+                win.grab_set()
+            except Exception:
+                pass
+        except Exception as _e:
+            note_swallowed(T("打开「版权与来源」失败"), _e)
+            # 兜底：画不出来就退回系统弹窗（至少能看到内容）
+            try:
+                messagebox.showinfo(T("版权与来源"), T(_CREDITS_TEXT),
+                                    parent=parent or self.root)
+            except Exception:
+                pass
     def show_about(self):
         """★ 关于。
 
@@ -27887,6 +28079,26 @@ class FileTaggerApp:
                 text=T("带标签图结构、星图编辑、瀑布流浏览的本地文件标签工具。"),
                 foreground=theme_get("fg_dim")).pack(anchor="w", pady=(4, 10))
 
+            # ★★★ 版权与来源（2026-10-08）★★★
+            #   ★ 用户要求「**一开始就醒目标明**」——
+            #     所以放在**标题下面第一块**，不是最底下的小字。
+            #   ★★ 为什么必须放在这里（不只是 README）：
+            #     **下载 exe 的人不会去看 README，但他会点「关于」**。
+            #   ★ 判据：**"声明要放在读者真正会到的地方"**。
+            credit = tk.Frame(body, bg=theme_get("sel_bg") if
+                              theme_get("sel_bg") else theme_get("win_bg"))
+            credit.pack(fill="x", pady=(0, 12))
+            tk.Label(
+                credit,
+                text=T("★ 代码由 AI（DeepSeek）编写 —— 人提出、设计、验收。"),
+                bg=credit.cget("bg"), fg=theme_get("fg"),
+                font=(FONT, UI_FONT_SIZE, BOLD),
+                anchor="w", justify="left").pack(fill="x", padx=10, pady=(8, 2))
+            tk.Label(
+                credit,
+                text=T("★ 版权由作者与深度求索（DeepSeek）共同持有。"),
+                bg=credit.cget("bg"), fg=theme_get("fg_dim"),
+                anchor="w", justify="left").pack(fill="x", padx=10, pady=(0, 8))
             info = [
                 (T("版本"), "v26"),
                 (T("当前界面缩放"), "%d%%" % int(self.ui_scale * 100)),
@@ -27907,6 +28119,10 @@ class FileTaggerApp:
 
             btns = ttk.Frame(body)
             btns.pack(fill="x", pady=(14, 0))
+            # ★ 版权详情入口（★ 声明正文比较长，单独一个窗看）
+            ttk.Button(btns, text=T("版权与来源…"), width=14,
+                       command=lambda: self.show_credits(win)
+                       ).pack(side="left")
             ttk.Button(btns, text=T("确定"), width=10,
                        command=win.destroy).pack(side="right")
             try:

@@ -1268,5 +1268,14 @@
  "（在星图上点一个标签，这里就显示它的上下游）": "(click a tag in the graph to see its relations)",
  "给符合条件的文件自动打标签。\n「作用范围」可填多个文件夹（每行一个），留空 = 全局；填了 = 该目录及其所有子目录。\n「匹配方式」选“全部文件”时，作用范围内所有文件都打这个标签。": "Automatically tag files that match.\n“Scope” accepts several folders (one per line); empty = global. If filled, it means that folder and all its subfolders.\nWhen “Match mode” is “all files”, every file in scope gets this tag.",
  "想改哪个键：① 双击那一行直接按键，或 ② 选中后从右边的下拉框里挑。\n留空 = 不用快捷键（比如你不想让 F2 改文件名，就把它清空）。": "To change a key: (1) double-click that row and press a key, or (2) select it and pick from the dropdown on the right.\nEmpty = no shortcut (e.g. clear F2 if you do not want it to rename files).",
- "这是**这次开程序以来**记下的「没吭声的小毛病」（关窗口就清零）。\n想看「老出问题的是哪些」→ 点上面那个「历史累计」页。\n★ 把这里的内容发我即可，全是中文、不含你的文件名/路径。": "These are the “silent glitches” recorded **since this session started** (cleared when you close the window).\nTo see which ones keep happening → open the “All-time” tab above.\n★ Just send me what is here — it is all in plain words and does not contain your file names or paths."
+ "这是**这次开程序以来**记下的「没吭声的小毛病」（关窗口就清零）。\n想看「老出问题的是哪些」→ 点上面那个「历史累计」页。\n★ 把这里的内容发我即可，全是中文、不含你的文件名/路径。": "These are the “silent glitches” recorded **since this session started** (cleared when you close the window).\nTo see which ones keep happening → open the “All-time” tab above.\n★ Just send me what is here — it is all in plain words and does not contain your file names or paths.",
+ "版权与来源": "Copyright & provenance",
+ "版权与来源声明": "Copyright & provenance",
+ "打开仓库": "Open repo",
+ "人提出、设计、验收；AI 写出全部代码。": "Proposed, designed and accepted by a human; every line of code written by an AI.",
+ "★ 代码由 AI（DeepSeek）编写 —— 人提出、设计、验收。": "★ Code written by an AI (DeepSeek) — proposed, designed and accepted by a human.",
+ "★ 版权由作者与深度求索（DeepSeek）共同持有。": "★ Copyright held jointly by the author and DeepSeek (深度求索).",
+ "打开「版权与来源」失败": "Failed to open “Copyright & provenance”",
+ "打开网址失败": "Failed to open URL",
+ "版权与来源…": "Copyright & provenance…"
 }
