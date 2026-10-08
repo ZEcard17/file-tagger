@@ -1858,6 +1858,56 @@ class StarGraphEditor(tk.Toplevel):
         cy = self.canvas.canvasy(ch // 2)
         return cx / self.scale, cy / self.scale
 
+    def _free_spot_near(self, x, y, skip_tid=None):
+        """★★★ 找一个"不会被别人挡住"的位置（错题本 #183）。
+
+        ★ 用户报的：「每个新建的标签**老是在同一位置**」。
+        ★★ 真因：新建时一律放在**视口正中央** ——
+          连着建 5 个，5 个**精确叠在一起**，看着像"只建了一个"。
+        ★ 修法：从正中央开始**螺旋往外找**，撞到已有节点就挪下一格。
+          · 先试中心 → 再试右边一圈 → 再试更大一圈 …
+          · 最多试 ~120 个点，还找不到就直接放在中心右边一列
+            （★ 宁可叠着，也不能**卡住不让建**）
+        ★★ 判据：**"默认位置"要能"连着用"** ——
+          用户连着建多个时，**每个都该看得见**。
+        """
+        try:
+            nodes = [n for t, n in self.nodes.items() if t != skip_tid]
+        except Exception:
+            nodes = []
+        if not nodes:
+            return x, y
+        # ★ 每个节点占多大（用平均值兜底）
+        try:
+            nw = max(60.0, sum(n.w for n in nodes) / len(nodes))
+            nh = max(24.0, sum(n.h for n in nodes) / len(nodes))
+        except Exception:
+            nw, nh = 120.0, 30.0
+        step_x = nw + 24.0
+        step_y = nh + 16.0
+
+        def _hit(px, py):
+            for n in nodes:
+                try:
+                    if (abs(n.x - px) < nw * 0.9
+                            and abs(n.y - py) < nh * 1.1):
+                        return True
+                except Exception:
+                    continue
+            return False
+
+        if not _hit(x, y):
+            return x, y
+        # ★ 螺旋：右 → 下 → 左 → 上 一圈圈扩大
+        for ring in range(1, 12):
+            for dx, dy in ((1, 0), (1, 1), (0, 1), (-1, 1),
+                           (-1, 0), (-1, -1), (0, -1), (1, -1)):
+                px = x + dx * step_x * ring
+                py = y + dy * step_y * ring
+                if not _hit(px, py):
+                    return px, py
+        return x + step_x, y
+
     # ---------------- 滚轮/平移 ----------------
     def _on_mouse_wheel(self, event):
         if event.state & 0x0004:
@@ -2687,8 +2737,11 @@ class StarGraphEditor(tk.Toplevel):
             return
         tid = self.store.tag_id_by_name(name)
         if tid is not None:
-            # ★ 放在视口正中央：直接叠在最上层，只需要拖这一个新标签
+            # ★★★ 2026-10-08 **不再固定放正中央**（错题本 #183）——
+            #   原来一律放视口正中 → 连着建就**精确叠在一起**。
+            #   现在：从正中开始找"空位"，撞到别人就挪开。
             x, y = self._viewport_center_world()
+            x, y = self._free_spot_near(x, y, skip_tid=tid)
             self.store.set_tag_position(tid, x, y)
         self._reload()
         self.dirty = True
@@ -2716,8 +2769,13 @@ class StarGraphEditor(tk.Toplevel):
         if tid is None:
             return
         self.store.add_tag_relation(parent.tag_id, tid)
-        # ★ 同样放在视口正中央：叠在最上层，只拖这一个
-        x, y = self._viewport_center_world()
+        # ★★★ 子标签也一样：**放父标签右边**，而不是一律放正中央
+        #   （原来一律正中央 → 连着建子标签会**全叠在一起**，错题本 #183）
+        try:
+            x, y = parent.x, parent.y
+        except Exception:
+            x, y = self._viewport_center_world()
+        x, y = self._free_spot_near(x, y, skip_tid=tid)
         self.store.set_tag_position(tid, x, y)
         self._reload()
         self.dirty = True

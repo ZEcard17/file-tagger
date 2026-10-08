@@ -801,13 +801,42 @@ class PreviewPane(ttk.Frame):
         if abs(new - cur) < 1e-6:
             return
         self._user_zoom = new
+        # ★★★ 2026-10-08 **改成"先快速拉伸、停手再重渲染"**（错题本 #185）★★★
+        #   ★ 用户报的：「渲染预览 PDF 放大缩小有卡顿」。
+        #   ★★ 真因：这里原来直接调 `_img_relayout()` ——
+        #     那是**完整重排**（会把画布上每张图重新算尺寸、重新建 Tk 图元）。
+        #     而 Ctrl+滚轮**一次滚好几格** → **每格都跑一遍完整重排** → 卡顿。
+        #   ★ 而"拖窗格"那条路（`_img_refit`）**早就解决过这个问题**：
+        #     ① **当下**只做"快速拉伸"（`_img_quick_rescale`，几乎不耗时）
+        #     ② **停手 700 毫秒后**再重新渲染清晰版
+        #   → 判据：**同一类操作（"连续改变尺寸"）要共用同一套防抖** ——
+        #     我当初只给"拖窗格"加了防抖，**漏了"缩放"**，所以又卡在这儿。
         try:
-            self._img_relayout()
-        except Exception as _e:
+            self._img_quick_rescale()
+        except Exception:
+            # ★ 快速拉伸失败就退回完整重排（宁可慢，不能没反应）
             try:
-                note_swallowed(T("预览缩放失败"), _e, quiet=True)
+                self._img_relayout()
             except Exception:
                 pass
+        # ★ 停手 700 毫秒后补一次完整重排（把"拉伸糊"换成"清晰"）
+        try:
+            if getattr(self, "_zoom_relayout_job", None) is not None:
+                try:
+                    self.root.after_cancel(self._zoom_relayout_job)
+                except Exception:
+                    pass
+
+            def _zoom_later():
+                self._zoom_relayout_job = None
+                try:
+                    self._img_relayout()
+                except Exception:
+                    pass
+
+            self._zoom_relayout_job = self.root.after(700, _zoom_later)
+        except Exception:
+            pass
         # 缩放条上的百分数也要跟着变
         try:
             self._zoom_label_update()
@@ -825,8 +854,16 @@ class PreviewPane(ttk.Frame):
             pass
 
     def zoom_reset(self):
-        """把缩放恢复到 100%（"适应窗格"那个默认状态）。"""
+        """把缩放恢复到 100%（"适应窗格"那个默认状态）。
+
+        ★★ 2026-10-08：**改走"先快速拉伸"那条路**（跟 `zoom_by` 一致）——
+          原来直接 `_img_relayout()`，在几百页的 PDF 上会**顿一下**。
+        """
         self._user_zoom = 1.0
+        try:
+            self._img_quick_rescale()
+        except Exception:
+            pass
         try:
             self._img_relayout()
         except Exception:

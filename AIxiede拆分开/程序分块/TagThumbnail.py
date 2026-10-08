@@ -391,7 +391,9 @@ class TagThumbnail(tk.Frame):
         self.vsb.pack(side="right", fill="y")
         self.canvas.pack(side="left", fill="both", expand=True)
 
-        self.canvas.bind("<Configure>", lambda e: self._redraw())
+        # ★★ 2026-10-08：`<Configure>`（窗口尺寸变化）**一次拖窗能触发几十次** →
+        #   用 `_redraw_soon()` 节流（错题本 #185）。
+        self.canvas.bind("<Configure>", lambda e: self._redraw_soon())
         self.canvas.bind("<ButtonPress-1>", self._on_press)
         self.canvas.bind("<B1-Motion>", self._on_motion)
         self.canvas.bind("<ButtonRelease-1>", self._on_release)
@@ -853,7 +855,44 @@ class TagThumbnail(tk.Frame):
             pass
         self._view_x = self.canvas.canvasx(0)
         self._view_y = self.canvas.canvasy(0)
-        self._redraw()
+        # ★★★ 缩放用 `_redraw_soon` —— Ctrl+滚轮**一次能滚好几格**，
+        #   每格都全量重画的话就卡（错题本 #185）。
+        self._redraw_soon()
+
+    def _visible_world_rect(self, pad=120.0):
+        """★★★ 当前**看得见的那块世界坐标**（错题本 #185）。
+
+        ★ 为什么要它：用户报「标签星图一卡一卡的」。
+          ★★ 真因：`_redraw()` 是 `delete("all")` + **把 230 个标签全画一遍** ——
+            每个标签 3~5 个图元（矩形 + 层级徽章 + 名字 + 计数）+ 每条连线，
+            总共 **1000+ 个 Tk 图元**；而**滚动、平移、缩放、点选**每次都重画全部 →
+            ★★★ **一帧就要几万次 Tcl 调用**，肉眼就是"一卡一卡"。
+        ★ 修法：**只画"看得见的那块 + 一圈余量"里的东西**（视口裁剪）。
+          ★ 这和"只渲染看得见的 PDF 页"是同一个套路（预览窗格早就这么干了）。
+        ★ 返回值：`(min_x, min_y, max_x, max_y)`（**世界坐标**），
+          算不出来时返回 `None`（= 不裁剪，全画 —— 宁可慢也别画不出来）。
+        """
+        try:
+            c = self.canvas
+            s = max(float(self.scale), 1e-6)
+            x0 = c.canvasx(0) / s - pad
+            y0 = c.canvasy(0) / s - pad
+            w = max(1, c.winfo_width()) / s + pad * 2
+            h = max(1, c.winfo_height()) / s + pad * 2
+            return (x0, y0, x0 + w, y0 + h)
+        except Exception:
+            return None
+
+    def _in_rect(self, n, rect):
+        """★ 节点 `n` 跟"看得见的那块"有没有交叠。`rect=None` 一律算有。"""
+        if rect is None:
+            return True
+        try:
+            x0, y0, x1, y1 = rect
+            return not (n.x + n.w < x0 or n.x > x1
+                        or n.y + n.h < y0 or n.y > y1)
+        except Exception:
+            return True
 
     def _redraw(self):
         c = self.canvas
@@ -869,7 +908,17 @@ class TagThumbnail(tk.Frame):
                           fill=theme_get("fg_dim"), font=(FONT, UI_FONT_SIZE))
             return
 
+        # ★★★ 2026-10-08：**先算出"看得见的那块"**（视口裁剪，错题本 #185）
+        #   ★★ 这是治"一卡一卡"的**关键一步** ——
+        #     230 个标签里通常只有十几个在屏幕上，**其余的画了也白画**。
+        _vis = self._visible_world_rect()
+        _vis_nodes = [n for n in self.nodes.values() if self._in_rect(n, _vis)]
+        _vis_ids = {n.tag_id for n in _vis_nodes}
+
         for (pid, cid) in self.edges:
+            # ★ 连线的两端**都不在可见区**就跳过（画了也看不见）
+            if _vis is not None and pid not in _vis_ids and cid not in _vis_ids:
+                continue
             p = self.nodes.get(pid)
             ch = self.nodes.get(cid)
             if p is None or ch is None:
@@ -915,6 +964,9 @@ class TagThumbnail(tk.Frame):
             _badge_on = True
 
         for n in self.nodes.values():
+            # ★★★ 看不见的节点**直接跳过**（视口裁剪，错题本 #185）
+            if not self._in_rect(n, _vis):
+                continue
             x, y = self._world_to_canvas(n.x, n.y)
             w = n.w * s
             h = n.h * s
@@ -1020,6 +1072,35 @@ class TagThumbnail(tk.Frame):
             except Exception:
                 pass
 
+    def _redraw_soon(self, delay=16):
+        """★★★ "稍后重画一次"（合并同一帧里的多次请求，错题本 #185）。
+
+        ★ 为什么要它：`_apply_view_offset`（空格平移）/ `_on_wheel`（滚轮）
+          **每秒能触发几十上百次**，每次都 `delete("all")` + 全量重画 →
+          ★★ 一次滚动能重画几十遍，**白白烧掉几十倍的 Tk 调用**。
+        ★ 做法：**一帧最多重画一次**（`after(16, ...)` ≈ 60fps），
+          这期间来的请求都合并掉。
+        ★★ 判据：**"连续事件"要节流（throttle），不能每来一个就干一遍。**
+          （同类问题：拖窗格重渲染 PDF —— 那边用的是 700ms 防抖）
+        """
+        try:
+            if getattr(self, "_redraw_job", None) is not None:
+                return                      # ★ 已经排了一个，不重复排
+            self._redraw_job = self.after(delay, self._redraw_now)
+        except Exception:
+            # ★ 排不上就直接画（宁可慢，不能没反应）
+            try:
+                self._redraw()
+            except Exception:
+                pass
+
+    def _redraw_now(self):
+        self._redraw_job = None
+        try:
+            self._redraw()
+        except Exception:
+            pass
+
     def _apply_view_offset(self):
         try:
             region = self.canvas.cget("scrollregion")
@@ -1032,7 +1113,10 @@ class TagThumbnail(tk.Frame):
             self.canvas.yview_moveto(max(0.0, min(1.0, fy)))
         except Exception:
             pass
-        self._redraw()
+        # ★★★ 这里原来直接 `_redraw()` —— 而它是**鼠标每动一下就调一次**，
+        #   于是"空格+拖动平移"会**每毫秒重画全部节点**（错题本 #185）。
+        #   改成 `_redraw_soon()`：一帧最多画一次（合并掉多余的）。
+        self._redraw_soon()
 
     def _on_press(self, event):
         self.canvas.focus_set()

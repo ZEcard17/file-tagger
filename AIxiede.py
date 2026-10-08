@@ -7783,12 +7783,31 @@ except Exception:
                 跟你当前在看的文件夹完全没关系
                 （用户看到的「📁 文件目录 下面只有一个 home 之类的名字」就是这个）。
 
-            现在的取法，按优先顺序：
-              ① 你当前正在看的目录（最符合直觉）；
-              ② 索引管理里登记的那些盘（E:\\ / D:\\ / I:\\ / 网盘挂载…）；
-              ③ 索引根目录若为空 → 退回你「常用位置」里记录的那几个盘；
-              ④ 实在都没有 → 用户主目录。
+            现在的取法，按优先顺序（★ 2026-10-08 改过，见下面的说明）：
+              ① **索引管理里登记的那些盘**（E:\\ / D:\\ / I:\\ / 网盘挂载…）
+                 —— ★★★ 这才是"树的主干"，**跟「索引管理」一一对应**；
+              ② 索引根目录若为空 → 退回你「常用位置」里记录的那几个盘；
+              ③ 实在都没有 → 用户主目录。
+              ★★★ **"当前正在看的目录"不再进这个列表** ——
+                它由 `_expand_current_chain()` 负责"**展开到它**"，
+                照样能一眼看到"我在哪"，但**树上的根 = 索引里的根**。
             """
+            # ★★★ 2026-10-08 **改优先顺序**（用户报「文件树好像没跟索引配对」）★★★
+            #   ★ 原来的顺序是「① 当前目录 → ② 索引根」——
+            #     ★★ 结果：树上**永远比索引多一个**
+            #       （你正在看的那个目录被塞进去了，而它**不在索引里**）。
+            #     实测：索引里 4 个根（E:\ / I:\ / D:\ / \\CloudDrive\X\），
+            #           ★ 而树上显示了 **5 个** —— 第 5 个是"当前目录"。
+            #   ★ 用户的原话是「**没跟索引配对**」——
+            #     他期望的是 **"树 = 索引里登记的那些根"**。
+            #
+            #   ★★ 新顺序（判据：**"树"该反映"你登记了什么"，不是"你在看什么"**）：
+            #     ① **索引根目录**（这才是"树的主干"）
+            #     ② 常用位置里记的盘（**兜底**：索引是空的时候）
+            #     ③ 用户主目录（**再兜底**）
+            #     ★★★ **当前目录不再进根列表** ——
+            #        它由 `_expand_current_chain()` 负责"展开到它"，
+            #        照样能"一眼看到我在哪"，但**不会多出一个根**。
             out = []
 
             def _add(p):
@@ -7804,20 +7823,13 @@ except Exception:
                 if p.lower() not in [x.lower() for x in out]:
                     out.append(p)
 
-            # ① 当前正在看的目录
-            try:
-                cur = getattr(self.app, "current_dir", None)
-                if cur and os.path.isdir(str(cur)):
-                    _add(cur)
-            except Exception:
-                pass
-            # ② 索引根目录（用户自己在「索引管理」里登记的那些盘）
+            # ① 索引根目录（用户自己在「索引管理」里登记的那些盘）
             try:
                 for r in self.app.store.all_index_roots():
                     _add(r["path"] if hasattr(r, "keys") else r[1])
             except Exception:
                 pass
-            # ③ 常用位置里记的盘
+            # ② 常用位置里记的盘（★ 只在索引为空时兜底）
             if not out:
                 try:
                     for pp in (getattr(self.app, "_places", {}) or {}).values():
@@ -7825,13 +7837,14 @@ except Exception:
                             _add(pp)
                 except Exception:
                     pass
-            # ④ 兜底：用户主目录
-            try:
-                home = os.path.expanduser("~")
-                if os.path.isdir(home):
-                    _add(home)
-            except Exception:
-                pass
+            # ③ 兜底：用户主目录
+            if not out:
+                try:
+                    home = os.path.expanduser("~")
+                    if os.path.isdir(home):
+                        _add(home)
+                except Exception:
+                    pass
 
             # ★★ 2026-10-07 按用户要求排序（错题本 #62 / 待清单 #15）：
             #   用户原话：「本来应该 C、D、E、H、I、X、Y 这样按字母顺序排列」。

@@ -360,6 +360,20 @@ class AutoTagRulesDialog(tk.Toplevel):
         _sp.bind("<FocusOut>", lambda e: self._save_idle_cfg())
         ttk.Label(idle_row, text=T("分钟后运行（你一动鼠标它就停）")).pack(
             side="left", padx=(2, 0))
+        # ★★★ 2026-10-08 补一个**看得见的「确定」键**（用户报的）★★★
+        #   ★ 用户原话：「刚写的分类计数统计闲时运行没有确定键，
+        #     虽然回车也能改，但是使用的人可能不知道」。
+        #   ★★ 真因：这个数**改了就存**（`command=` / `<Return>` / `<FocusOut>`
+        #     三重触发），功能上是好的 —— 但**用户看不出来"我改的生效了没有"**。
+        #   ★★★ 判据：**"自动保存"不等于"用户知道它保存了"** ——
+        #     少一个"确认动作"时，用户会**反复改、反复怀疑**。
+        #     → 给一个明确的按钮 + 一句"已保存"的反馈。
+        self._idle_save_btn = ttk.Button(
+            idle_row, text=T("确定"), width=6,
+            command=self._save_idle_cfg_clicked)
+        self._idle_save_btn.pack(side="left", padx=(6, 0))
+        ttk.Label(idle_row, text=T("（改完点它 / 或直接回车）"),
+                  foreground=theme_get("fg_dim")).pack(side="left", padx=(4, 0))
         self._idle_hint_lbl = ttk.Label(idle_row, text="",
                                        foreground=theme_get("fg_dim"))
         self._idle_hint_lbl.pack(side="left", padx=(10, 0))
@@ -592,6 +606,26 @@ class AutoTagRulesDialog(tk.Toplevel):
         try:
             if self.app is not None:
                 self.app._refresh_idle_state()
+        except Exception:
+            pass
+
+    def _save_idle_cfg_clicked(self):
+        """★★★ 点「确定」按钮时：存 + **给一句看得见的反馈**（错题本 #182）。
+
+        ★ 为什么要有这个（而不是直接用 `_save_idle_cfg`）：
+          用户不知道"这个数改了就生效" —— **点了按钮得让他看到结果**。
+        ★★ 反馈写在哪：★ 就写在旁边那个小字标签上（`_idle_hint_lbl`），
+          因为它本来就显示「上次闲时跑：…」，**同一个位置**最不突兀。
+          ★ 而且**过 2 秒自动恢复**成"上次闲时跑…"（不然那句提示会一直挂着）。
+        """
+        self._save_idle_cfg()
+        try:
+            self._idle_hint_lbl.config(text=T("✔ 已保存"))
+        except Exception:
+            pass
+        # ★ 2 秒后把那句"已保存"换回原来的提示
+        try:
+            self.after(2000, self._refresh_idle_hint)
         except Exception:
             pass
 
