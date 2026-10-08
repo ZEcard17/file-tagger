@@ -49,20 +49,39 @@ and it is being **split up gradually**.
 
 ### ★ 作者是个什么样的人 / Who the author is
 
-**★ 说实话 / Honest disclosure**：
-- 作者**不是专业程序员**（自述"我不懂代码"）
-  the author is **not a professional programmer**
-- 项目里**大量代码由 AI（DeepSeek）辅助生成**
-  **much of the code was written with AI (DeepSeek) assistance**
-- ★ 但**需求、设计、取舍、测试标准都是作者定的**
-  ★ but **requirements, design, trade-offs and acceptance criteria are the
-  author's**
+**★★★ 先把最重要的事说清楚 / The most important thing first**：
+> **这个程序的**代码**是 AI（DeepSeek）写的** ——
+> **全部约 3.7 万行，没有一行是人手敲的。**
+> **人做的是**提出、设计、测试、验收**。**
+>
+> 详见 [`NOTICE`](NOTICE)（版权与来源声明）。
+
+> **The code was written by an AI (DeepSeek)** — all ~37,000 lines,
+> **not one typed by a human**. The human proposed, designed, tested and
+> accepted it. See [`NOTICE`](NOTICE).
+
+**★ 具体分工 / The split**
+
+| 做了什么 / What | 谁 / Who |
+|---|---|
+| 提出需求、定功能 / requirements | ★ **人 / the human** |
+| 设计界面、定取舍 / design, trade-offs | ★ **人 / the human** |
+| 测试、验收、报问题 / testing, bug reports | ★ **人 / the human** |
+| ★★★ **写代码（3.7 万行）** / ★★★ **all the code** | ★★★ **AI（DeepSeek）** |
 
 **★★ 所以 / Therefore**：
 - **别看不起这个项目** —— 它是**一个人业余时间**一点点磨出来的
   **don't look down on it** — it was ground out in someone's spare time
+- ★ **也别小看"提需求"这件事** —— 3.7 万行代码里每一个取舍都是人定的
+  ★ **and don't underestimate the "just asking for it" part** — every one of
+  the trade-offs behind those 37k lines was a human decision
 - **也别客气** —— 有问题直说，**说清楚比说好听有用**
   **and don't be shy** — being clear beats being polite
+
+**★★ 版权归属 / Copyright**：作者 + **DeepSeek**。
+**★ 你贡献的代码，同样会被记在这里。**
+**★★ Attribution**: the author **and DeepSeek**. **★ Your contributions will be
+recorded here too.**
 
 ---
 

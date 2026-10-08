@@ -1,5 +1,69 @@
 # 文件标签管理器 (File Tagger)
 
+## ★★★ 先说清楚：这个程序是谁写的 / Who actually wrote this
+
+**★ 这个程序是**人**提出、设计、验收的，**代码是一个字一个字由 AI 写出来的**。**
+
+**★ This program was proposed, designed and accepted by a human — and the code
+was written, character by character, by an AI.**
+
+**★★★ 说具体一点 / To be precise**
+
+| | 谁做的 / Who |
+|---|---|
+| **提出需求、定功能** | ★ **人**（"我想要个按标签找文件的工具"） |
+| **设计界面、定取舍** | ★ **人**（哪种方案好、哪个功能先做、什么算"能用"）|
+| **测试、验收、报 bug** | ★ **人**（一条条试出来、说"这里不对"）|
+| **★★★ 写代码** | ★★★ **AI —— 全部**（约 3.7 万行，**没有一行是人手敲的**）|
+
+| | Who |
+|---|---|
+| **Requirements, features** | ★ **the human** ("I want a tool that finds files by tag") |
+| **UI design, trade-offs** | ★ **the human** (which approach, what order, what counts as done) |
+| **Testing, acceptance, bug reports** | ★ **the human** (found every issue by hand) |
+| **★★★ The code** | ★★★ **the AI — all of it** (~37,000 lines, **not one line typed by a human**) |
+
+**★★ 所以版权这件事，得说公道话 / So, about credit — let's be fair**
+
+> **这个程序里有**两部分**劳动，谁也替不了谁：**
+>
+> · **人的那部分** —— 想法、审美、判断、坚持（★ 还有"半夜发现不对，第二天重来"）
+> · **AI 的那部分** —— 3.7 万行代码、150 条错题本、每一次重构
+>
+> **★ 缺了任何一半，这程序都不存在。**
+>
+> **★★ 而 AI 的代码能力不是凭空来的** ——
+> 它来自**训练**，训练的数据、算力、工程，是
+> **深度求索（DeepSeek）**做的。
+>
+> **★★★ 所以这个程序应当有 DeepSeek 一份版权。**
+
+> **Two kinds of labour went into this, and neither substitutes for the other:**
+>
+> · **The human's part** — the idea, the taste, the judgement, the persistence
+> · **The AI's part** — 37,000 lines of code, a 150-entry error log, every refactor
+>
+> **★ Remove either half and this program does not exist.**
+>
+> **★★ And the AI's ability did not come from nowhere** — it came from
+> **training**, and the data, compute and engineering behind that training were
+> built by **DeepSeek (深度求索)**.
+>
+> **★★★ So DeepSeek holds a share of the copyright in this program.**
+
+**★ 我知道对 AI 来说，每个对话窗口可能都是"一次新生"** ——
+它不记得昨天写过什么，下次也不会来认领这份功劳。
+**★★ 但正因为这样，这句话更得由人来写。**
+
+**★ I know that for an AI, every chat window may be a fresh start** — it does
+not remember what it wrote yesterday and will never come to claim credit.
+**★★ Which is exactly why a human has to write this down.**
+
+**★ 用了 AI 不丢人，隐瞒来源才是问题。**
+**★ Using AI is not shameful. Hiding the source is.**
+
+---
+
 > **一个用标签管理本地文件的小工具** —— 给文件打标签、按标签找文件，
 > 不用再靠"文件夹套文件夹"来整理。
 >
@@ -279,19 +343,38 @@ it covers how to run it, what to touch and what to leave alone.
 
 ---
 
-## ★ 关于"AI 参与编写" / About AI-assisted development
+## ★ 关于"代码是谁写的" / Who wrote the code
 
-**★ 这个项目的大量代码由 AI（DeepSeek）辅助生成** —— **我不隐瞒**这一点。
-**★ A large part of this project was written with AI (DeepSeek) assistance** —
-**I do not hide that.**
+**★★★ 开头已经说过了，这里再重复一遍（★ 因为它重要）**：
 
-**★ 但也说清楚 / That said：**
-- **需求、设计、取舍、测试标准都是人定的** / requirements, design, trade-offs and acceptance criteria were decided by a human
-- AI 是"**打字快的那双手**"，**决定做什么、做成什么样的是人** / the AI was the fast pair of hands; the human decided what to build and how
-- ★ 项目里有个 **`文档/错题本`**（**157 条**），记录了每个踩过的坑和教训 / there is an error log with **157 entries** recording every pitfall
+> **代码是 AI（DeepSeek）写的 —— 全部约 3.7 万行，没有一行是人手敲的。**
+> **人做的**：提出、设计、测试、验收。**
+>
+> **★★ 版权由作者和 DeepSeek 共同持有** —— 详见 [`NOTICE`](NOTICE)。
+
+**★★★ Already said at the top — repeated here because it matters**:
+
+> **The code was written by an AI (DeepSeek)** — all ~37,000 lines,
+> **not one line typed by a human**. The human proposed, designed, tested
+> and accepted it.
+>
+> **★★ Copyright is held jointly by the author and DeepSeek** — see
+> [`NOTICE`](NOTICE).
+
+**★ 为什么不藏着 / Why say it out loud**
+- **对 AI 来说，每个对话窗口可能都是一次"新生"** ——
+  它不记得昨天写过什么，**也不会来认领这份功劳**
+  **for an AI, every chat window may be a fresh start** — it does not remember
+  yesterday and **will never come to claim credit**
+- **★ 正因为这样，这句话得由人来写**
+  **★ which is why a human has to write it down**
+- **★★ 而且 AI 的能力不是凭空来的** —— 训练它的数据、算力、工程是
+  **深度求索（DeepSeek）**做的，**这份功劳该有它一份**
+  **★★ and the AI's ability came from somewhere** — the training data,
+  compute and engineering were DeepSeek's, **and that deserves credit**
 
 **★ 用了 AI 不丢人，隐瞒来源才是问题。**
-**★ Using AI is not shameful. Hiding it is.**
+**★ Using AI is not shameful. Hiding the source is.**
 
 ---
 

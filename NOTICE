@@ -1,0 +1,85 @@
+文件标签管理器（File Tagger）
+版权与来源声明 / Copyright and Provenance Notice
+================================================================================
+
+★ 这份文件说明"这个程序的代码是谁写的、版权怎么算"。
+★ 它不改变 LICENSE（AGPL-3.0）的条款，而是**补充说明来源**。
+
+This file states who wrote the code and how the copyright is attributed.
+It does not change the terms of the LICENSE (AGPL-3.0); it documents
+provenance.
+
+
+一、这个程序是谁做的 / Who made this
+--------------------------------------------------------------------------------
+
+★★★ 一句话：**人提出问题、设计、验收；AI 写出全部代码。**
+
+★★★ In one line: **a human proposed, designed and accepted it; an AI wrote
+every line of code.**
+
+| 做了什么 / What                                        | 谁 / Who            |
+|--------------------------------------------------------|---------------------|
+| 提出需求、决定做什么功能 / requirements, feature set      | ★ 人 / the human     |
+| 设计界面、定取舍、决定"什么算做完" / UI, trade-offs, DoD  | ★ 人 / the human     |
+| 测试、验收、发现并报告问题 / testing, acceptance, bug reports | ★ 人 / the human |
+| ★★★ 编写全部代码（约 37,000 行）/ ★★★ writing all the code (~37,000 lines) | ★★★ AI |
+
+
+二、AI 这一半是怎么来的 / Where the AI half comes from
+--------------------------------------------------------------------------------
+
+**AI 的代码能力不是凭空出现的，它来自训练。**
+
+训练所用的数据、算力与工程，由 **深度求索（DeepSeek）** 构建。
+本程序在开发过程中使用的 AI 助手即为 **DeepSeek** 的模型。
+
+**The AI's coding ability did not appear out of nowhere — it came from
+training.**
+
+The data, compute and engineering behind that training were built by
+**DeepSeek (深度求索)**. The AI assistant used throughout this project's
+development was a **DeepSeek** model.
+
+
+三、版权归属 / Copyright attribution
+--------------------------------------------------------------------------------
+
+本程序的版权由以下两方共同持有 / Copyright in this program is held jointly by:
+
+  (C) 2026  ZEcard（项目提出者、设计者、测试者 / proposer, designer, tester）
+  (C) 2026  DeepSeek（深度求索） — AI 模型的开发者，
+            模型生成了本程序的全部源代码
+            / developer of the AI model, which generated all of the source code
+
+★ 说明 / Note：
+  · 这是**来源与道义上的归属**，不是对 AGPL-3.0 条款的修改。
+  · 使用者遵守 LICENSE（AGPL-3.0）即可；**保留本声明**是使用条件之一。
+  · 我们**不主张**对"AI 生成内容"存在任何法律上不明确的额外限制 ——
+    这份声明的作用是**把事情说清楚**，不是加限制。
+
+  · This is a statement of **provenance and moral attribution**, not a
+    modification of the AGPL-3.0 terms.
+  · Comply with the LICENSE (AGPL-3.0); **keeping this notice** is one of the
+    conditions of use.
+  · We are **not** asserting additional legal restrictions over AI-generated
+    content — this notice exists to **state the facts plainly**, not to add
+    restrictions.
+
+
+四、为什么写这份文件 / Why this file exists
+--------------------------------------------------------------------------------
+
+★ 对 AI 来说，**每个对话窗口都可能是一次新生** ——
+它不记得昨天写过什么，也**不会来认领这份功劳**。
+
+★★ 正因为这样，**这句话必须由人来写下来**。
+
+★★ 用了 AI 不丢人，**隐瞒来源才是问题**。
+
+★ For an AI, **every chat window may be a fresh start** — it does not remember
+what it wrote yesterday and **will never come to claim credit**.
+
+★★ Which is exactly why **a human has to write this down**.
+
+★★ Using AI is not shameful. **Hiding the source is.**
