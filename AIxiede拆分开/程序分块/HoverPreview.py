@@ -186,6 +186,57 @@ class _Borrowed:
         return _c.deepcopy(self._v(), memo)
 
 
+
+    # ★★★ 2026-10-09 补齐协议（错题本 #185）★★★
+    #   ★★ 原来缺 **比较大小**（`__lt__` 等四个）——
+    #     真出过事：`app._idle_seconds() < IDLE_STOP_WITHIN_SEC`
+    #     → `float < _Borrowed` →
+    #     `TypeError: '<' not supported between instances of 'float' and '_Borrowed'`
+    #   ★★★ 判据：**代理会被当成什么用，你猜不到** ——
+    #     所以别一个个补，要**对着完整清单查一遍**
+    #     （工具：`工具\代理协议检查.py`）。
+    #   ★ 每次读都回主程序现取（`_v()`），所以「转给真值去做」最不容易错。
+
+
+    def __lt__(self, o):
+            return self._v() < o
+
+
+    def __le__(self, o):
+            return self._v() <= o
+
+
+    def __gt__(self, o):
+            return self._v() > o
+
+
+    def __ge__(self, o):
+            return self._v() >= o
+
+
+    def __ne__(self, o):
+            return self._v() != o
+
+
+    def __mul__(self, o):
+            return self._v() * o
+
+
+    def __float__(self):
+            return float(self._v())
+
+
+    def __setitem__(self, k, v):
+            self._v()[k] = v
+
+
+    def __add__(self, o):
+            return self._v() + o
+
+
+    def __radd__(self, o):
+            return o + self._v()
+
 def _set_app(app):
     """主程序启动时调一下：把「自己」交进来，顺便把要借的名字填上。"""
     global _APP

@@ -12408,14 +12408,46 @@ class FileTaggerApp:
         """
         out = {}
         reg = getattr(self, "_menu_state_map", None) or []
-        for idx, getter, name in reg:
+        # ★★★ 2026-10-09 **修一个真 bug**（错题本 #185）：
+        #   原来这里是 `for idx, getter, name in reg:` —— **写死 3 个**，
+        #   而 `_menu_state_map2` 里存的是 **4 个**
+        #   （`(索引, getter, 名字, 菜单对象)`，见 `面板_菜单构建.py`）→
+        #   ★★★ `ValueError: too many values to unpack (expected 3)` →
+        #     **整个函数炸掉、一个圆点都不刷**。
+        #   ★★ 而**模块里那份**（`面板_主题配色._refresh_menu_states`）
+        #     早就处理了两种格式（`if len(item) == 4:`）——
+        #     ★ 主程序里这份是**旧拷贝**，没跟着改。
+        #   ★ 判据：**"兼容两种格式"的写法要两边一致** ——
+        #     同一个逻辑存在两份拷贝时，改了一份**必须改另一份**
+        #     （★ 这是"转发 + 兜底"结构天生的风险）。
+        def _unpack(item):
+            if len(item) == 4:
+                idx, getter, name, _menu_use = item
+            else:
+                idx, getter, name = item
+            return idx, getter, name
+
+        for item in reg:
+            try:
+                idx, getter, name = _unpack(item)
+            except Exception:
+                continue
             m = getattr(self, "_m_switches", None)
             if m is not None:
                 out[(str(m), idx)] = (getter, name)
         m2 = getattr(self, "_m_settings", None)
-        for idx, getter, name in (getattr(self, "_menu_state_map2", None) or []):
-            if m2 is not None:
-                out[(str(m2), idx)] = (getter, name)
+        for item in (getattr(self, "_menu_state_map2", None) or []):
+            # ★★ 4 元组的第 4 个元素**自带菜单** —— 用它，别硬套 `_m_settings`
+            try:
+                if len(item) == 4:
+                    idx, getter, name, menu_use = item
+                else:
+                    idx, getter, name = item
+                    menu_use = m2
+            except Exception:
+                continue
+            if menu_use is not None:
+                out[(str(menu_use), idx)] = (getter, name)
         return out
     def _refresh_menu_states(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_主题配色.py`
@@ -14386,7 +14418,23 @@ class FileTaggerApp:
     def _clean_path_input(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_导航.py`
         #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
-        return _面板导航._clean_path_input(self, *a, **k)
+        # ★★★ 2026-10-09 **修一个真 bug**（错题本 #185）：
+        #   模块里那个是 **`@staticmethod def _clean_path_input(text):`**
+        #   —— **它不接 `app`**！而这里原来写的是
+        #   `return _面板导航._clean_path_input(self, *a, **k)` →
+        #   ★★★ 把 `self`（整个 FileTaggerApp 实例）**当 text 传了进去** →
+        #     调用方 `app._clean_path_input(app.path_var.get())` 实际变成
+        #     `_clean_path_input(self, "文字")` → `text or ""` 取到的是 **self** →
+        #     `self.strip()` → **`AttributeError: 'FileTaggerApp' object
+        #     has no attribute 'strip'`**。
+        #   ★★ 后果：**地址栏里手输路径 + 回车，整个功能是坏的**
+        #     （一直被 `note_swallowed` 吞掉，界面上只看到"没反应"）。
+        #   ★ 判据：**转发时"传不传 `self`"要看被转发那个函数的签名** ——
+        #     · 模块里是 `def xxx(app, ...)` → 传 `self`
+        #     · 模块里是 `@staticmethod def xxx(text)` → **不传**
+        #     ★★ 这就是"稳定接口"的代价：转发层要**逐个核对签名**，
+        #       不能一律 `(self, *a, **k)`。
+        return _面板导航._clean_path_input(*a, **k)
 
 
     def _nav_record(self, *a, **k):
@@ -15767,6 +15815,107 @@ class FileTaggerApp:
         #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
         return _面板文件操作._open_in_explorer(self, *a, **k)
 
+
+    def _ask_one_line(self, title, prompt, initial=""):
+        """★★★ 「一行输入」小窗口（错题本 #185 —— **补一个缺失的方法**）。
+
+        ★★★ 为什么现在才补（真事）：
+          `面板_空白区菜单.py` 里「新建文件夹 / 新建文本文件」调的是
+          **`app._ask_one_line(...)`** —— 但那方法**只在
+          `IndexManagerDialog` 里有**，`FileTaggerApp` **根本没有**！
+          ★★ 后果：右键空白区 → 新建文件夹 / 新建文本文件 →
+            **报 `AttributeError`，功能整个用不了**
+            （而且被 `note_swallowed` 吞掉，界面上只看到"什么都没发生"）。
+        ★ 判据：**`app.xxx` 这种"跨模块调用"，被调的那个名字**必须真的存在** ——
+          ★ 而"存在的名字"我**没法靠肉眼记全**（主类 330 个方法、53 个模块）。
+          → 所以要有**自动查**的工具（`工具\\功能探测.py` 就是这么抓到的）。
+
+        ★ 为什么不直接用 `SimpleInputDialog`：
+          · 它**要 3 个参数**（title / initial / values），而这个接口是
+            `(title, prompt, initial)` —— **签名不一样**（★ prompt 没有对应位）；
+          · ★★ 而且 `SimpleInputDialog` 会 `grab_set` + `wait_window` 阻塞，
+            在这里用它**没问题**（同一个套路），但**参数语义对不上** →
+            会在窗口里显示成"标题写两遍"。
+          → 所以**老老实实实现一个**，参数跟调用方一致。
+
+        ★ 返回：用户输入的文字（★ 取消 = `None`）。
+        """
+        try:
+            top = tk.Toplevel(self.root)
+        except Exception:
+            return None
+        # ★ Toplevel 是原生窗口，底色不跟 ttk 主题走 —— 必须自己设
+        #   （不然夜间模式下这个小窗还是白的，错题本 #69 那一类）
+        try:
+            top.configure(bg=theme_get("win_bg"))
+        except Exception:
+            pass
+        try:
+            top.title(title)
+            top.transient(self.root)
+            top.resizable(False, False)
+        except Exception:
+            pass
+        try:
+            body = ttk.Frame(top, padding=14)
+            body.pack(fill="both", expand=True)
+            ttk.Label(body, text=prompt, justify="left").pack(
+                anchor="w", pady=(0, 6))
+            _var = tk.StringVar(value=str(initial or ""))
+            _ent = ttk.Entry(body, textvariable=_var, width=46)
+            _ent.pack(fill="x")
+            _ent.focus_set()
+            try:
+                _ent.icursor("end")
+            except Exception:
+                pass
+            _out = {"v": None}
+
+            def _ok(_e=None):
+                _out["v"] = _var.get()
+                try:
+                    top.destroy()
+                except Exception:
+                    pass
+
+            def _cancel(_e=None):
+                _out["v"] = None
+                try:
+                    top.destroy()
+                except Exception:
+                    pass
+
+            _btns = ttk.Frame(body)
+            _btns.pack(fill="x", pady=(12, 0))
+            ttk.Button(_btns, text=T("确定"), command=_ok).pack(side="right")
+            ttk.Button(_btns, text=T("取消"), command=_cancel).pack(
+                side="right", padx=6)
+            top.bind("<Return>", _ok)
+            top.bind("<Escape>", _cancel)
+            top.protocol("WM_DELETE_WINDOW", _cancel)
+            try:
+                top.update_idletasks()
+                _w, _h = top.winfo_width(), top.winfo_height()
+                _px = self.root.winfo_rootx() + (self.root.winfo_width() - _w) // 2
+                _py = self.root.winfo_rooty() + (self.root.winfo_height() - _h) // 3
+                top.geometry("+%d+%d" % (max(_px, 0), max(_py, 0)))
+            except Exception:
+                pass
+            try:
+                top.grab_set()
+            except Exception:
+                pass
+            try:
+                top.wait_window(top)
+            except Exception:
+                pass
+            return _out["v"]
+        except Exception as _e:
+            try:
+                note_swallowed(T("一行输入窗口失败"), _e, quiet=True)
+            except Exception:
+                pass
+            return None
 
     def _current_dir(self):
         """★★ 问出"现在在哪个目录" —— **唯一来源**，别处不要自己猜。

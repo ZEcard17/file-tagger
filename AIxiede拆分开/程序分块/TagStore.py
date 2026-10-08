@@ -145,6 +145,158 @@ class _Borrowed(object):
 
 
 # ---------- 借来的名字（都做成现取的小函数）----------
+
+
+    # ★★★ 2026-10-09 补齐协议（错题本 #185）★★★
+    #   ★★ 原来缺 **比较大小**（`__lt__` 等四个）——
+    #     真出过事：`app._idle_seconds() < IDLE_STOP_WITHIN_SEC`
+    #     → `float < _Borrowed` →
+    #     `TypeError: '<' not supported between instances of 'float' and '_Borrowed'`
+    #   ★★★ 判据：**代理会被当成什么用，你猜不到** ——
+    #     所以别一个个补，要**对着完整清单查一遍**
+    #     （工具：`工具\代理协议检查.py`）。
+    #   ★ 每次读都回主程序现取（`_v()`），所以「转给真值去做」最不容易错。
+
+
+    def __lt__(self, o):
+            return self._now() < o
+
+
+    def __le__(self, o):
+            return self._now() <= o
+
+
+    def __gt__(self, o):
+            return self._now() > o
+
+
+    def __ge__(self, o):
+            return self._now() >= o
+
+
+    def __ne__(self, o):
+            return self._now() != o
+
+
+    def __mul__(self, o):
+            return self._now() * o
+
+
+    def __rmul__(self, o):
+            return o * self._now()
+
+
+    def __sub__(self, o):
+            return self._now() - o
+
+
+    def __rsub__(self, o):
+            return o - self._v()
+
+
+    def __truediv__(self, o):
+            return self._v() / o
+
+
+    def __floordiv__(self, o):
+            return self._v() // o
+
+
+    def __mod__(self, o):
+            return self._v() % o
+
+
+    def __pow__(self, o):
+            return self._v() ** o
+
+
+    def __and__(self, o):
+            return self._v() & o
+
+
+    def __or__(self, o):
+            return self._v() | o
+
+
+    def __xor__(self, o):
+            return self._v() ^ o
+
+
+    def __lshift__(self, o):
+            return self._v() << o
+
+
+    def __rshift__(self, o):
+            return self._v() >> o
+
+
+    def __round__(self, n=None):
+            return round(self._v(), n) if n else round(self._v())
+
+
+    def __abs__(self):
+            return abs(self._v())
+
+
+    def __int__(self):
+            return int(self._v())
+
+
+    def __float__(self):
+            return float(self._v())
+
+
+    def __index__(self):
+            return self._v().__index__()
+
+
+    def __next__(self):
+            return next(self._v())
+
+
+    def __neg__(self):
+            return -self._v()
+
+
+    def __pos__(self):
+            return +self._v()
+
+
+    def __invert__(self):
+            return ~self._v()
+
+
+    def __bytes__(self):
+            return bytes(self._v())
+
+
+    def __fspath__(self):
+            return os.fspath(self._v())
+
+
+    def __format__(self, spec):
+            return format(self._v(), spec)
+
+
+    def __copy__(self):
+            return self._v()
+
+
+    def __enter__(self):
+            return self._v().__enter__()
+
+
+    def __exit__(self, *a):
+            return self._v().__exit__(*a)
+
+
+    def __add__(self, o):
+            return self._v() + o
+
+
+    def __radd__(self, o):
+            return o + self._v()
+
 def note_swallowed(*a, **kw):
     """★ 借来的函数（现取，永远拿最新那个）。"""
     f = _need('note_swallowed')

@@ -124,6 +124,113 @@ class _Borrowed:
         return self._v().items()
 
 
+
+    # ★★★ 2026-10-09 补齐协议（错题本 #185）★★★
+    #   ★★ 原来缺 **比较大小**（`__lt__` 等四个）——
+    #     真出过事：`app._idle_seconds() < IDLE_STOP_WITHIN_SEC`
+    #     → `float < _Borrowed` →
+    #     `TypeError: '<' not supported between instances of 'float' and '_Borrowed'`
+    #   ★★★ 判据：**代理会被当成什么用，你猜不到** ——
+    #     所以别一个个补，要**对着完整清单查一遍**
+    #     （工具：`工具\代理协议检查.py`）。
+    #   ★ 每次读都回主程序现取（`_v()`），所以「转给真值去做」最不容易错。
+
+
+    def __rmul__(self, o):
+            return o * self._v()
+
+
+    def __sub__(self, o):
+            return self._v() - o
+
+
+    def __rsub__(self, o):
+            return o - self._v()
+
+
+    def __truediv__(self, o):
+            return self._v() / o
+
+
+    def __floordiv__(self, o):
+            return self._v() // o
+
+
+    def __mod__(self, o):
+            return self._v() % o
+
+
+    def __pow__(self, o):
+            return self._v() ** o
+
+
+    def __and__(self, o):
+            return self._v() & o
+
+
+    def __or__(self, o):
+            return self._v() | o
+
+
+    def __xor__(self, o):
+            return self._v() ^ o
+
+
+    def __lshift__(self, o):
+            return self._v() << o
+
+
+    def __rshift__(self, o):
+            return self._v() >> o
+
+
+    def __round__(self, n=None):
+            return round(self._v(), n) if n else round(self._v())
+
+
+    def __abs__(self):
+            return abs(self._v())
+
+
+    def __next__(self):
+            return next(self._v())
+
+
+    def __neg__(self):
+            return -self._v()
+
+
+    def __pos__(self):
+            return +self._v()
+
+
+    def __invert__(self):
+            return ~self._v()
+
+
+    def __bytes__(self):
+            return bytes(self._v())
+
+
+    def __fspath__(self):
+            return os.fspath(self._v())
+
+
+    def __format__(self, spec):
+            return format(self._v(), spec)
+
+
+    def __copy__(self):
+            return self._v()
+
+
+    def __enter__(self):
+            return self._v().__enter__()
+
+
+    def __exit__(self, *a):
+            return self._v().__exit__(*a)
+
 _MISS = object()   # 哨兵：区分「取不到」和「取到 None」
 _NEED = ['FONT', 'UI_FONT_SIZE', 'enable_wheel_scroll', 'note_swallowed', 'messagebox']
 _SIBLINGS = ['AutoNameRulesDialog', 'CategoryDialog', 'CategoryHiddenTagsDialog', 'CategoryItem', 'CategorySidebar', 'CategoryTagLinkDialog', 'PreviewPane', 'RemoveFileTagsDialog', 'ScanProgressDialog', 'ShortcutDialog', 'SimpleInputDialog', 'TagBoxGridDialog', 'TagBoxPicker', 'TagPickerDialog', 'UIScaleDialog']

@@ -184,6 +184,37 @@ class _Borrowed:
 
 
 
+
+    # ★★★ 2026-10-09 补齐协议（错题本 #185）★★★
+    #   ★★ 原来缺 **比较大小**（`__lt__` 等四个）——
+    #     真出过事：`app._idle_seconds() < IDLE_STOP_WITHIN_SEC`
+    #     → `float < _Borrowed` →
+    #     `TypeError: '<' not supported between instances of 'float' and '_Borrowed'`
+    #   ★★★ 判据：**代理会被当成什么用，你猜不到** ——
+    #     所以别一个个补，要**对着完整清单查一遍**
+    #     （工具：`工具\代理协议检查.py`）。
+    #   ★ 每次读都回主程序现取（`_v()`），所以「转给真值去做」最不容易错。
+
+
+    def __lt__(self, o):
+            return self._v() < o
+
+
+    def __le__(self, o):
+            return self._v() <= o
+
+
+    def __gt__(self, o):
+            return self._v() > o
+
+
+    def __ge__(self, o):
+            return self._v() >= o
+
+
+    def __mul__(self, o):
+            return self._v() * o
+
 _MISS = object()
 _NEED = ['T', 'note_swallowed']
 _APP = None

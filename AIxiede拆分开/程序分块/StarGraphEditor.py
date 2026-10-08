@@ -1494,18 +1494,39 @@ class StarGraphEditor(tk.Toplevel):
         if not ids:
             return
         n = 0
+        skipped = 0
         for other in ids:
             try:
+                # ★★★ 2026-10-09 **修一个"静默失败"的 bug**（错题本 #185）：
+                #   `add_tag_relation` **返回 False 表示没加成**
+                #   （自己连自己 / 会成环）—— 它**不抛异常**。
+                #   ★★ 而这里原来**无条件 `n += 1`** →
+                #     用户勾了 5 个标签，其中 2 个因为"会成环"被拒，
+                #     界面却说「已加 **5** 个标签」—— **数字是假的**。
+                #   ★ 判据：**返回布尔值的接口，调用方必须看它** ——
+                #     不看 = 把"失败"当成"成功"报给用户。
                 if mode == "up":
-                    self.store.add_tag_relation(other, tid)
+                    ok = self.store.add_tag_relation(other, tid)
                 else:
-                    self.store.add_tag_relation(tid, other)
-                n += 1
+                    ok = self.store.add_tag_relation(tid, other)
+                if ok:
+                    n += 1
+                else:
+                    skipped += 1
             except Exception as exc:
+                skipped += 1
                 try:
                     note_swallowed(T("加标签关系失败"), exc)
                 except Exception:
                     pass
+        # ★ 有被拒的就说清楚（★ 别让用户以为全加上了）
+        if skipped:
+            try:
+                self.set_status_hint(
+                    T("加关系：成功 {n} 个，跳过 {k} 个"
+                      "（自己连自己 / 会绕成圈的不允许）", n=n, k=skipped))
+            except Exception:
+                pass
         if n:
             self.dirty = True
             self._reload()
@@ -2768,7 +2789,17 @@ class StarGraphEditor(tk.Toplevel):
         tid = self.store.tag_id_by_name(name)
         if tid is None:
             return
-        self.store.add_tag_relation(parent.tag_id, tid)
+        # ★★ 2026-10-09：**看返回值**（错题本 #185）——
+        #   返回 False = "没加成"（会成环 / 自己连自己）。
+        #   ★ 新建子标签一般是新 id，**不会成环**；但万一没加成，
+        #     下面那句"已建子标签"就是**假话** → 所以这里要判。
+        if not self.store.add_tag_relation(parent.tag_id, tid):
+            try:
+                self.set_status_hint(
+                    T("标签建好了，但**没能挂到「{p}」下面**"
+                      "（会绕成圈，程序不允许）", p=str(parent.name)[:16]))
+            except Exception:
+                pass
         # ★★★ 子标签也一样：**放父标签右边**，而不是一律放正中央
         #   （原来一律正中央 → 连着建子标签会**全叠在一起**，错题本 #183）
         try:
