@@ -5285,8 +5285,19 @@ def make_search_label(parent, text=None, px=16, **kw):
     ★ 取不到图片就**老老实实退回 emoji** —— 绝不显示空白。
       （错题本 #5 那条：「最坏情况要能看能点，不能一片空白」。）
     """
+    # ★★ 2026-10-08：**不管调用方传什么，这里都再翻一次** ——
+    #   · 有的地方写 `make_search_label(sbar, T("搜索标签："))`（已翻）
+    #   · 有的地方写 `make_search_label(sbar, "搜索标签：")`（**原文**）
+    #   ★ 再翻一次对"已翻好的"**无害**（表里查不到就原样返回）——
+    #     所以**统一在这里兜底**，比"到处去改调用方"可靠。
+    #   ★★ 判据：**"兜底放在最靠近使用的地方"**，
+    #     而不是"指望每个调用方都记得翻"。
     if text is None:
         text = T("搜索文件：")
+    try:
+        text = T(text)
+    except Exception:
+        pass
     try:
         img = get_ui_icon("search", px)
     except Exception:
@@ -11181,9 +11192,10 @@ class StarGraphEditor(tk.Toplevel):
         if tid is None:
             n_sel = len(getattr(self, "selected_node_ids", ()) or ())
             self.relation_lbl.config(
-                text=("已选中 %d 个标签（选一个看它的上下游）" % n_sel)
-                if n_sel > 1 else
-                "（在星图上点一个标签，这里就显示它的上下游）")
+                text=(T("已选中 {n} 个标签（选一个看它的上下游）",
+                        n=n_sel)
+                      if n_sel > 1 else
+                      T("（在星图上点一个标签，这里就显示它的上下游）")))
             return
         node = self.nodes.get(tid)
         if node is None:
@@ -18251,10 +18263,10 @@ class AutoTagRulesDialog(tk.Toplevel):
         #   实际显示时 Tk 会按这个宽度折行。
         self._desc_lbl = ttk.Label(
             body,
-            text="给符合条件的文件自动打标签。\n"
-                 "「作用范围」可填多个文件夹（每行一个），留空 = 全局；"
-                 "填了 = 该目录及其所有子目录。\n"
-                 "「匹配方式」选“全部文件”时，作用范围内所有文件都打这个标签。",
+            text=T("给符合条件的文件自动打标签。\n"
+                    "「作用范围」可填多个文件夹（每行一个），留空 = 全局；"
+                    "填了 = 该目录及其所有子目录。\n"
+                    "「匹配方式」选“全部文件”时，作用范围内所有文件都打这个标签。"),
             foreground=theme_get("fg_dim"), justify="left",
             wraplength=760)
         self._desc_lbl.pack(anchor="w", pady=(0, 8))
@@ -18324,7 +18336,7 @@ class AutoTagRulesDialog(tk.Toplevel):
         self.idle_var = tk.BooleanVar(value=self._idle_cfg["rules_enabled"])
         ttk.Checkbutton(
             idle_row,
-            text="☁ 闲时自动跑（扫描全部范围 + 应用文件名规则）",
+            text=T("☁ 闲时自动跑（扫描全部范围 + 应用文件名规则）"),
             variable=self.idle_var,
             command=self._save_idle_cfg).pack(side="left")
         ttk.Label(idle_row, text=T("鼠标 / 键盘空闲")).pack(
@@ -18583,7 +18595,7 @@ class AutoTagRulesDialog(tk.Toplevel):
                 txt = ("上次闲时跑：" + datetime.fromtimestamp(last)
                        .strftime("%m-%d %H:%M"))
             else:
-                txt = "还没闲时跑过"
+                txt = T("还没闲时跑过")
             self._idle_hint_lbl.config(text=txt)
         except Exception:
             pass
@@ -19525,8 +19537,8 @@ class ShortcutDialog(tk.Toplevel):
         body.pack(fill="both", expand=True, padx=10, pady=10)
         ttk.Label(
             body,
-            text="想改哪个键：① 双击那一行直接按键，或 ② 选中后从右边的下拉框里挑。\n"
-                 "留空 = 不用快捷键（比如你不想让 F2 改文件名，就把它清空）。",
+            text=T("想改哪个键：① 双击那一行直接按键，或 ② 选中后从右边的下拉框里挑。\n"
+                    "留空 = 不用快捷键（比如你不想让 F2 改文件名，就把它清空）。"),
             justify="left", foreground=theme_get("fg_dim")).pack(anchor="w", pady=(0, 6))
 
         mid = ttk.Frame(body)
@@ -21911,7 +21923,7 @@ class QuickPreview:
         except Exception:
             pass
         self.win = win
-        win.title("快速预览 —— 空格 / Esc 关闭，← → 换文件")
+        win.title(T("快速预览 —— 空格 / Esc 关闭，← → 换文件"))
         win.transient(root)
 
         # 尺寸：按屏幕比例，别铺满（外面惯例）
@@ -22138,7 +22150,8 @@ class QuickPreview:
         try:
             self._title_lbl.configure(text=name)
             self._zoom_lbl.configure(
-                text="第 %d / %d 个" % (self.index + 1, len(self.paths)))
+                text=T("第 {a} / {b} 个",
+                         a=self.index + 1, b=len(self.paths)))
         except Exception:
             pass
         # ★ 复用现成的渲染（它自己会丢后台读、会显示「正在读取…」）
@@ -22927,9 +22940,9 @@ class IndexManagerDialog(tk.Toplevel):
 
         ttk.Label(
             body,
-            text="把常用根目录加入索引后，打开其下任意子目录都能秒开。\n"
-                 "索引只记录文件名 / 是否为目录 / 文件大小（大小是目录列表"
-                 "自带的，不额外请求网盘），不下载文件内容。",
+            text=T("把常用根目录加入索引后，打开其下任意子目录都能秒开。\n"
+                   "索引只记录文件名 / 是否为目录 / 文件大小（大小是目录列表"
+                   "自带的，不额外请求网盘），不下载文件内容。"),
             foreground=theme_get("fg_dim"), justify="left").pack(anchor="w", pady=(0, 8))
 
         # 顶部按钮
@@ -23343,14 +23356,17 @@ class IndexManagerDialog(tk.Toplevel):
             return
         cached = self.store.dir_cache_meta_count_under(r["path"])
         text = (
-            f"路径：{r['path']}\n"
-            f"状态：{'启用' if r['enabled'] else '已停用'}\n"
-            f"已缓存目录数：{cached}\n"
-            f"上次扫描：{r.get('last_scan_at') or '从未'}\n"
-            f"上次统计：文件 {r['total_files']}  目录 {r['total_dirs']}\n"
+            T("路径：{x}\n", x=r["path"]) +
+            T("状态：{x}\n",
+              x=(T("启用") if r["enabled"] else T("已停用"))) +
+            T("已缓存目录数：{x}\n", x=cached) +
+            T("上次扫描：{x}\n",
+              x=(r.get("last_scan_at") or T("从未"))) +
+            T("上次统计：文件 {a}  目录 {b}\n",
+              a=r["total_files"], b=r["total_dirs"])
         )
         if r.get("last_error"):
-            text += f"上次错误：{r['last_error']}\n"
+            text += T("上次错误：{x}\n", x=r["last_error"])
         self._info_lbl.config(text=text)
 
     def _summary_text(self):
@@ -23367,10 +23383,12 @@ class IndexManagerDialog(tk.Toplevel):
             cached = self.store.dir_cache_meta_count_under("")
         except Exception:
             cached = 0
-        return (f"根目录：{n_all} 个（已启用 {n_on} 个）\n"
-                f"已缓存目录数：{cached}\n"
-                f"索引统计：文件 {tot_f}  目录 {tot_d}\n"
-                f"提示：选中左边一行看详情；双击一行 = 启用 / 停用。")
+        return (T("根目录：{a} 个（已启用 {b} 个）\n",
+                  a=n_all, b=n_on) +
+                T("已缓存目录数：{x}\n", x=cached) +
+                T("索引统计：文件 {a}  目录 {b}\n",
+                  a=tot_f, b=tot_d) +
+                T("提示：选中左边一行看详情；双击一行 = 启用 / 停用。"))
 
     # ---------------- ★ v25：闲时设置 ----------------
     def _save_idle_cfg(self):
@@ -23404,7 +23422,7 @@ class IndexManagerDialog(tk.Toplevel):
                 txt = ("上次闲时跑：" + datetime.fromtimestamp(last)
                        .strftime("%m-%d %H:%M"))
             else:
-                txt = "还没闲时跑过"
+                txt = T("还没闲时跑过")
             self._idle_hint_lbl.config(text=txt)
         except Exception:
             pass
@@ -23439,7 +23457,7 @@ class IndexManagerDialog(tk.Toplevel):
             if not HAS_CD_API:
                 txt = "（没找到 grpcio 库，只能走挂载盘）"
             elif not tok:
-                txt = "（还没填令牌，点左边按钮填一次）"
+                txt = T("（还没填令牌，点左边按钮填一次）")
             elif not bool(self.cd_api_var.get()):
                 txt = "（已关闭，网盘索引会走挂载盘，慢）"
             else:
@@ -27657,9 +27675,9 @@ class FileTaggerApp:
         nb.add(tab_now, text=T("  本次开程序  "))
         ttk.Label(
             tab_now,
-            text="这是**这次开程序以来**记下的「没吭声的小毛病」（关窗口就清零）。\n"
-                 "想看「老出问题的是哪些」→ 点上面那个「历史累计」页。\n"
-                 "★ 把这里的内容发我即可，全是中文、不含你的文件名/路径。",
+            text=T("这是**这次开程序以来**记下的「没吭声的小毛病」（关窗口就清零）。\n"
+                    "想看「老出问题的是哪些」→ 点上面那个「历史累计」页。\n"
+                    "★ 把这里的内容发我即可，全是中文、不含你的文件名/路径。"),
             justify="left", font=(FONT, UI_FONT_SIZE)).pack(anchor="w",
                                                             pady=(0, 6))
         box = tk.Text(tab_now, width=76, height=20, wrap="none",
@@ -27870,11 +27888,11 @@ class FileTaggerApp:
                 foreground=theme_get("fg_dim")).pack(anchor="w", pady=(4, 10))
 
             info = [
-                ("版本", "v26"),
-                ("当前界面缩放", "%d%%" % int(self.ui_scale * 100)),
-                ("数据库", str(DB_PATH)),
-                ("导出目录", str(EXPORT_DIR)),
-                ("设置文件", str(SETTINGS_PATH)),
+                (T("版本"), "v26"),
+                (T("当前界面缩放"), "%d%%" % int(self.ui_scale * 100)),
+                (T("数据库"), str(DB_PATH)),
+                (T("导出目录"), str(EXPORT_DIR)),
+                (T("设置文件"), str(SETTINGS_PATH)),
             ]
             for k, v in info:
                 row = ttk.Frame(body)
@@ -30019,8 +30037,8 @@ class FileTaggerApp:
         fr.pack(fill="both", expand=True)
 
         ttk.Label(
-            fr, text="网盘文件预览时，会在本地留一份临时副本（缓存）。\n"
-                     "下面四个选项决定「放哪」和「什么时候自己清掉」。",
+            fr, text=T("网盘文件预览时，会在本地留一份临时副本（缓存）。\n"
+                     "下面四个选项决定「放哪」和「什么时候自己清掉」。"),
             justify="left", font=(FONT, UI_FONT_SIZE)).pack(anchor="w",
                                                             pady=(0, 10))
 
@@ -30048,8 +30066,8 @@ class FileTaggerApp:
         ent.pack(side="left", fill="x", expand=True)
         ttk.Button(row, text=T("浏览…"), command=_pick_dir).pack(side="left", padx=4)
         ttk.Button(row, text=T("用临时目录"), command=_use_temp).pack(side="left")
-        ttk.Label(box1, text="留空 = 用系统临时目录（推荐，省心）。"
-                             "正在用的目录见下面「现在的情况」。",
+        ttk.Label(box1, text=T("留空 = 用系统临时目录（推荐，省心）。"
+                             "正在用的目录见下面「现在的情况」。"),
                   foreground=theme_get("fg_dim")).pack(anchor="w", pady=(6, 0))
 
         # ---------- ② 无痕模式 ----------
@@ -30058,11 +30076,11 @@ class FileTaggerApp:
         inc_var = tk.BooleanVar(
             value=bool(load_ui_setting("cache_incognito", True)))
         ttk.Checkbutton(
-            box2, text="开启 —— 每次开程序都换一个全新的缓存目录，"
-                       "上次留下的自动清掉（推荐）",
+            box2, text=T("开启 —— 每次开程序都换一个全新的缓存目录，"
+                       "上次留下的自动清掉（推荐）"),
             variable=inc_var).pack(anchor="w")
-        ttk.Label(box2, text="不开的话：缓存会一直留着，下次看同一个文件会更快"
-                             "（但也更占地方）。",
+        ttk.Label(box2, text=T("不开的话：缓存会一直留着，下次看同一个文件会更快"
+                             "（但也更占地方）。"),
                   foreground=theme_get("fg_dim")).pack(anchor="w", pady=(4, 0))
 
         # ---------- ③ 定时清理 ----------
@@ -30110,8 +30128,9 @@ class FileTaggerApp:
                         except Exception:
                             pass
                 info_lbl.configure(
-                    text="正在用的缓存目录：\n%s\n\n里面现在有 %d 个文件，"
-                         "共 %.1f MB" % (now, n, sz / 1024 / 1024))
+                    text=T("正在用的缓存目录：\n{x}\n\n里面现在有 {n} 个文件，"
+                           "共 {s} MB",
+                           x=now, n=n, s="%.1f" % (sz / 1024 / 1024)))
             except Exception as e:
                 info_lbl.configure(text="看不出来（%s）" % e)
 

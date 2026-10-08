@@ -30,6 +30,34 @@ enable_wheel_scroll = None
 note_swallowed = None
 
 
+
+
+# ==========================================================================
+#  ★★★ 2026-10-08 **多语言**：模块里的界面文字也走 T() ★★★
+#  --------------------------------------------------------------------------
+#  ★ 为什么"向主程序要"（而不是自己 `from i18n import T`）：
+#    · 那样**语言表就有两套**了 —— 用户切语言时可能**不同步**
+#    · ★★ 统一"向主程序要"：**只有一处知道当前语言**（主程序的 i18n）
+#    ★ 而本模块**已经有** `_need()`（向主程序借名字的通道），
+#      所以这里**只是多要一个 `T`**，不引入新机制。
+#
+#  ★★ 为什么要有那个 `except` 兜底：
+#    万一主程序还没接上（`_set_app` 没调），或者 `T` 取不到，
+#    **也要返回原文**（能看），**不能报错**（界面上的字不该让程序崩）。
+# ==========================================================================
+def T(text, **kw):
+    """★ 向主程序要翻译（取不到就返回原文 —— 界面永远能看）。"""
+    try:
+        f = _need("T")
+        if f is not None:
+            return f(text, **kw)
+    except Exception:
+        pass
+    try:
+        return str(text).format(**kw) if kw else str(text)
+    except Exception:
+        return str(text)
+
 def _set_app(app):
     """主程序启动时调一下：把「自己」交进来，顺便把要借的名字填上。"""
     global _APP
@@ -133,9 +161,9 @@ class TagBoxPicker(tk.Toplevel):
 
         body = ttk.Frame(self)
         body.pack(fill="both", expand=True, padx=10, pady=10)
-        ttk.Label(body, text="勾上要放进盒子的标签（按「用得最多」排序）：",
+        ttk.Label(body, text=T("勾上要放进盒子的标签（按「用得最多」排序）："),
                   justify="left").pack(anchor="w")
-        ttk.Label(body, text="（「固定」= 换视图也留着；不勾固定就是这次用用）",
+        ttk.Label(body, text=T("（「固定」= 换视图也留着；不勾固定就是这次用用）"),
                   foreground="#777").pack(anchor="w", pady=(0, 6))
 
         # ★ v25 补丁39（用户提的）：这个窗口**原来没有搜索框** —— 标签有
@@ -143,13 +171,13 @@ class TagBoxPicker(tk.Toplevel):
         #   边打边筛（按标签名，不区分大小写）。
         sbar = ttk.Frame(body)
         sbar.pack(fill="x", pady=(0, 6))
-        ttk.Label(sbar, text="🔍 搜索标签：").pack(side="left")
+        ttk.Label(sbar, text=T("🔍 搜索标签：")).pack(side="left")
         self.search_var = tk.StringVar()
         _se = ttk.Entry(sbar, textvariable=self.search_var)
         _se.pack(side="left", fill="x", expand=True, padx=(4, 4))
         _se.focus_set()
         self.search_var.trace_add("write", lambda *a: self._load())
-        ttk.Button(sbar, text="清除", width=6,
+        ttk.Button(sbar, text=T("清除"), width=6,
                    command=lambda: self.search_var.set("")).pack(side="left")
         self.count_lbl = ttk.Label(body, text="", foreground="#16a085")
         self.count_lbl.pack(anchor="w", pady=(0, 4))
@@ -175,12 +203,12 @@ class TagBoxPicker(tk.Toplevel):
             pass
 
         self.fixed_var = tk.BooleanVar(value=True)
-        ttk.Checkbutton(body, text="固定进盒子（换视图也在）",
+        ttk.Checkbutton(body, text=T("固定进盒子（换视图也在）"),
                         variable=self.fixed_var).pack(anchor="w", pady=(6, 4))
         btns = ttk.Frame(body)
         btns.pack(fill="x")
-        ttk.Button(btns, text="确定", command=self._ok).pack(side="right")
-        ttk.Button(btns, text="取消", command=self.destroy).pack(
+        ttk.Button(btns, text=T("确定"), command=self._ok).pack(side="right")
+        ttk.Button(btns, text=T("取消"), command=self.destroy).pack(
             side="right", padx=6)
         self.bind("<Escape>", lambda e: self.destroy())
         self._load()

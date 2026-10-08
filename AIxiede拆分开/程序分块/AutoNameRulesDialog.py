@@ -33,6 +33,34 @@ note_swallowed = None
 messagebox = None
 
 
+
+
+# ==========================================================================
+#  ★★★ 2026-10-08 **多语言**：模块里的界面文字也走 T() ★★★
+#  --------------------------------------------------------------------------
+#  ★ 为什么"向主程序要"（而不是自己 `from i18n import T`）：
+#    · 那样**语言表就有两套**了 —— 用户切语言时可能**不同步**
+#    · ★★ 统一"向主程序要"：**只有一处知道当前语言**（主程序的 i18n）
+#    ★ 而本模块**已经有** `_need()`（向主程序借名字的通道），
+#      所以这里**只是多要一个 `T`**，不引入新机制。
+#
+#  ★★ 为什么要有那个 `except` 兜底：
+#    万一主程序还没接上（`_set_app` 没调），或者 `T` 取不到，
+#    **也要返回原文**（能看），**不能报错**（界面上的字不该让程序崩）。
+# ==========================================================================
+def T(text, **kw):
+    """★ 向主程序要翻译（取不到就返回原文 —— 界面永远能看）。"""
+    try:
+        f = _need("T")
+        if f is not None:
+            return f(text, **kw)
+    except Exception:
+        pass
+    try:
+        return str(text).format(**kw) if kw else str(text)
+    except Exception:
+        return str(text)
+
 def _set_app(app):
     """主程序启动时调一下：把「自己」交进来，顺便把要借的名字填上。"""
     global _APP
@@ -153,12 +181,12 @@ class AutoNameRulesDialog(tk.Toplevel):
         # 搜索行
         sbar = ttk.Frame(body)
         sbar.pack(fill="x", pady=(0, 6))
-        ttk.Label(sbar, text="🔍 搜索标签：").pack(side="left")
+        ttk.Label(sbar, text=T("🔍 搜索标签：")).pack(side="left")
         self.search_var = tk.StringVar()
         se = ttk.Entry(sbar, textvariable=self.search_var)
         se.pack(side="left", fill="x", expand=True, padx=(4, 4))
         self.search_var.trace_add("write", lambda *a: self._render_list())
-        ttk.Button(sbar, text="清除", width=6,
+        ttk.Button(sbar, text=T("清除"), width=6,
                    command=lambda: self.search_var.set("")
                    ).pack(side="left")
 
@@ -197,13 +225,13 @@ class AutoNameRulesDialog(tk.Toplevel):
         # 底部按钮
         btns = ttk.Frame(body)
         btns.pack(fill="x", pady=(10, 0))
-        ttk.Button(btns, text="保存",
+        ttk.Button(btns, text=T("保存"),
                    command=self._save).pack(side="right")
-        ttk.Button(btns, text="取消",
+        ttk.Button(btns, text=T("取消"),
                    command=self._cancel).pack(side="right", padx=6)
-        ttk.Button(btns, text="全不选",
+        ttk.Button(btns, text=T("全不选"),
                    command=lambda: self._set_all(False)).pack(side="left")
-        ttk.Button(btns, text="全选",
+        ttk.Button(btns, text=T("全选"),
                    command=lambda: self._set_all(True)).pack(side="left",
                                                              padx=4)
 
@@ -252,7 +280,7 @@ class AutoNameRulesDialog(tk.Toplevel):
             row.bind("<Button-1>", _toggle)
 
         if shown == 0:
-            tk.Label(self.inner, text="（没有匹配的标签）",
+            tk.Label(self.inner, text=T("（没有匹配的标签）"),
                      bg="white", fg="#999").pack(pady=16)
             self.search_info.config(text="")
         elif q:
@@ -264,7 +292,7 @@ class AutoNameRulesDialog(tk.Toplevel):
                 self.search_info.config(
                     text=f"已选 {n_on} 个标签参与文件名匹配")
             else:
-                self.search_info.config(text="（没有勾选任何标签）")
+                self.search_info.config(text=T("（没有勾选任何标签）"))
 
     def _wheel(self, event):
         if event.num == 4:
