@@ -5931,6 +5931,51 @@ except Exception as _e:
     note_swallowed(T("搬出去的 面板_面板布局.py 没找到"), _e)
 
 
+# ★★★ 「帮助关于」这组方法已搬到 `AIxiede拆分开/程序分块/面板_帮助关于.py`
+#   ★★ 方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_帮助关于 as _面板帮助关于
+    _面板帮助关于._set_app(sys.modules[__name__])
+    _HAS_PANEL_帮助关于 = True
+except Exception as _e:
+    _HAS_PANEL_帮助关于 = False
+    note_swallowed(T("搬出去的 面板_帮助关于.py 没找到"), _e)
+
+
+# ★★★ 「外观零件」这组方法已搬到 `AIxiede拆分开/程序分块/面板_外观零件.py`
+#   ★★ 方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_外观零件 as _面板外观零件
+    _面板外观零件._set_app(sys.modules[__name__])
+    _HAS_PANEL_外观零件 = True
+except Exception as _e:
+    _HAS_PANEL_外观零件 = False
+    note_swallowed(T("搬出去的 面板_外观零件.py 没找到"), _e)
+
+
+# ★★★ 「插件挂载」这组方法已搬到 `AIxiede拆分开/程序分块/面板_插件挂载.py`
+#   ★★ 方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_插件挂载 as _面板插件挂载
+    _面板插件挂载._set_app(sys.modules[__name__])
+    _HAS_PANEL_插件挂载 = True
+except Exception as _e:
+    _HAS_PANEL_插件挂载 = False
+    note_swallowed(T("搬出去的 面板_插件挂载.py 没找到"), _e)
+
+
 # ★★★ FileList 已拆到 `AIxiede拆分开/程序分块/FileList.py`（2026-10-08）
 #   ★★ 写法（错题本 #158）：① 直接 `from FileList import …`（不带包路径）
 #     ② `_set_app` 取别名 —— 模块名和类名同名时会跑到类上找
@@ -11188,83 +11233,11 @@ class FileTaggerApp:
         except Exception as _e:
             note_swallowed(T("切换菜单栏显示失败"), _e)
 
-    # ======================================================================
-    #  ★★★ 2026-10-08：**插件菜单**（用户要"配合插件入口"）
-    # ======================================================================
-    def _attach_plugin_menus(self):
-        """★ 把插件想加的菜单**挂到主菜单上**（"问表要东西"）。
+    def _attach_plugin_menus(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_插件挂载.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板插件挂载._attach_plugin_menus(self, *a, **k)
 
-        ★ 为什么是一个单独的方法（而不是塞在 `_build_menu` 里）：
-          `_build_menu` 跑在**插件加载之前**（菜单要先生出来，
-          插件才能往上挂）—— 所以**加载完插件后要再挂一次**。
-          ★ 这也是"预留入口"的做法：**主程序不认识任何插件**，
-            只是"问 `plugin_menu_entries()` 要一份清单，照着挂"。
-
-        ★ 什么时候被调：
-          ① 启动、插件加载完之后（见 `__init__`）
-          ② 以后如果做"运行时启用插件"，再来一遍就行
-
-        ★ 每一块单独 try —— 一个插件菜单挂失败，不影响别的、也不影响主程序。
-        """
-        try:
-            # ---- ① 插件要的**顶层菜单** ----
-            for pname, label, items in plugin_menu_entries():
-                try:
-                    sub = tk.Menu(self.menubar, tearoff=0)
-                    for it in (items or []):
-                        try:
-                            if it is None:
-                                sub.add_separator()
-                                continue
-                            text, cmd = it
-                            sub.add_command(label=str(text), command=cmd)
-                        except Exception:
-                            pass
-                    if sub.index("end") is None:
-                        continue        # 空的就不挂（免得点开一片空白）
-                    self.menubar.add_cascade(label=str(label), menu=sub)
-                except Exception as _e:
-                    note_swallowed(T("挂插件菜单「{x}」失败", x=pname), _e)
-            # ---- ①.5 ★ 插件可能注册了**自己的皮肤** → 把皮肤菜单重刷一遍 ----
-            #   ★ 为什么需要（实测踩的）：
-            #     皮肤菜单是**建菜单时**列一遍的，那会儿插件**还没加载**，
-            #     它注册的配色**列不出来**（实测：进了 `_THEMES`，菜单里却没有）。
-            #     ★ 虽然我给它挂了 `postcommand`（每次点开重列），
-            #       但**这里再刷一次更稳** —— 万一 `postcommand` 在某些
-            #       Tk 版本上不灵，这里也兜住了。
-            #     ★ "两处都做"是刻意的：用户要的就是"留冗余、方便以后改"。
-            try:
-                _tm = getattr(self, "_theme_menu", None)
-                if _tm is not None:
-                    self._fill_theme_menu(_tm)
-            except Exception:
-                pass
-            # ---- ② 插件要"插进已有菜单"的项 ----
-            #   ★ 按菜单名找：主菜单里 cget("label") 等于它的那个
-            for pname, mlabel, ilabel, cmd in plugin_menu_items():
-                try:
-                    target = None
-                    n = self.menubar.index("end")
-                    if n is None:
-                        continue
-                    for i in range(n + 1):
-                        try:
-                            if str(self.menubar.entrycget(i, "label")) == str(mlabel):
-                                target = self.menubar.nametowidget(
-                                    self.menubar.entrycget(i, "menu"))
-                                break
-                        except Exception:
-                            continue
-                    if target is None:
-                        # ★ 找不到那个菜单 → 就加到主菜单最外层（别把插件吃掉）
-                        self.menubar.add_command(label=str(ilabel), command=cmd)
-                    else:
-                        target.add_separator()
-                        target.add_command(label=str(ilabel), command=cmd)
-                except Exception as _e:
-                    note_swallowed(T("插插件菜单项「{x}」失败", x=pname), _e)
-        except Exception as _e:
-            note_swallowed(T("挂插件菜单失败"), _e)
 
     # ======================================================================
     #  ★★★ 2026-10-08：**皮肤菜单"每次打开时重建"**（用户要"配合插件入口"）
@@ -11309,24 +11282,11 @@ class FileTaggerApp:
         menu.add_command(label=T("📂 打开语言文件夹（可自己加语言）"),
                          command=self._open_lang_folder)
 
-    def _open_lang_folder(self):
-        """★ 打开 `语言/` 文件夹 —— **让别人自己能加语言**。
+    def _open_lang_folder(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_帮助关于.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板帮助关于._open_lang_folder(self, *a, **k)
 
-        ★ 为什么要给这个入口：语言文件是**纯 JSON**，
-          懂一点的人**照着 `en_US.json` 加一个 `ru_RU.json` 就行** ——
-          **不用改代码、不用重新打包**。
-          ★ 这是"开放"的一部分：**别人能参与翻译，不需要我**。
-        """
-        try:
-            d = ""
-            if _i18n is not None:
-                d = _i18n._candidates_dir()
-            if not d or not os.path.isdir(d):
-                d = os.path.join(_HERE, "语言")
-            os.makedirs(d, exist_ok=True)
-            os.startfile(d)          # ★ Windows 打开文件夹
-        except Exception as _e:
-            note_swallowed(T("打开语言文件夹失败"), _e)
 
     def set_language_now(self, code):
         """★ **换语言**（存设置 + 提示重启 + 给"现在就重启"）。
@@ -11426,60 +11386,11 @@ class FileTaggerApp:
             except Exception:
                 pass
 
-    # ======================================================================
-    #  ★★★ 2026-10-08：**背景图 + "假毛玻璃"**（用户要的美化效果）
-    # ======================================================================
-    def _theme_bg_spec(self):
-        """★ 从当前皮肤里读"美化项"（图 / 模式 / 模糊 / 面板透明感）。
+    def _theme_bg_spec(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_外观零件.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板外观零件._theme_bg_spec(self, *a, **k)
 
-        ★ 皮肤里这些键都是**可选**的 —— 没有就表示"不启用背景图"：
-            `background_image` / `background_mode` / `background_blur`
-            `panel_alpha`
-        ★ 返回 `(图片路径, 模式, 模糊半径, 面板透明感 0~100)`；
-          没有图就返回 `(None, ..., 0)`。
-
-        ★★ 2026-10-08：**再读一处** —— 用户在「设置 → 背景图」里手选的那张。
-          ★ 优先级：**用户手选的 > 皮肤自带的**
-            （用户刚选完图，当然该用他的；皮肤自带的只是"默认长相"）。
-          ★ 为什么要两处：用户说「他们挺喜欢搞个图片当背景」——
-            **最自然的用法是"我自己挑一张"**，不该逼他先做一套皮肤。
-        """
-        try:
-            th = _themes_now()
-            path = str(th.get("background_image") or "").strip()
-            mode = str(th.get("background_mode") or "cover").strip().lower()
-            try:
-                blur = float(th.get("background_blur") or 0)
-            except Exception:
-                blur = 0.0
-            try:
-                pa = float(th.get("panel_alpha") or 0)
-            except Exception:
-                pa = 0.0
-            # ★ 用户手选的优先（存在 custom_themes 的 `__background__` 里）
-            try:
-                data = load_ui_setting("custom_themes", None)
-                if isinstance(data, dict):
-                    u = data.get("__background__") or {}
-                    if isinstance(u, dict) and u.get("background_image"):
-                        path = str(u.get("background_image") or "").strip()
-                        mode = str(u.get("background_mode") or mode).lower()
-                        try:
-                            blur = float(u.get("background_blur") or blur)
-                        except Exception:
-                            pass
-                        try:
-                            pa = float(u.get("panel_alpha") or pa)
-                        except Exception:
-                            pass
-            except Exception:
-                pass
-            if mode not in BG_MODES:
-                mode = "cover"
-            return (path or None, mode, max(0.0, blur),
-                    max(0.0, min(100.0, pa)))
-        except Exception:
-            return (None, "cover", 0.0, 0.0)
 
     def _apply_background(self):
         """★★ **铺背景图**（用户要的"搞个图片当背景"）。
@@ -11541,58 +11452,11 @@ class FileTaggerApp:
         except Exception as _e:
             note_swallowed(T("铺背景图失败"), _e)
 
-    def _apply_panel_blend(self):
-        """★★ **面板色"看着半透明"** —— 这一步不做，背景图基本看不见。
+    def _apply_panel_blend(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_外观零件.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板外观零件._apply_panel_blend(self, *a, **k)
 
-        ★ 为什么需要（实测出来的）：
-          Tk 的控件**没有透明这回事** —— 面板有底色就是实色，
-          **背景图只有"控件之间的缝"能露出来**。
-          → 所以要让"看着像半透明"，只能**把面板色往图片的颜色上调**。
-
-        ★ 怎么做：
-          ① 取背景图的**平均色**（缩到 1x1，最省事也最准）
-          ② 把"面板色"按 `panel_alpha` 混进这个平均色
-             · `panel_alpha=0`   → 面板是原来的实色（看不出背景图）
-             · `panel_alpha=60`  → 面板明显偏图片色（像透了一层）
-             · `panel_alpha=100` → 面板几乎就是图片色（**字可能看不清**）
-          ③ 把混好的颜色**临时覆盖到主题表里** ——
-             这样"所有读 `theme_get()` 的地方"**自动**用上新颜色，
-             **不用改任何调用方**（跟自定义皮肤一个套路）。
-
-        ★★ 为什么是"临时覆盖"而不是"改皮肤表本身"：
-          皮肤表是**共享的**（`light` / `dark` 就一份）——
-          直接改它会把"原配色"弄丢（切回去就回不来了）。
-          → 所以先把**原始色存一份**，混完写进"当前皮肤"；
-            换皮肤 / 关背景图时**恢复**（见 `_restore_panel_colors`）。
-        """
-        path, _mode, blur, pa = self._theme_bg_spec()
-        # ★ 先把上次混过的恢复（不然越混越偏）
-        self._restore_panel_colors()
-        if not path or pa <= 0:
-            return
-        try:
-            avg = average_color_of_image(path, blur)
-            if not avg:
-                return
-            th = _themes_now()
-            # ★ 要调的"面板类"颜色（这几块正好是"盖在背景上的面"）
-            keys = ("win_bg", "card_bg", "panel_bg", "panel_bg2", "text_bg",
-                    "canvas_bg", "stripe_bg")
-            saved = {}
-            k = pa / 100.0
-            for key in keys:
-                try:
-                    old = th.get(key)
-                    if not old:
-                        continue
-                    saved[key] = old             # ★ 存原始色（恢复用）
-                    th[key] = blend_color_over(old, avg, k)
-                except Exception:
-                    pass
-            # ★ 存起来，换皮肤时恢复
-            self._blended_saved = saved
-        except Exception as _e:
-            note_swallowed(T("调和面板色失败（背景图会看不太出来）"), _e)
 
     def _restore_panel_colors(self):
         """★ 把上次"调和过的面板色"**恢复成原始色**。
@@ -12092,449 +11956,22 @@ class FileTaggerApp:
                 "无法写入设置文件，请检查目录权限。",
                 parent=self.root)
 
-    def show_usage_log(self):
-        """★★ 2026-10-07 **合并版**：「用法记录」+「体检报告」合成一个窗口。
+    def show_usage_log(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_帮助关于.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板帮助关于.show_usage_log(self, *a, **k)
 
-        ★ 用户提的：「体验报告和用法记录的区别是什么，感觉可以合并」
-          → 我查了，他说的"体验报告"其实是**体检报告**，两者确实是**一个东西的两半**：
-            |          | 体检报告                 | 用法记录               |
-            |----------|--------------------------|------------------------|
-            | 数据来源 | `swallowed_report()`（内存） | `usage_read()`（落盘）  |
-            | 范围     | **只管这一次开程序**       | **跨次累积**            |
-            | 内容     | 哪儿出的问题 —— N 次       | 哪儿 / 次数 / 最近 / 错误 |
 
-        ★ 用户选了**方案 B**：一个窗口、**两个页签**（本次 / 历史）。
-          为什么不做成一个表：**"本次"和"跨次"是不同的东西** ——
-            · 「本次」适合"我刚发现一个 bug，现在就看看"
-            · 「历史」适合"哪些毛病**老**出现"
-          硬合成一个表会**丢掉这个区分**，而**恰恰"老出现"才最该修**。
-        """
-        win = tk.Toplevel(self.root)
-        # ★★ 2026-10-07：Toplevel 是**原生窗口**，底色不跟 ttk 主题走 ——
-        #   不设 bg 就用系统默认（白/浅灰），那就是"小窗口夜间还是白的"的根因。
-        try:
-            win.configure(bg=theme_get("win_bg"))
-            # ★ 登记一下，切主题时由 _retheme_custom_parts 统一刷新
-            _reg = getattr(self, "_theme_windows", None)
-            if _reg is None:
-                _reg = self._theme_windows = []
-            _reg.append(win)
-        except Exception:
-            pass
-        win.title("📓 用法记录 —— 哪儿出过问题（本次 / 历史）")
-        win.transient(self.root)
-        try:
-            win.geometry(_dlg_geom(900, 600))
-        except Exception:
-            pass
-        outer = ttk.Frame(win, padding=10)
-        outer.pack(fill="both", expand=True)
+    def show_credits(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_帮助关于.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板帮助关于.show_credits(self, *a, **k)
 
-        # ★★ 2026-10-07 修（截图看出来的）：**底部按钮被挤没了**。
-        #   原因：`Notebook` 先 `pack(fill="both", expand=True)` 把空间全吃掉，
-        #   后面 `btns` 再 pack 就没地方了（截图里一个按钮都看不到）。
-        #   ★ 正确顺序：**先把贴边的（bottom）摆好，再让中间那块 expand 去填剩下的。**
-        #     这跟预览窗格那次是同一个道理（翻页条要先 pack 到底部）。
-        btns = ttk.Frame(outer)
-        btns.pack(side="bottom", fill="x", pady=(8, 0))
+    def show_about(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_帮助关于.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板帮助关于.show_about(self, *a, **k)
 
-        nb = ttk.Notebook(outer)
-        nb.pack(fill="both", expand=True)
-
-        # 本次那边要用的数据先取出来（内存里的，很快）
-        try:
-            _this_text = self.dump_swallowed_report()
-        except Exception as _e:
-            _this_text = "生成报告失败：%s" % _e
-
-        # ---------------- 页签 1：本次（原「体检报告」）----------------
-        tab_now = ttk.Frame(nb, padding=10)
-        nb.add(tab_now, text=T("  本次开程序  "))
-        ttk.Label(
-            tab_now,
-            text=T("这是**这次开程序以来**记下的「没吭声的小毛病」（关窗口就清零）。\n"
-                    "想看「老出问题的是哪些」→ 点上面那个「历史累计」页。\n"
-                    "★ 把这里的内容发我即可，全是中文、不含你的文件名/路径。"),
-            justify="left", font=(FONT, UI_FONT_SIZE)).pack(anchor="w",
-                                                            pady=(0, 6))
-        box = tk.Text(tab_now, width=76, height=20, wrap="none",
-                      font=(FONT, UI_FONT_SIZE),
-                      bg=theme_get("text_bg"), fg=theme_get("fg"),
-                      insertbackground=theme_get("fg"),
-                      relief="flat", highlightthickness=1,
-                      highlightbackground=theme_get("line"))
-        box.pack(fill="both", expand=True)
-        box.insert("1.0", str(_this_text))
-        box.configure(state="disabled")
-
-        # ---------------- 页签 2：历史累计（原「用法记录」）----------------
-        tab_hist = ttk.Frame(nb, padding=10)
-        nb.add(tab_hist, text=T("  历史累计  "))
-
-        try:
-            recs = usage_read(limit=2000)
-        except Exception:
-            recs = []
-
-        ttk.Label(
-            tab_hist,
-            text="这里记的是**跨次积累**的（关了程序也留着）——"
-                 "按「出现次数」从多到少排，**排最上面的就是最该修的**。\n"
-                 "★ 不包含文件名 / 路径 / 标签 / 搜索词。",
-            justify="left", font=(FONT, UI_FONT_SIZE)).pack(anchor="w",
-                                                            pady=(0, 8))
-        agg = []
-        try:
-            agg = usage_summary()
-        except Exception:
-            agg = []
-
-        if not recs and not agg:
-            ttk.Label(tab_hist, text=T("（还什么都没记到 —— 挺好）"),
-                      foreground=theme_get("ok"),
-                      font=(FONT, UI_FONT_SIZE)).pack(anchor="w")
-        else:
-            wrap = ttk.Frame(tab_hist)
-            wrap.pack(fill="both", expand=True)
-            cols = ("where", "n", "last", "exc")
-            # ★★ 2026-10-07 修「行高比字矮、文字被上下切掉」（用户报）：
-            #   原来这句没给 style，于是用**系统默认行高**（约 20），
-            #   装不下 14/13 号字（要 24 左右）→ 每行字被压扁。
-            #   ★ 修法：跟目录树一样，注册一个带 `rowheight=_tree_row_height()`
-            #     的样式再挂上（`_tree_row_height()` 是按字体算的，会跟着字号走）。
-            try:
-                _st = ttk.Style()
-                _rh = _tree_row_height()
-                _st.configure("UsageLog.Treeview",
-                              background=theme_get("card_bg"),
-                              foreground=theme_get("fg"),
-                              fieldbackground=theme_get("card_bg"),
-                              rowheight=_rh,
-                              font=(FONT, UI_FONT_SIZE_SMALL))
-                _st.configure("UsageLog.Treeview.Heading",
-                              font=(FONT, UI_FONT_SIZE_SMALL, BOLD))
-                tv = ttk.Treeview(wrap, columns=cols, show="headings", height=14,
-                                  style="UsageLog.Treeview")
-            except Exception:
-                tv = ttk.Treeview(wrap, columns=cols, show="headings", height=14)
-                # ★★ 2026-10-07 补：这棵树没给 style → 系统默认行高(约20)装不下字
-                #   → 字被上下切掉（用户报「字体比行高长」）。按字体算行高。
-                #   ★ 这个分支是"注册样式失败时的退路"，所以复用上面那个
-                #     `UsageLog.Treeview` 的名字（同样的样式，不必再注册一份）。
-                try:
-                    _st_fb = ttk.Style()
-                    _st_fb.configure("UsageLog.Treeview",
-                        background=theme_get("card_bg"),
-                        foreground=theme_get("fg"),
-                        fieldbackground=theme_get("card_bg"),
-                        rowheight=_tree_row_height(),
-                        font=(FONT, UI_FONT_SIZE_SMALL))
-                    _st_fb.configure("UsageLog.Treeview.Heading",
-                        font=(FONT, UI_FONT_SIZE_SMALL, BOLD))
-                    tv.configure(style="UsageLog.Treeview")
-                except Exception:
-                    pass
-            for c, txt, wd in (("where", "哪儿出的问题", 360),
-                               ("n", "次数", 60),
-                               ("last", "最近一次", 150),
-                               ("exc", "错误", 260)):
-                tv.heading(c, text=txt)
-                # ★ 2026-10-06：这里踩了一下 —— `column()` **没有 text 参数**，
-                #   标题要用 heading() 设；column() 只管宽度和对齐。
-                tv.column(c, width=wd,
-                          anchor="center" if c == "n" else "w")
-            for d in agg:
-                try:
-                    tv.insert("", "end", values=(d["where"], d["n"],
-                                                 d["last"], d["exc"]))
-                except Exception:
-                    continue
-            sb = ttk.Scrollbar(wrap, orient="vertical", command=tv.yview)
-            tv.configure(yscrollcommand=sb.set)
-            tv.pack(side="left", fill="both", expand=True)
-            sb.pack(side="right", fill="y")
-
-        # ---------------- 底部按钮（两个页签共用）----------------
-        #   ★ 注意：这个 `btns` **已经在上面对 Notebook 之前 pack 好了**
-        #     （必须先摆贴底的，否则会被 Notebook 的 expand 挤没）。
-
-        def _copy_this():
-            try:
-                self.root.clipboard_clear()
-                self.root.clipboard_append(str(_this_text))
-                self.set_status(T("本次记录已复制到剪贴板"))
-            except Exception as _e:
-                note_swallowed(T("复制本次记录失败"), _e, quiet=True)
-
-        def _save_this():
-            try:
-                p = filedialog.asksaveasfilename(
-                    parent=win, title=T("保存本次记录"),
-                    defaultextension=".txt", initialfile="用法记录-本次.txt")
-                if not p:
-                    return
-                with open(p, "w", encoding="utf-8") as f:
-                    f.write(str(_this_text))
-                self.set_status(T("已保存到：{x}", x=p))
-            except Exception as _e:
-                note_swallowed(T("保存本次记录失败"), _e)
-
-        def _open_file():
-            try:
-                p = _USAGE_PATH
-                if p and os.path.isfile(p):
-                    os.startfile(os.path.dirname(p))
-                else:
-                    messagebox.showinfo("用法记录", T("还没有记账文件。"),
-                                        parent=win)
-            except Exception as exc:
-                messagebox.showerror("打不开", str(exc), parent=win)
-
-        def _clear():
-            if not messagebox.askyesno(
-                    "清空历史记录",
-                    "把**历史累计**的记录清掉？\n\n"
-                    "（「本次开程序」那一页不受影响；"
-                    "只是把「账本」清空，不影响程序任何功能）",
-                    parent=win):
-                return
-            try:
-                if _USAGE_PATH and os.path.isfile(_USAGE_PATH):
-                    os.remove(_USAGE_PATH)
-            except Exception:
-                pass
-            win.destroy()
-
-        ttk.Button(btns, text=T("复制本次记录"), command=_copy_this).pack(
-            side="left", padx=4)
-        ttk.Button(btns, text=T("保存本次记录…"), command=_save_this).pack(
-            side="left", padx=4)
-        ttk.Button(btns, text=T("打开记账文件"), command=_open_file).pack(
-            side="left", padx=4)
-        ttk.Button(btns, text=T("清空历史记录"), command=_clear).pack(
-            side="left", padx=4)
-        ttk.Button(btns, text=T("关闭"), command=win.destroy).pack(
-            side="right", padx=4)
-
-        # ★ 顺便写进「问题」面板，这样关掉小窗还能回看（老行为保留）
-        try:
-            for _ln in str(_this_text).split("\n"):
-                if _ln.strip():
-                    self.log_problem(_ln, level="info")
-        except Exception:
-            pass
-
-    def show_credits(self, parent=None):
-        """★★★ 「关于」里的「版权与来源」详情窗。
-
-        ★★ 为什么单独一个窗（不塞进「关于」）：
-          · 版权声明**比较长**（要中英对照）—— 塞进「关于」会**挤爆**
-          · ★ 而且**不是每个人都要看** —— 想看的人点一下就够
-
-        ★ 为什么这个声明必须存在（★ 用户 2026-10-08 的要求）：
-          > 「这个程序只是我提出设计的，代码全是你写的……
-          >   深度求索公司也该有这程序一份版权」
-          ★★ 关键那句：「**对 AI 来说每个对话窗口可能都是一次新生**」——
-            它**不会来认领这份功劳**，所以**必须由人写下来**。
-        """
-        try:
-            win = tk.Toplevel(parent or self.root)
-            win.title(T("版权与来源"))
-            win.transient(parent or self.root)
-            win.resizable(True, True)
-            try:
-                win.configure(bg=theme_get("win_bg"))
-            except Exception:
-                pass
-            try:
-                _reg = getattr(self, "_theme_windows", None)
-                if _reg is None:
-                    _reg = self._theme_windows = []
-                _reg.append(win)
-            except Exception:
-                pass
-
-            body = ttk.Frame(win, padding=16)
-            body.pack(fill="both", expand=True)
-
-            ttk.Label(body, text=T("版权与来源声明"),
-                      font=(FONT, UI_FONT_SIZE + 2, BOLD)).pack(anchor="w")
-            ttk.Label(
-                body,
-                text=T("人提出、设计、验收；AI 写出全部代码。"),
-                foreground=theme_get("fg_dim")).pack(anchor="w", pady=(2, 10))
-
-            # ★ 正文：只读 Text（能选中复制、能滚）
-            #   ★★ 注意：`tk.Text` **必须给 width**（错题本里踩过 ——
-            #      不给就默认 80 字符宽 ≈ 884 像素，窗口"莫名其妙很宽"）
-            box = tk.Text(body, width=72, height=17, wrap="word",
-                          font=(FONT, UI_FONT_SIZE),
-                          bg=theme_get("text_bg"), fg=theme_get("fg"),
-                          relief="flat", padx=10, pady=8)
-            box.pack(fill="both", expand=True)
-            box.insert("1.0", T(_CREDITS_TEXT))
-            box.configure(state="disabled")
-
-            btns = ttk.Frame(body)
-            btns.pack(fill="x", pady=(10, 0))
-            try:
-                ttk.Button(btns, text=T("打开仓库"), width=12,
-                           command=lambda: _open_url(_REPO_URL)
-                           ).pack(side="left")
-            except Exception:
-                pass
-            ttk.Button(btns, text=T("确定"), width=10,
-                       command=win.destroy).pack(side="right")
-            try:
-                win.bind("<Escape>", lambda e: win.destroy())
-            except Exception:
-                pass
-            try:
-                win.update_idletasks()
-                rx = (parent or self.root).winfo_rootx()
-                ry = (parent or self.root).winfo_rooty()
-                rw = (parent or self.root).winfo_width()
-                rh = (parent or self.root).winfo_height()
-                win.geometry("+%d+%d" % (
-                    rx + max(0, (rw - win.winfo_reqwidth()) // 2),
-                    ry + max(0, (rh - win.winfo_reqheight()) // 4)))
-            except Exception:
-                pass
-            try:
-                win.grab_set()
-            except Exception:
-                pass
-        except Exception as _e:
-            note_swallowed(T("打开「版权与来源」失败"), _e)
-            # 兜底：画不出来就退回系统弹窗（至少能看到内容）
-            try:
-                messagebox.showinfo(T("版权与来源"), T(_CREDITS_TEXT),
-                                    parent=parent or self.root)
-            except Exception:
-                pass
-    def show_about(self):
-        """★ 关于。
-
-        ★★ 2026-10-07：从 `messagebox.showinfo` **改成自己画的窗口**。
-          为什么改：
-            · 用户报「**关于对话框整片白**」—— 因为 `messagebox` 是
-              **Windows 系统弹窗**，走系统 API，**颜色完全不受程序控制**
-              （切夜间它也还是白的）。
-            · 自己画的话就能跟主题走，还能顺便把信息排得好看点。
-          ★ 顺带修：版本号原来写 **v24**，而标题栏是 **v26** —— 对不上了。
-        """
-        try:
-            win = tk.Toplevel(self.root)
-            win.title("关于")
-            win.transient(self.root)
-            win.resizable(False, False)
-            # ★ Toplevel 是原生窗口，底色必须自己设（错题本 #92）
-            try:
-                win.configure(bg=theme_get("win_bg"))
-            except Exception:
-                pass
-            # ★ 登记一下，切主题时跟着变
-            try:
-                _reg = getattr(self, "_theme_windows", None)
-                if _reg is None:
-                    _reg = self._theme_windows = []
-                _reg.append(win)
-            except Exception:
-                pass
-
-            body = ttk.Frame(win, padding=18)
-            body.pack(fill="both", expand=True)
-
-            ttk.Label(body, text=T("📁 文件标签管理器"),
-                      font=(FONT, UI_FONT_SIZE + 3, BOLD)).pack(anchor="w")
-            ttk.Label(
-                body,
-                text=T("带标签图结构、星图编辑、瀑布流浏览的本地文件标签工具。"),
-                foreground=theme_get("fg_dim")).pack(anchor="w", pady=(4, 10))
-
-            # ★★★ 版权与来源（2026-10-08）★★★
-            #   ★ 用户要求「**一开始就醒目标明**」——
-            #     所以放在**标题下面第一块**，不是最底下的小字。
-            #   ★★ 为什么必须放在这里（不只是 README）：
-            #     **下载 exe 的人不会去看 README，但他会点「关于」**。
-            #   ★ 判据：**"声明要放在读者真正会到的地方"**。
-            credit = tk.Frame(body, bg=theme_get("sel_bg") if
-                              theme_get("sel_bg") else theme_get("win_bg"))
-            credit.pack(fill="x", pady=(0, 12))
-            tk.Label(
-                credit,
-                text=T("★ 代码由 AI（DeepSeek）编写 —— 人提出、设计、验收。"),
-                bg=credit.cget("bg"), fg=theme_get("fg"),
-                font=(FONT, UI_FONT_SIZE, BOLD),
-                anchor="w", justify="left").pack(fill="x", padx=10, pady=(8, 2))
-            tk.Label(
-                credit,
-                text=T("★ 版权由作者与深度求索（DeepSeek）共同持有。"),
-                bg=credit.cget("bg"), fg=theme_get("fg_dim"),
-                anchor="w", justify="left").pack(fill="x", padx=10, pady=(0, 8))
-            info = [
-                (T("版本"), "v26"),
-                (T("当前界面缩放"), "%d%%" % int(self.ui_scale * 100)),
-                (T("数据库"), str(DB_PATH)),
-                (T("导出目录"), str(EXPORT_DIR)),
-                (T("设置文件"), str(SETTINGS_PATH)),
-            ]
-            for k, v in info:
-                row = ttk.Frame(body)
-                row.pack(fill="x", pady=1)
-                ttk.Label(row, text=k, width=12,
-                          foreground=theme_get("fg_dim")).pack(side="left")
-                # ★ 路径可能很长 → 用只读 Entry，能选中复制
-                e = ttk.Entry(row, width=58, font=(FONT, UI_FONT_SIZE_SMALL))
-                e.insert(0, v)
-                e.configure(state="readonly")
-                e.pack(side="left", fill="x", expand=True)
-
-            btns = ttk.Frame(body)
-            btns.pack(fill="x", pady=(14, 0))
-            # ★ 版权详情入口（★ 声明正文比较长，单独一个窗看）
-            ttk.Button(btns, text=T("版权与来源…"), width=14,
-                       command=lambda: self.show_credits(win)
-                       ).pack(side="left")
-            # ★★ 支持入口（2026-10-08）
-            #   ★ 为什么放在「关于」里：**这是真实用户唯一会看到的位置**
-            #     （下载 exe 的人不会去翻 README）
-            #   ★★ 用 `♥` 而不是 `💰` —— 前者是"心意"，后者是"要钱"，
-            #     在开源项目里这个区别很重要。
-            ttk.Button(btns, text=T("♥ 支持这个项目"), width=16,
-                       command=lambda: _open_url(_SPONSOR_URL)
-                       ).pack(side="left", padx=(6, 0))
-            ttk.Button(btns, text=T("确定"), width=10,
-                       command=win.destroy).pack(side="right")
-            try:
-                win.bind("<Escape>", lambda e: win.destroy())
-                win.bind("<Return>", lambda e: win.destroy())
-            except Exception:
-                pass
-            # 居中到主窗口
-            try:
-                win.update_idletasks()
-                rx = self.root.winfo_rootx()
-                ry = self.root.winfo_rooty()
-                rw = self.root.winfo_width()
-                rh = self.root.winfo_height()
-                ww = win.winfo_reqwidth()
-                wh = win.winfo_reqheight()
-                win.geometry("+%d+%d" % (rx + (rw - ww) // 2,
-                                         ry + (rh - wh) // 3))
-            except Exception:
-                pass
-            try:
-                win.grab_set()
-            except Exception:
-                pass
-        except Exception as _e:
-            note_swallowed(T("打开「关于」失败"), _e)
-            # 兜底：实在画不出来就退回系统弹窗（至少能看到信息）
-            try:
-                messagebox.showinfo("关于", T("文件标签管理器 v26"), parent=self.root)
-            except Exception:
-                pass
 
     # ---------------- UI ----------------
     def _build_ui(self):
@@ -13024,65 +12461,11 @@ class FileTaggerApp:
 
         self.root.after(150, self._init_sash)
 
-    # ---------- ★★ 2026-10-03：分栏条「看得见 + 拖得着」 ----------
-    def _style_sashes(self):
-        """把四个大分区之间的分栏条画清楚一点（Tk 默认那一条几乎看不见）。
+    def _style_sashes(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_外观零件.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板外观零件._style_sashes(self, *a, **k)
 
-        ★★ 2026-10-06：现在这里只是「按当前皮肤摆一次」的**薄薄一层** ——
-          真正的样式表在 `_style_all_widgets()` 里（那边连按钮、滚动条、
-          输入框、文件树、菜单全都一起管），皮肤一换整片都会跟着换。
-          这样做的好处：以后加皮肤只要多写一张颜色表，不用改这里。
-        """
-        try:
-            _style_all_widgets(self.root, THEME_NAME)
-        except Exception as _e:
-            note_swallowed(T("给界面套皮肤失败（会用 Tk 默认外观）"), _e)
-        # ★★★ 2026-10-07 **修「状态栏那排按钮的彩色时有时无」**（用户报）★★★
-        #   用户原话：「撤销 / 标签盒 / 标签库 / 标签条 / 预览 / 顶部 / 网盘
-        #   **是彩色的，然后点了几下就又不彩了**，问题什么的也又变白了」。
-        #
-        #   ★ 真因（实测追出来的）：
-        #     `_make_tone_styles()`（注册 `ToneTag.TButton` 那五个样式）
-        #     **只在两个地方被调**：
-        #       ① 建状态栏按钮的那一刻（`_build_status_bar` 里）
-        #       ② 换皮肤之后（`_retheme_custom_parts` 里，行 ~27890）
-        #     —— **`_apply_theme()` 这条路上没有它！**
-        #     而 `_apply_theme()` 会调 `_style_all_widgets()`，
-        #     那里重设了 `TButton` 的基础样式 ——
-        #     **把刚注册的五个色调样式覆盖/冲掉了**。
-        #
-        #   ★ 实测证据：
-        #       启动后立刻查 → `ToneTag.TButton configure = {}`（**空的！**）
-        #       手动再调一次 `_make_tone_styles()` → `bg=#3b3050` ✔
-        #     → 所以：**启动时没颜色；切一次皮肤才有颜色；
-        #       之后某个操作又走 `_apply_theme` → 颜色又没了。**
-        #       这跟用户描述的"时有时无"**完全对得上**。
-        #
-        #   ★ 修法：**在 `_style_all_widgets()` 之后立刻重注册一次** ——
-        #     保证基础样式先铺好、再盖上我们的色调样式（顺序不能反）。
-        try:
-            self._make_tone_styles()
-        except Exception as _e:
-            note_swallowed(T("状态栏按钮分组底色注册失败"), _e, quiet=True)
-        # ★★ 2026-10-06：**把标题栏 / 菜单栏染深**。
-        #   ★★ 这里踩过一个坑，写清楚：一开始就在这儿直接调，**没生效**
-        #      （截图看标题栏还是白的）。原因是：
-        #      `_build_ui()` 跑在 `mainloop()` **之前**，这时候窗口
-        #      **还没映射到屏幕上**，DWM 拿它没办法 —— 调用返回 0（成功）
-        #      但不起作用，**是那种最坑的"静默失败"**。
-        #      （对照实验：单独写个小窗口，先 `root.update()` 再调，
-        #        标题栏立刻变深 (24,24,24) —— 证明接口本身没问题。）
-        #   ★ 正解：**等窗口真的显示出来再调**。用 `after(0, ...)`
-        #     把这件事推到事件循环里去（那时窗口已经映射好了）。
-        #     `after(0)` 而不是延迟几百毫秒：尽量早点染，
-        #     免得用户看见"先白一下再变黑"。
-        try:
-            _dark_now = (THEME_NAME == "dark")
-            self.root.after(0, lambda d=_dark_now: _set_native_dark(
-                self.root, d))
-        except Exception as _e:
-            note_swallowed(T("标题栏/菜单栏没能染成深色（老系统上正常）"), _e,
-                           quiet=True)
 
     # ---------- ★★ 2026-10-06：皮肤（白天 / 夜间） ----------
     def set_theme(self, name, save=True):
@@ -13138,198 +12521,11 @@ class FileTaggerApp:
         cur = "dark" if THEME_NAME == "light" else "light"
         self.set_theme(cur)
 
-    def _retheme_custom_parts(self):
-        """★★ 换皮肤后，把「代码自己画颜色」的那几块重新画一遍。
+    def _retheme_custom_parts(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_外观零件.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板外观零件._retheme_custom_parts(self, *a, **k)
 
-        它们不是普通控件（颜色不是控件属性，是画上去的），
-        上面那套「扫控件换色」扫不到 —— 必须自己重画。这里逐块叫一下，
-        每一块单独包 try：**坏一块不影响别的**。
-        这也是本程序一贯的写法（见「出错必留痕」那段）。
-        """
-
-        # ★★ 2026-10-07 新增：把**登记过的 Toplevel** 的底色刷一遍。
-        #   为什么需要：`tk.Toplevel` 是原生窗口，底色不跟 ttk 主题走；
-        #   建的时候设了 `bg=`，但**窗口开着切主题**时不会自己变 ——
-        #   必须在这里再刷一次，否则"切了夜间、那个窗口还是白的"。
-        #
-        # ★★ 2026-10-08 增强：**不光刷底色，还要问窗口"你自己要不要重刷"**。
-        #   ★ 为什么（用户报「索引管理切换夜间皮肤显示不对」，待清算 #8-②）：
-        #     有些窗口（比如 `IndexManagerDialog`）**里面大量用原生 tk 控件**
-        #     （`tk.Text` / `tk.Frame`）—— 它们的颜色是"建的时候设死的"，
-        #     光刷**窗口自己**的底色**不够**，里面的控件还是旧配色。
-        #   ★ 所以定一个约定：**窗口想要跟着皮肤变，就实现一个
-        #     `_apply_theme()`**（无参数）—— 这里发现就调它。
-        #     ★ 这样"怎么刷"由窗口自己决定，主程序不用知道它的内部结构
-        #       （这也是"留接口"的思路，用户前面提过）。
-        try:
-            for _w in list(getattr(self, "_theme_windows", []) or []):
-                try:
-                    if not _w.winfo_exists():
-                        continue
-                    try:
-                        _w.configure(bg=theme_get("win_bg"))
-                    except Exception:
-                        pass
-                    # ★ 问窗口"你自己要不要重刷"
-                    _fn = getattr(_w, "_apply_theme", None)
-                    if callable(_fn):
-                        try:
-                            _fn()
-                        except Exception:
-                            pass
-                except Exception:
-                    pass
-        except Exception:
-            pass
-        # 顺手把「其他类自己建的窗口」也刷一下（它们把引用挂在 _theme_windows
-        # 上的方式一样，只是 self 不是主程序 —— 那就在各自的类里处理，
-        # 这里只管主程序自己开的那些）。
-
-        # ★★ 2026-10-07 新增：**底部「输出 / 问题 / 进度」这三个 tk.Text**
-        #   必须在这里重刷颜色！
-        #   ★★ 为什么（这是个"第一次打开是白的、第二次才好"的怪 bug）：
-        #     `_build_log_panel()` 在 **26840 行**被调，
-        #     而"读出用户存的皮肤 + 套上去"在 **27116 ~ 27300 行** ——
-        #     **也就是说：建这三个 Text 的时候，主题还是"白天"** →
-        #     它们拿到了白底深字 → 后面套夜间时，
-        #     `_retheme_tree()` 那套"扫控件换色"**扫不到 tk.Text 的文字色**
-        #     （它只按"原始单据"翻颜色，而这几个控件的底色被别的逻辑改过），
-        #     于是**第一次开就是白的**。
-        #   ★ 第二次打开为什么好：设置文件里已经有 theme=dark，
-        #     启动时 `THEME_NAME` 一开始就是 dark → 建 Text 时直接拿到深色。
-        #   ★ 修法：**在这儿显式重刷一遍**（不依赖那套自动扫描）——
-        #     这几个控件的颜色本来就从 `theme_get` 取，重设一次就对了。
-        try:
-            for _t, _bgkey in ((getattr(self, "_text_output", None),
-                                "panel_bg2"),
-                               (getattr(self, "_text_problems", None),
-                                "panel_bg"),
-                               (getattr(self, "_text_progress", None),
-                                "panel_bg")):
-                if _t is None:
-                    continue
-                try:
-                    _t.configure(bg=theme_get(_bgkey), fg=theme_get("fg"),
-                                 insertbackground=theme_get("fg"),
-                                 selectbackground=theme_get("select_bg"),
-                                 highlightbackground=theme_get("line"))
-                except Exception:
-                    pass
-        except Exception:
-            pass
-        # ★ 顺带把「进程/问题/输出」的页签底也刷一下（ttk.Notebook 内部部件）
-        try:
-            if getattr(self, "_log_nb", None) is not None:
-                self._log_nb.configure(style="TNotebook")
-                for _f in self._log_nb.winfo_children():
-                    try:
-                        _f.configure(style="TFrame")
-                    except Exception:
-                        pass
-        except Exception:
-            pass
-
-        # ★★ 2026-10-07 新增：**先把"登记过角色"的控件按当前皮肤刷一遍**。
-        #   这是新的统一机制（见 `register_themed` 的说明）——
-        #   以后新增控件只要 `register_themed(w, "card")`，这里自动管。
-        try:
-            apply_themed()
-        except Exception:
-            pass
-
-        # ★★ 2026-10-08 新增：**换皮肤时也让图标尺寸重新按字高算一遍**。
-        #   为什么换皮肤要重算图标：本程序换皮肤时会走
-        #   `_style_all_widgets`（重设各种 ttk 样式、字体），
-        #   **字高有可能跟着变**（不同主题下可能选到不同的字体度量）——
-        #   而图标尺寸是**按字高算的**（待清算 #16 的修法），
-        #   不清缓存就会"字变了、图标还是旧的"。
-        #   ★ 一行成本，换"永远齐平"。
-        try:
-            FileList.refresh_icon_sizes()
-        except Exception:
-            pass
-
-        # ★★ 2026-10-08 新增：**悬浮球也跟着换皮肤**。
-        #   ★ 它是个**无边框独立窗口**，主程序那套"扫控件换色"扫不到它
-        #     （跟 `IndexManagerDialog` 是同一个道理，见错题本 #123）——
-        #     所以定个约定：**窗口想跟着皮肤变，就实现 `apply_theme()`**。
-        #   ★★★ 2026-10-08 **后来改了**（用户选 B B B）★★★
-        #     ★ 用户原话：「有球自己的皮肤也有主界面的皮肤，
-        #       **两个都搞好入口**，但是**是完全不一样的**，你可别搞混了啊」
-        #       然后他选了：② 球默认独立 ③ **永远不跟**主界面
-        #     → 所以这里**不再**调球的 `apply_theme()`
-        #       （球自己那套皮肤归 `set_ball_style()` 管）。
-        #     ★ 但我**保留**这个调用位置、只是注释掉 —— 万一以后
-        #       用户想加一个"球跟随主界面"的选项，**改一行就能回来**。
-        #       （"留位置、不提前造"）
-        # try:
-        #     _fb = getattr(self, "floating_ball", None)
-        #     if _fb is not None:
-        #         _fb.apply_theme()
-        # except Exception:
-        #     pass
-
-        # 文件列表 / 瀑布流（底色、文件名颜色、网格线都是画上去的）
-        try:
-            # ★★ 2026-10-07 **修一个一直在报错的 bug**（账本里 8 次）★★
-            #   原来这里写的是 `self.list_frame._redraw()` ——
-            #   而 `list_frame` 只是个 **ttk.Frame 空容器**（27242 行建的），
-            #   **它没有 `_redraw` 方法** → 每次都抛
-            #     `AttributeError: 'Frame' object has no attribute '_redraw'`
-            #   → 被下面那个 except 吞掉 → **文件列表的夜间配色从来没刷上**。
-            #   ★ 真正的列表对象是 `self.file_list`（一个 `FileList`，
-            #     它才有 `_redraw`，见 10255 行）。
-            #   ★ 后果（用户报的）：切皮肤后**文件列表还是白底黑字**；
-            #     而且这段一报错，**后面该刷的（状态栏/底部面板）也跟着断**。
-            lf = getattr(self, "file_list", None) or getattr(self, "list_frame", None)
-            if lf is not None and hasattr(lf, "_redraw"):
-                lf._redraw()
-        except Exception as _e:
-            note_swallowed(T("换皮肤：重画文件列表失败"), _e, quiet=True)
-        # 左侧分类库的每条（名字、图标底色是画上去的）
-        try:
-            sb = getattr(self, "sidebar", None)
-            if sb is not None and hasattr(sb, "_redraw_header"):
-                sb._redraw_header()
-        except Exception:
-            pass
-        # 预览窗格（画布底、类型信息、翻页条）
-        try:
-            pv = getattr(self, "preview", None)
-            if pv is not None:
-                if hasattr(pv, "_repaint_theme"):
-                    pv._repaint_theme()
-        except Exception as _e:
-            note_swallowed(T("换皮肤：重画预览区失败"), _e, quiet=True)
-        # 标签条（胶囊的底色是按标签颜色算的，得重刷）
-        try:
-            self._restyle_tagbar()
-        except Exception:
-            pass
-        # 状态栏
-        try:
-            self._on_status_bar_config()
-        except Exception:
-            pass
-        # ★★ 2026-10-07 新增：状态栏那排按钮的**分组底色**要重刷。
-        #   为什么必须放这儿：ttk 样式的颜色是**注册时定死的** ——
-        #   不重注册的话，从浅色切到夜间，那排按钮**还是白底**，
-        #   在深色状态栏上像贴了几块膏药。
-        try:
-            self._make_tone_styles()
-            # 样式名没变（还是 ToneTag.TButton 那些），重注册即可生效 ——
-            # 不用重新给按钮挂 style。但**已经挂在按钮上的引用**要更新一下
-            # （ttk 是按名字查样式的，所以其实自动就生效了）。
-        except Exception:
-            pass
-        # ★★ 2026-10-07 新增：「文件 · 共 N · 未打标签 N · 仅中间标签 N」这几个
-        #   标签。**用户报的"夜间看着不够亮、有时候黑了东点西点又好了"就是这个** ——
-        #   它们的颜色原来是写死的、而且**从没登记过换皮肤重刷**，
-        #   所以切到夜间它们不变，得靠某个偶然的重画才补上。
-        try:
-            self._retheme_stats_labels()
-        except Exception:
-            pass
 
     def _retheme_stats_labels(self):
         """把「文件 / 共 N / 未打标签 N / 仅中间标签 N」那一排的颜色刷成当前皮肤。
@@ -13370,67 +12566,11 @@ class FileTaggerApp:
                     pass
         # 列表标题「文件」两个字是 ttk.Label，跟着主题走，这里不用管
 
-    def _make_tone_styles(self):
-        """★ 给状态栏按钮注册"带底色"的 ttk 样式（按色调分组）。
+    def _make_tone_styles(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_外观零件.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板外观零件._make_tone_styles(self, *a, **k)
 
-        ★★ 2026-10-07 新增。用户要求：「给按钮增加底色什么的」，
-          并且**按功能分组配色**：
-            · 标签盒 / 标签库 / 标签条 → **一个色调**（紫，都是"标签"）
-            · 预览 / 顶部             → **一个色调**（蓝，都是"看/布局"）
-            · 网盘                    → **一个色调**（青，"数据来源"）
-            · 问题                    → **一个色调**（橙红，"要你看的"）
-            · 撤销                    → 单独一个（灰黄，"补救"）
-
-        ★★ 为什么不能直接 `configure(background=...)`：
-          **ttk 的 clam 主题不吃 background** —— 试过，`w.configure(
-          background="#xxx")` 一点反应都没有（ttk 控件的颜色由 style 决定）。
-          **正确做法：每个色调注册一个 `xxx.TButton` 样式**，
-          再用 `style=` 挂到按钮上。这也是 ttk 唯一的正规路子。
-
-        ★ 深浅两套都要注册（切皮肤时一起换）—— 所以这里读 `theme_get`，
-          并且在 `apply_theme` 之后会**重跑一遍**（见 `_retheme_custom_parts`）。
-        """
-        try:
-            st = ttk.Style()
-        except Exception:
-            return {}
-        dark = (str(theme_get("name") or "") == "dark")
-        # 每个色调：底色 / 悬停色 / 文字色
-        #   ★ 夜间用"深一点的底色 + 亮一点的字"，浅色反过来 ——
-        #     不然夜间会刺眼、浅色会糊（老毛病了，见错题本 #75）。
-        if dark:
-            spec = {
-                "tag":     ("#3b3050", "#4a3d63", "#d9cdf0"),   # 紫
-                "layout":  ("#26384f", "#2f4460", "#bcd6f5"),   # 蓝
-                "net":     ("#1f3f3c", "#2a514d", "#a8ded6"),   # 青
-                "problem": ("#4a2f26", "#5c3a2e", "#f0bda8"),   # 橙红
-                "undo":    ("#3d3a26", "#4d4a30", "#e8dfae"),   # 灰黄
-            }
-        else:
-            spec = {
-                "tag":     ("#e8ddf7", "#dccbf2", "#4a2f7a"),   # 紫
-                "layout":  ("#dcebfb", "#c9e0f7", "#1e4b80"),   # 蓝
-                "net":     ("#d4f0ec", "#bfe6e0", "#0f5a52"),   # 青
-                "problem": ("#fbe3da", "#f7d0c2", "#8a3a1e"),   # 橙红
-                "undo":    ("#f5eecb", "#eee3b0", "#6b5a12"),   # 灰黄
-            }
-        out = {}
-        for tone, (bg, hv, fgc) in spec.items():
-            name = "Tone%s.TButton" % tone.capitalize()
-            try:
-                st.configure(name, background=bg, foreground=fgc,
-                             borderwidth=0, focuscolor=bg, relief="flat",
-                             padding=(8, 4))
-                # 悬停 / 按下 / 禁用 三态都要给，不然一悬停就变回灰白
-                st.map(name,
-                       background=[("pressed", hv), ("active", hv),
-                                   ("disabled", bg)],
-                       foreground=[("disabled", theme_get("fg_dim"))],
-                       relief=[("pressed", "flat"), ("active", "flat")])
-                out[tone] = name
-            except Exception:
-                continue
-        return out
 
 
     def _near_sash(self, x, y, slack=6):
@@ -15346,74 +14486,11 @@ class FileTaggerApp:
 
 
 
-    # ========== ★★ 2026-10-05「先加说话」：出错必留痕 ==========
-    def _install_error_spy(self):
-        """装一道「出错必留痕」的保险。
+    def _install_error_spy(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_插件挂载.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板插件挂载._install_error_spy(self, *a, **k)
 
-        用户抱怨的三件事——卡死 / 显示不全 / 改着改着功能没了——
-        查下来根子之一是程序里 624 处 `except Exception: pass`
-        （出错装没事）。它们不可能一条条手改，所以这里装两手「探照灯」：
-
-        ● ① **后台线程**里没被抓住的出错
-              线程一崩，界面还在那儿好好地转 —— 用户看到的就是「卡死」。
-              以前这种错**完全没人知道**。现在会记进「问题」面板。
-        ● ② **界面回调**里没被抓住的出错
-              点按钮、画列表这类回调出错，以前也是悄悄没了。
-
-        ★ 三条铁律（很重要，别破坏）：
-          1. **只记一笔，绝不改变原有行为** —— 原 hook 该调还调；
-          2. **自己绝不能再抛异常** —— 全程 try 包住，出问题就闭嘴；
-          3. **不拖慢程序** —— 只在真出错时才干活，平时零开销。
-        """
-        if getattr(self, "_error_spy_on", False):
-            return
-        self._error_spy_on = True
-
-        # ---------- ① 后台线程的兜底 ----------
-        try:
-            _old_hook = threading.excepthook
-
-            def _thread_hook(args):
-                try:
-                    tname = getattr(args.thread, "name", "?")
-                    note_swallowed(
-                        f"后台线程「{tname}」出错了（界面可能因此没反应）",
-                        args.exc_value if args.exc_value is not None
-                        else RuntimeError(str(args.exc_type)),
-                        level="error")
-                except Exception:
-                    pass
-                try:
-                    _old_hook(args)
-                except Exception:
-                    pass
-
-            threading.excepthook = _thread_hook
-        except Exception:
-            pass
-
-        # ---------- ② 界面回调的兜底 ----------
-        # ★★★ 2026-10-05 **回退了这一手，别再装回来** ★★★
-        #   教训（实测踩到的）：以前这里写了
-        #       _old_report = tk.Tk.report_callback_exception
-        #       tk.Tk.report_callback_exception = _new_report
-        #   本意是「界面回调出错也能留痕」，结果**装上去之后
-        #   分栏条拖不动了**——用户原话「现在直接没法拖动区域了」。
-        #   原因：这是**替换 Tk 全局的出错处理**，等于在所有窗口的
-        #   事件路上多拐了一道；这台机器上 Tk 的鼠标事件本来就敏感
-        #   （见文件开头「鼠标事件 state 的 0x8 不是 Alt」那条实测），
-        #   多拐一道就把拖拽打断了。
-        #   ★ 结论：**不要在 Tk 全局上动手脚**。界面出错要留痕，
-        #     改用别的路子（局部登记 / 后台线程兜底），绝不碰全局。
-        #   只保留下面 ① 后台线程兜底 —— 那个是线程级的，不碰界面，
-        #   实测不影响任何交互。
-        pass
-
-        # ---------- ③ 开机做个轻轻的体检 ----------
-        try:
-            self.root.after(1500, self._startup_health_check)
-        except Exception:
-            pass
 
     def _startup_health_check(self):
         """开机后轻轻看一眼「有没有在偷偷出错」。
@@ -15452,86 +14529,11 @@ class FileTaggerApp:
         except Exception:
             pass
 
-    def show_health_report(self):
-        """★★ 2026-10-05「先加说话」：点菜单就能看「体检报告」。
+    def show_health_report(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_帮助关于.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板帮助关于.show_health_report(self, *a, **k)
 
-        用户原话：「老卡死，界面有些部分经常显示不全，改来改去经常前面
-        写好的功能后面没了」。这份报告的用处就是——**让程序别闷着**，
-        把这些「本来没人知道」的小毛病摊开给他看。
-
-        输出全是中文说法 + 出错次数，他能直接复制发给我。
-        """
-        try:
-            text = self.dump_swallowed_report()
-        except Exception as e:
-            text = f"生成报告失败：{e}"
-        try:
-            # 顺手也写进「问题」面板，这样关掉小窗还能回看
-            for _ln in str(text).split("\n"):
-                if _ln.strip():
-                    self.log_problem(_ln, level="info")
-        except Exception:
-            pass
-        try:
-            win = tk.Toplevel(self.root)
-            # ★★ 2026-10-07：Toplevel 是**原生窗口**，底色不跟 ttk 主题走 ——
-            #   不设 bg 就用系统默认（白/浅灰），那就是"小窗口夜间还是白的"的根因。
-            try:
-                win.configure(bg=theme_get("win_bg"))
-                # ★ 登记一下，切主题时由 _retheme_custom_parts 统一刷新
-                _reg = getattr(self, "_theme_windows", None)
-                if _reg is None:
-                    _reg = self._theme_windows = []
-                _reg.append(win)
-            except Exception:
-                pass
-            win.title("🩺 体检报告 —— 哪些地方在偷偷出错")
-            win.transient(self.root)
-            fr = ttk.Frame(win, padding=10)
-            fr.pack(fill="both", expand=True)
-            ttk.Label(fr, text="下面是程序自己记下来的「没吭声的小毛病」。\n"
-                               "次数越多越值得查；把这份内容发我即可。",
-                      justify="left").pack(anchor="w", pady=(0, 6))
-            box = tk.Text(fr, width=76, height=22, wrap="none",
-                          font=(FONT, UI_FONT_SIZE))
-            box.pack(fill="both", expand=True)
-            box.insert("1.0", str(text))
-            box.configure(state="disabled")
-            btns = ttk.Frame(fr)
-            btns.pack(fill="x", pady=(8, 0))
-
-            def _copy():
-                try:
-                    self.root.clipboard_clear()
-                    self.root.clipboard_append(str(text))
-                    self.set_status(T("体检报告已复制到剪贴板"))
-                except Exception as _e:
-                    note_swallowed(T("复制体检报告失败"), _e, quiet=True)
-
-            def _save():
-                try:
-                    fn = filedialog.asksaveasfilename(
-                        title=T("保存体检报告"), defaultextension=".txt",
-                        initialfile="体检报告.txt",
-                        filetypes=[("文本文件", "*.txt"), ("所有文件", "*.*")])
-                    if not fn:
-                        return
-                    with open(fn, "w", encoding="utf-8") as f:
-                        f.write(str(text))
-                    self.set_status(f"已保存：{fn}")
-                except Exception as _e:
-                    note_swallowed(T("保存体检报告失败"), _e)
-
-            ttk.Button(btns, text=T("复制到剪贴板"), command=_copy).pack(side="left")
-            ttk.Button(btns, text=T("另存为文件…"), command=_save).pack(side="left", padx=6)
-            ttk.Button(btns, text=T("关闭"), command=win.destroy).pack(side="right")
-            win.update_idletasks()
-            try:
-                win.geometry("")
-            except Exception:
-                pass
-        except Exception as _e:
-            note_swallowed(T("打开体检报告窗口失败"), _e)
 
     def dump_swallowed_report(self):
         """把「哪些地方在偷偷出错」整理成人话，供排查用。
