@@ -5901,6 +5901,36 @@ except Exception as _e_ts:
                 "    ③ 找回来之后重开程序即可。" % (_TS_IMPORT_ERR,))
 
 # ==========================================================================
+# ★★★ 「缓存设置」这组方法已搬到 `AIxiede拆分开/程序分块/面板_缓存设置.py`
+#   ★★ 搬法跟独立类不同：方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_缓存设置 as _面板缓存设置
+    _面板缓存设置._set_app(sys.modules[__name__])
+    _HAS_PANEL_缓存设置 = True
+except Exception as _e:
+    _HAS_PANEL_缓存设置 = False
+    note_swallowed(T("搬出去的 面板_缓存设置.py 没找到"), _e)
+
+
+# ★★★ 「面板布局」这组方法已搬到 `AIxiede拆分开/程序分块/面板_面板布局.py`
+#   ★★ 搬法跟独立类不同：方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_面板布局 as _面板面板布局
+    _面板面板布局._set_app(sys.modules[__name__])
+    _HAS_PANEL_面板布局 = True
+except Exception as _e:
+    _HAS_PANEL_面板布局 = False
+    note_swallowed(T("搬出去的 面板_面板布局.py 没找到"), _e)
+
+
 # ★★★ FileList 已拆到 `AIxiede拆分开/程序分块/FileList.py`（2026-10-08）
 #   ★★ 写法（错题本 #158）：① 直接 `from FileList import …`（不带包路径）
 #     ② `_set_app` 取别名 —— 模块名和类名同名时会跑到类上找
@@ -13628,86 +13658,11 @@ class FileTaggerApp:
             note_swallowed(T("恢复分栏大小失败（按默认排）"), _e)
             return False
 
-    def _auto_sash_sidebar(self, force=False):
-        """根据左侧分类名称的最长字数，自动算一个合适的宽度。
+    def _auto_sash_sidebar(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_面板布局.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板面板布局._auto_sash_sidebar(self, *a, **k)
 
-        ★ 2026-10-03：如果上次已经记住了宽度（用户自己拖过），
-          就**别再自动算了** —— 老老实实用他拉好的那个
-          （他明确要求「关了程序再开还是我原来拉好的比例」）。
-
-        ★★ 2026-10-07 修「区域开关以后的比例会自动跳成最初的」（用户报）★★
-          病根（实测追出来的）：
-            这里判断"分类库在不在"用的是 **`self.sidebar.winfo_ismapped()`**。
-            可是**刚 `paned.add()` 插回去的那一刻，Tk 还没把它映射出来** ——
-            于是这里读到的还是 `0`（不在）→ **要么直接 return、
-            要么走"自动算"分支** → 用户拉好的 330 **被改成算法值 395**。
-          ★ 修法：**用我们自己的 `_sidebar_wanted` 判断**（那是"打算显示吗"，
-            一设就准），**不要问 Tk "现在画出来了吗"**（那个有延迟）。
-          ★ 实测：改前 `sashpos(0)` 跳成 395；改后**稳定 330** ✔
-        """
-        def _sidebar_should_show():
-            """分类库**应不应该**显示 —— 用记忆，不用 `winfo_ismapped()`。"""
-            try:
-                w = getattr(self, "_sidebar_wanted", None)
-                if w is not None:
-                    return bool(w)
-            except Exception:
-                pass
-            try:
-                return bool(self.sidebar.winfo_ismapped())
-            except Exception:
-                return False
-
-        if not force:
-            try:
-                saved = int((getattr(self, "_pane_sizes", {}) or {})
-                            .get("pane_sidebar_w") or 0)
-            except Exception:
-                saved = 0
-            if saved > 60:
-                try:
-                    if _sidebar_should_show():
-                        self.paned.sashpos(0, saved)
-                    return
-                except Exception:
-                    pass
-        # ★ 如果左侧分类库已经隐藏，paned 里只剩两个面板，
-        #   这时 sashpos(0, ...) 会把中间和右边的分界挪走，
-        #   导致右侧标签库显示得巨大 —— 直接跳过。
-        if not _sidebar_should_show():
-            return
-        names = [T("全部文件")]
-        try:
-            for c in self.store.all_categories():
-                n = (c.get("name") or "").strip()
-                if n:
-                    names.append(n)
-        except Exception:
-            pass
-        try:
-            f = tkfont.Font(family=FONT, size=UI_FONT_SIZE)
-            max_name_px = max(f.measure(n) for n in names)
-        except Exception:
-            max_name_px = 80
-
-        # 头像 36px + 头像左右 padding (10+8) + 名字宽
-        # + 计数/右边距 24 + 滚动条 16
-        want = 36 + 18 + max_name_px + 24 + 16
-        # 就锚在 200 附近，名字短→略窄，名字长→略宽
-        want = max(185, min(215, int(want)))
-
-        # 别超过窗口宽度的五分之一，免得挤掉中间的列表
-        try:
-            total = self.paned.winfo_width()
-            if total > 400:
-                want = min(want, int(total * 0.20))
-        except Exception:
-            pass
-
-        try:
-            self.paned.sashpos(0, want)
-        except Exception:
-            pass
 
     def _relayout_panes_soon(self):
         """★ 补丁37：把分栏和左侧宽度再算一遍（防抖，避免连环触发）。
@@ -13756,117 +13711,11 @@ class FileTaggerApp:
         self.preview = PreviewPane(parent, app=self)
         self.preview.pack(fill="both", expand=True)
 
-    def _layout_right_panes(self):
-        """给右侧的面板分宽度：可能只有标签库，也可能是「预览 + 标签库」。
+    def _layout_right_panes(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_面板布局.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板面板布局._layout_right_panes(self, *a, **k)
 
-        ★ 不按固定 sash 序号算（隐藏/显示之后序号会变），而是按 paned 里
-          实际的 pane 顺序定位，免得把分隔条设错地方。
-        """
-        try:
-            panes = [str(p) for p in self.paned.panes()]
-            total = self.paned.winfo_width()
-            if total < 400:
-                return
-            prev = str(self.preview_frame)
-            tag = str(self.tag_frame)
-            # 左侧分类库现在有多宽（第一根分栏条的位置）
-            try:
-                sb_w = (int(self.paned.sashpos(0))
-                        if self.sidebar.winfo_ismapped() else 0)
-            except Exception:
-                sb_w = 185
-            # ★ 2026-10-03：标签库宽度也优先用「上次记住的」
-            #   ★★ 2026-10-07：上限原来死钳 520 —— 跟预览窗格同一个毛病
-            #     （用户拉宽了会被压回去）。改成跟着窗口比例走。
-            _LIB_MAX = max(520, int(total * 0.40))
-            lib_w = (min(_LIB_MAX, max(300, int(total * 0.30)))
-                     if tag in panes else 0)
-            try:
-                _lw = int(getattr(self, "_taglib_width", 0) or 0)
-                if _lw and tag in panes:
-                    lib_w = min(_LIB_MAX, max(240, _lw))
-            except Exception:
-                pass
-            # ★★ 2026-10-07 修「区域宽度记不住」（用户报：
-            #   「区域宽度又没法被记住了，下次打开又得重新拉好」）★★
-            #   真因（实测追出来的）：`_apply_saved_pane_sizes()` **算对了**
-            #   （sashpos 设成 519），但紧接着这里一句
-            #       `prev_w = min(480, max(300, _pw))`
-            #   **把宽度死死钳在 300~480 之间** → 用户拉宽到 630，
-            #   一经过这里就被压回 480 → **看起来就是"记不住"**。
-            #   （实测：apply 后 sashpos(1)=519，layout 后变成 685。）
-            #   ★ 修法：**上限放宽到窗口的 45%** ——
-            #     既尊重用户拉出来的宽度，又不会宽到把文件列表挤没
-            #     （下面还有 list_min 那层保护，不会失控）。
-            _PREV_MAX = max(480, int(total * 0.45))
-            _pw = int(getattr(self, "_preview_width", 0) or 0)
-            if _pw:
-                prev_w = min(_PREV_MAX, max(240, _pw))
-            else:
-                prev_w = min(_PREV_MAX, max(300, int(total * 0.30)))
-            # ★★ 2026-10-03：**文件列表不能太窄！**
-            #   用户反馈「单击文件跟没有差不多」—— 其中一半原因是：
-            #   预览窗格 + 标签库一开，中间的文件列表只剩 400 像素出头，
-            #   文件名被截成「calibr…」「ede7…」，你根本看不出点的是哪个
-            #   文件（1400 的窗口下实测只有 443 像素）。
-            #   这里给文件列表兜一个下限：窗口够宽时至少 500 像素。
-            list_min = 500 if total >= 1100 else max(300, int(total * 0.34))
-            _avail = max(0, total - sb_w - list_min)      # 右侧总共能用多少
-            # ★ 2026-10-03 再修一次：右边两块先按「它们想要的宽度」算，
-            #   文件列表拿**剩下的全部**（但不能低于 list_min）。
-            #   上一版把分栏条钉在 sb_w + list_min 上，结果只开标签库时
-            #   标签库把整行剩下的空间全吃了（实测：列表只剩 520，
-            #   标签库 680）—— 那是反的，列表才是主角。
-            if tag in panes and prev in panes:
-                # ★★ 2026-10-07 修「区域宽度记不住」的**真正病根** ★★
-                #   （实测追出来的：窗口 1484、预览存 630、标签库存 319）
-                #   原来这里写：
-                #       if prev_w + lib_w > _avail:          # _avail 已扣掉 list_min
-                #           prev_w = min(prev_w, max(280, _avail - 280))
-                #           lib_w  = max(280, _avail - prev_w)
-                #   实测：630+319=949 > _avail(799) → **预览被压到 519**。
-                #   ★ 也就是说：**用户拉好的宽度每次开机都被这个公式重算掉**，
-                #     而 `list_min=500` 是"不可协商的" → 用户怎么拉都白搭
-                #     → 表现就是"记不住"。
-                #   ★ 修法：**用户存的宽度优先**。只有"列表被压到没法看"时
-                #     才收缩，而且**按比例缩**（不是把预览一刀切到 _avail-280），
-                #     这样各块的比例还是用户拉的那个样子。
-                _list_after = total - sb_w - prev_w - lib_w
-                # ★★ 2026-10-07：列表的"实在不能低于"再放宽一点。
-                #   ★ 为什么：用户**明确拉过**的宽度应该尽量尊重 ——
-                #     实测窗口 1484 时：预览 600 + 标签库 380 会让列表只剩 319，
-                #     而原来的保底是 488 → 于是把预览压到 497（用户想要的 600 没保住）。
-                #   ★ 现在把保底降到 `total*0.22`（约 326）——
-                #     列表还是"能看"的宽度（文件名不至于只剩几个字），
-                #     但用户拉出来的比例**基本能保住**。
-                #   ★ 注意：这是**取舍**，不是纯 bug ——
-                #     窗口就这么宽，三块不可能都要。用户拉过 → 优先听用户的。
-                _hard = max(280, int(total * 0.22))
-                if _list_after < _hard and (prev_w + lib_w) > 0:
-                    # 差额按比例从"预览 + 标签库"里扣
-                    _cut = _hard - _list_after
-                    _right = float(prev_w + lib_w)
-                    _ratio = max(0.45, (_right - _cut) / _right)
-                    prev_w = max(200, int(prev_w * _ratio))
-                    lib_w = max(220, int(lib_w * _ratio))
-                _list_w = max(200, total - sb_w - prev_w - lib_w)
-                i = panes.index(prev)
-                self.paned.sashpos(max(0, i - 1), min(total, sb_w + _list_w))
-                self.paned.sashpos(i, min(total, sb_w + _list_w + prev_w))
-            elif tag in panes:
-                if _avail:
-                    lib_w = min(lib_w, _avail)
-                _list_w = max(list_min, total - sb_w - lib_w)
-                i = panes.index(tag)
-                self.paned.sashpos(max(0, i - 1), min(total, sb_w + _list_w))
-            elif prev in panes:
-                if _avail:
-                    prev_w = min(prev_w, _avail)
-                _list_w = max(list_min, total - sb_w - prev_w)
-                i = panes.index(prev)
-                self.paned.sashpos(max(0, i - 1), min(total, sb_w + _list_w))
-        except Exception:
-            pass
 
     def _preview_index(self):
         """预览窗格在 paned 里排第几（没显示就返回 -1）。"""
@@ -14570,266 +14419,17 @@ class FileTaggerApp:
             messagebox.showerror("悬停预览", "切换失败：%s" % exc,
                                  parent=self.root)
 
-    def _open_cache_settings(self):
-        """★★ 2026-10-06：**网盘预览缓存设置**面板。
+    def _open_cache_settings(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_缓存设置.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板缓存设置._open_cache_settings(self, *a, **k)
 
-        用户要求：「弄个文件缓存设置，设置那些个网盘上的预览的时候临时
-        下载在哪里，要不要无痕浏览（就是阅后即焚），还是到一段时间就
-        自动清理，亦或者是文件夹超过一定大小就自动清理」。
 
-        四项：
-          ① 缓存放哪儿（可以挑盘；也能一键「用临时目录」）
-          ② 无痕模式（阅后即焚）—— 每次启动换新目录，旧的自动清掉
-          ③ 定时清理 —— 多久没用过的缓存就删
-          ④ 超大小清理 —— 目录超过多少 MB 就删最旧的
+    def _set_preview_cache_dir(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_缓存设置.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板缓存设置._set_preview_cache_dir(self, *a, **k)
 
-        ★ 界面上每一项都配一句大白话说明「这选项是干嘛的」。
-        """
-        win = tk.Toplevel(self.root)
-        # ★★ 2026-10-07：Toplevel 是**原生窗口**，底色不跟 ttk 主题走 ——
-        #   不设 bg 就用系统默认（白/浅灰），那就是"小窗口夜间还是白的"的根因。
-        try:
-            win.configure(bg=theme_get("win_bg"))
-            # ★ 登记一下，切主题时由 _retheme_custom_parts 统一刷新
-            _reg = getattr(self, "_theme_windows", None)
-            if _reg is None:
-                _reg = self._theme_windows = []
-            _reg.append(win)
-        except Exception:
-            pass
-        win.title("📥 网盘预览缓存设置")
-        win.transient(self.root)
-
-        fr = ttk.Frame(win, padding=14)
-        fr.pack(fill="both", expand=True)
-
-        ttk.Label(
-            fr, text=T("网盘文件预览时，会在本地留一份临时副本（缓存）。\n"
-                     "下面四个选项决定「放哪」和「什么时候自己清掉」。"),
-            justify="left", font=(FONT, UI_FONT_SIZE)).pack(anchor="w",
-                                                            pady=(0, 10))
-
-        # ---------- ① 缓存放哪儿 ----------
-        box1 = ttk.LabelFrame(fr, text=T("① 缓存放哪儿"), padding=10)
-        box1.pack(fill="x", pady=4)
-        dir_var = tk.StringVar(
-            value=str(load_ui_setting("preview_cache_dir", "") or ""))
-
-        def _pick_dir():
-            cur = dir_var.get().strip()
-            d = filedialog.askdirectory(
-                title=T("选一个放缓存的文件夹（建议放空间大的本地盘，比如 E 盘）"),
-                initialdir=cur or None, parent=win)
-            if d:
-                dir_var.set(d)
-
-        def _use_temp():
-            dir_var.set("")     # 空 = 用系统临时目录
-
-        row = ttk.Frame(box1)
-        row.pack(fill="x")
-        ent = ttk.Entry(row, textvariable=dir_var, width=52,
-                        font=(FONT, UI_FONT_SIZE))
-        ent.pack(side="left", fill="x", expand=True)
-        ttk.Button(row, text=T("浏览…"), command=_pick_dir).pack(side="left", padx=4)
-        ttk.Button(row, text=T("用临时目录"), command=_use_temp).pack(side="left")
-        ttk.Label(box1, text=T("留空 = 用系统临时目录（推荐，省心）。"
-                             "正在用的目录见下面「现在的情况」。"),
-                  foreground=theme_get("fg_dim")).pack(anchor="w", pady=(6, 0))
-
-        # ---------- ② 无痕模式 ----------
-        box2 = ttk.LabelFrame(fr, text=T("② 无痕模式（阅后即焚）"), padding=10)
-        box2.pack(fill="x", pady=4)
-        inc_var = tk.BooleanVar(
-            value=bool(load_ui_setting("cache_incognito", True)))
-        ttk.Checkbutton(
-            box2, text=T("开启 —— 每次开程序都换一个全新的缓存目录，"
-                       "上次留下的自动清掉（推荐）"),
-            variable=inc_var).pack(anchor="w")
-        ttk.Label(box2, text=T("不开的话：缓存会一直留着，下次看同一个文件会更快"
-                             "（但也更占地方）。"),
-                  foreground=theme_get("fg_dim")).pack(anchor="w", pady=(4, 0))
-
-        # ---------- ③ 定时清理 ----------
-        box3 = ttk.LabelFrame(fr, text=T("③ 定时清理"), padding=10)
-        box3.pack(fill="x", pady=4)
-        ttl_var = tk.StringVar(
-            value=str(load_ui_setting("cache_ttl_hours", 24)))
-        r3 = ttk.Frame(box3)
-        r3.pack(fill="x")
-        ttk.Label(r3, text=T("多久没用过的缓存就自动删掉：")).pack(side="left")
-        ttk.Entry(r3, textvariable=ttl_var, width=8,
-                  font=(FONT, UI_FONT_SIZE)).pack(side="left", padx=4)
-        ttk.Label(r3, text=T("小时（填 0 = 不按时间清）")).pack(side="left")
-
-        # ---------- ④ 超大小清理 ----------
-        box4 = ttk.LabelFrame(fr, text=T("④ 超大小清理"), padding=10)
-        box4.pack(fill="x", pady=4)
-        maxmb_var = tk.StringVar(
-            value=str(load_ui_setting("cache_max_mb", 2048)))
-        r4 = ttk.Frame(box4)
-        r4.pack(fill="x")
-        ttk.Label(r4, text=T("缓存文件夹超过")).pack(side="left")
-        ttk.Entry(r4, textvariable=maxmb_var, width=8,
-                  font=(FONT, UI_FONT_SIZE)).pack(side="left", padx=4)
-        ttk.Label(r4, text=T("MB 就删最旧的（填 0 = 不管大小）")).pack(side="left")
-        ttk.Label(box4, text=T("★ 是「删最旧的、腾到限额以下」，不会把整个目录清空。"),
-                  foreground=theme_get("fg_dim")).pack(anchor="w", pady=(4, 0))
-
-        # ---------- 现在的情况 ----------
-        info = ttk.LabelFrame(fr, text=T("现在的情况"), padding=10)
-        info.pack(fill="x", pady=(10, 4))
-        info_lbl = ttk.Label(info, text="", justify="left")
-        info_lbl.pack(anchor="w")
-
-        def _refresh_info():
-            try:
-                now = _preview_cache_dir()
-                n = 0
-                sz = 0
-                for dp, dn, fs in os.walk(now):
-                    for f in fs:
-                        try:
-                            sz += os.path.getsize(os.path.join(dp, f))
-                            n += 1
-                        except Exception:
-                            pass
-                info_lbl.configure(
-                    text=T("正在用的缓存目录：\n{x}\n\n里面现在有 {n} 个文件，"
-                           "共 {s} MB",
-                           x=now, n=n, s="%.1f" % (sz / 1024 / 1024)))
-            except Exception as e:
-                info_lbl.configure(text="看不出来（%s）" % e)
-
-        _refresh_info()
-
-        # ---------- 按钮 ----------
-        btns = ttk.Frame(fr)
-        btns.pack(fill="x", pady=(10, 0))
-
-        def _save():
-            try:
-                ttl_v = float(ttl_var.get() or 0)
-            except Exception:
-                messagebox.showerror("填错了", T("「定时清理」那里要填数字（小时）"),
-                                     parent=win)
-                return
-            try:
-                mb_v = float(maxmb_var.get() or 0)
-            except Exception:
-                messagebox.showerror("填错了", T("「超大小清理」那里要填数字（MB）"),
-                                     parent=win)
-                return
-            d = dir_var.get().strip()
-            if d:
-                try:
-                    if is_remote_path(d) and not messagebox.askyesno(
-                            "注意",
-                            "你选的是网络盘目录。\n\n"
-                            "缓存本来就是为了绕开网盘的慢 ——\n"
-                            "放网盘上反而更慢。\n\n还是用这个吗？",
-                            parent=win, default="no"):
-                        return
-                except Exception:
-                    pass
-                try:
-                    os.makedirs(d, exist_ok=True)
-                except Exception as exc:
-                    messagebox.showerror("建不出来",
-                                         "这个目录建不出来：\n%s\n\n%s" % (d, exc),
-                                         parent=win)
-                    return
-            save_ui_setting("preview_cache_dir", d)
-            save_ui_setting("cache_incognito", bool(inc_var.get()))
-            save_ui_setting("cache_ttl_hours", ttl_v)
-            save_ui_setting("cache_max_mb", mb_v)
-            self.set_status(T("缓存设置已保存"))
-            messagebox.showinfo(
-                "保存好了",
-                "设置已经存下来了。\n\n"
-                "· 「缓存放哪儿」和「无痕模式」要**重启程序**才对当前这次生效；\n"
-                "· 「定时清理」和「超大小清理」点下面的按钮就会立刻用上。",
-                parent=win)
-            _refresh_info()
-
-        def _clean_now():
-            try:
-                msg = _cache_clean_old(force=True)
-            except Exception as e:
-                msg = "清理出错：%s" % e
-            self.set_status(msg)
-            messagebox.showinfo("清理结果", msg, parent=win)
-            _refresh_info()
-
-        def _open_dir():
-            try:
-                d = _preview_cache_dir()
-                os.startfile(d)          # noqa: 只在 Windows 上跑
-            except Exception as e:
-                messagebox.showerror("打不开", str(e), parent=win)
-
-        ttk.Button(btns, text=T("保存设置"), command=_save).pack(side="left")
-        ttk.Button(btns, text=T("立刻清一次"), command=_clean_now).pack(side="left", padx=6)
-        ttk.Button(btns, text=T("打开缓存文件夹"), command=_open_dir).pack(side="left")
-        ttk.Button(btns, text=T("关闭"), command=win.destroy).pack(side="right")
-
-        try:
-            win.update_idletasks()
-        except Exception:
-            pass
-
-    def _set_preview_cache_dir(self):
-        """★★ v26 新增：设置「网盘预览的本地缓存目录」。
-
-        用户反馈：「这个缓存目录在哪里，我可不可以自己设置」——
-        现在可以：点这个菜单选一个目录，之后网盘预览拷下来的临时文件
-        就都放在那儿（比如放到 E 盘，不占 C 盘）。
-
-        改完需要**重启程序**才生效（现在的缓存路径是启动时定下的）。
-        """
-        cur = ""
-        try:
-            cur = str(load_ui_setting("preview_cache_dir", "") or "")
-        except Exception:
-            cur = ""
-        now_dir = _preview_cache_dir()
-        d = filedialog.askdirectory(
-            title="选择预览缓存目录（网盘文件预览时拷到这里的临时副本）\n"
-                  "（建议放在空间大的本地盘，比如 E 盘；不要选网络盘）",
-            initialdir=cur or None,
-            parent=self.root)
-        if not d:
-            return
-        # 检查：别让用户选一个网盘目录
-        try:
-            if is_remote_path(d):
-                if not messagebox.askyesno(
-                        "注意",
-                        "你选的是**网络盘**目录。\n\n"
-                        "预览缓存本来就是为了绕开网盘的慢 ——\n"
-                        "如果放网盘上，拷来拷去反而更慢。\n\n"
-                        "还是选它吗？",
-                        parent=self.root, default="no"):
-                    return
-        except Exception:
-            pass
-        try:
-            os.makedirs(d, exist_ok=True)
-        except Exception as exc:
-            messagebox.showerror("设置失败",
-                                 "这个目录建不出来：\n%s\n\n%s" % (d, exc),
-                                 parent=self.root)
-            return
-        save_ui_setting("preview_cache_dir", d)
-        messagebox.showinfo(
-            "设置成功",
-            "新的预览缓存目录：\n%s\n\n"
-            "现在还没生效 —— **重启程序**之后就会用这个目录。\n\n"
-            "（当前正在用的目录是：\n%s）\n\n"
-            "★ 旧目录里的文件不用你手动删，\n"
-            "  重启程序时会自动清理。"
-            % (d, now_dir),
-            parent=self.root)
 
     # ---------- ★ v25 补丁28：解压缩 ----------
     def extract_archives(self, here=True):
@@ -15091,74 +14691,11 @@ class FileTaggerApp:
             self._last_applied_level = -1
             self._apply_pending_icon_level()
 
-    def _build_tag_panel(self, parent):
-        head = ttk.Frame(parent)
-        head.pack(fill="x")
-        ttk.Label(head, text=T("标签库（星图缩略图）"),
-                  font=(FONT, UI_FONT_SIZE, BOLD)).pack(side="left")
-        ttk.Button(head, text=T("重置视图"), width=8,
-                   command=lambda: self.tag_thumb.reset_view()).pack(side="right")
+    def _build_tag_panel(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_面板布局.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板面板布局._build_tag_panel(self, *a, **k)
 
-        # ★ 2026-10-03：原来三大行说明文字太占空间（290宽 wrap 后 3 行），
-        #   精简成一行提示，缩略图能多用点地方。
-        # ★★ 2026-10-07：颜色原来是**写死的浅色** "#9aa0a6"
-        #   （那是浅色模式的次要字色）—— 夜间在深底上偏暗、而且不跟主题走。
-        #   现在改成 theme_get("fg_dim")。
-        ttk.Label(parent, text=T("← 拖标签到文件打标 │ 单击筛选 │ 双击查看"),
-                  foreground=theme_get("fg_dim"),
-                  font=(FONT, UI_FONT_SIZE_SMALL),
-                  anchor="w", justify="left").pack(anchor="w", pady=(0, 2))
-
-        self.tag_thumb = TagThumbnail(
-            parent,
-            # ★★ v26 补丁（2026-10-03）：把主程序传进去 —— 不然这里面的
-            #   self.app 从来没值，「从标签库拖标签进标签盒」一直是坏的。
-            app=self,
-            on_drop_on_file=self._on_tag_dropped,
-            on_context_menu=self._on_tag_right_click,
-            on_double_click=self._on_tag_double_click,
-        )
-        self.tag_thumb.pack(fill="both", expand=True)
-
-        zr = ttk.Frame(parent)
-        zr.pack(fill="x", pady=(6, 0))
-        ttk.Button(zr, text="🔍+", width=4,
-                   command=lambda: self.tag_thumb.zoom_center(1.15)).pack(side="left")
-        ttk.Button(zr, text="🔍-", width=4,
-                   command=lambda: self.tag_thumb.zoom_center(1 / 1.15)).pack(side="left", padx=2)
-        ttk.Label(zr, text=T("Ctrl+滚轮缩放 / 空格+拖动平移"),
-                  foreground=theme_get("fg_dim")).pack(side="left", padx=6)
-
-        r2 = ttk.Frame(parent)
-        r2.pack(fill="x", pady=(6, 0))
-        ttk.Button(r2, text=T("🌌 标签星图"),
-                   command=self.open_tag_tree).pack(fill="x")
-
-        r2c = ttk.Frame(parent)
-        r2c.pack(fill="x", pady=(4, 0))
-        ttk.Button(r2c, text=T("🎨 重新分配所有标签颜色"),
-                   command=self.reassign_colors).pack(fill="x")
-
-        r2b = ttk.Frame(parent)
-        r2b.pack(fill="x", pady=(4, 0))
-        ttk.Button(r2b, text=T("🧩 同步所有文件的标签链"),
-                   command=self.resync_now).pack(fill="x")
-
-        # ★ v24：右侧面板不再放「导入 / 导出」——这功能不常用，
-        #   统一走左上角「文件」菜单里的导出/导入标签结构、文件标签信息。
-        sep = ttk.Separator(parent)
-        sep.pack(fill="x", pady=(10, 6))
-
-        r3 = ttk.Frame(parent)
-        r3.pack(fill="x")
-        ttk.Button(r3, text=T("按选中标签筛选"),
-                   command=self.apply_filter).pack(side="left", fill="x", expand=True)
-        ttk.Button(r3, text=T("清除"), width=6,
-                   command=self.clear_filter).pack(side="left", padx=(4, 0))
-
-        self.match_all_var = tk.BooleanVar(value=True)
-        ttk.Checkbutton(parent, text=T("必须同时包含所有选中的标签"),
-                        variable=self.match_all_var).pack(anchor="w", pady=(4, 0))
 
     # ---------------- 工具 ----------------
     @staticmethod
@@ -15174,50 +14711,11 @@ class FileTaggerApp:
         ext = os.path.splitext(name)[1].lower().lstrip(".")
         return ext.upper() if ext else "文件"
 
-    def _view_info_text(self, text):
-        """★ v25 补丁10 / v26 修正：从一句状态消息里挑出「关于当前视图的信息」。
+    def _view_info_text(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_面板布局.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板面板布局._view_info_text(self, *a, **k)
 
-        是这类信息就返回那句（显示到消息右边）；不是就返回 None —— 这时
-        右边那块保持上一句不动（免得「标签条：已显示」把分类信息顶掉）。
-
-        例子：
-          「分类「图本」：55644 个文件（含 1 个标签超链接）（加载中…）」→ 留
-          「C:\\Users\\someone    共 44 项（已刷新）」→ 留
-          「标签条：已显示」→ 不留
-
-        ★★ v26 二次修正（2026-10-01）：**上一版这里把功能改没了。**
-          上一版跟 `self.status.cget("text")` 比 —— 但那个时候
-          `set_status` 已经把左边状态改成新文字了，所以 `t` 永远等于 `cur`，
-          `if` 永远成立、永远 return None —— 结果右边那块**再也刷不出来**。
-          现在改成跟**右边这一块自己当前显示的内容**比：
-            · 已经在显示同一句 → 不重复写（省地方）；
-            · 内容不同 / 之前是空的 → 正常更新。
-        """
-        t = (text or "").strip()
-        if not t:
-            return None
-        if t.startswith("标签条"):
-            return None                     # 关于标签条自身的提示，不重复显示
-        if not any(k in t for k in ("项", "个文件", "共", "目录", "分类", "路径")):
-            return None
-        # ★★ v26：只跟「右边这一块自己现在显示的内容」比 ——
-        #   同一句就不重复写（用户反馈过「一模一样的话显示了两遍，
-        #   白白占掉 400 多像素」）。
-        try:
-            cur = str(self._view_info_lbl.cget("text") or "").strip()
-            if cur and cur == t:
-                return None
-        except Exception:
-            pass
-        # ★ v25 补丁42：太长会把右边那排按钮挤出去。收紧到 40 字，
-        #   全文另存进「📋 输出」面板。
-        if len(t) > 40:
-            try:
-                self.log_output(t)
-            except Exception:
-                pass
-            t = t[:39] + "…"
-        return t
     def set_status(self, text):
         # ★★ 2026-10-03：**后台线程也能直接调**（之前只在主线程用）。
         #   原因：log_problem → set_status 这条路会在 _stuck_watchdog
@@ -15280,57 +14778,11 @@ class FileTaggerApp:
         except Exception:
             pass
 
-    def _fit_view_info(self, info):
-        """★ v25 补丁42：把「当前视图信息」截到它真正放得下的长度。
+    def _fit_view_info(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_面板布局.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板面板布局._fit_view_info(self, *a, **k)
 
-        它和状态文字是**抢同一块地方**的：两个都是 side="left"，
-        加起来超过状态栏宽度，右边那排按钮就会被顶出去。
-        所以这里按「状态文字已经用了多少」算剩下的能给它多少。
-        """
-        try:
-            f = tkfont.Font(family=FONT, size=UI_FONT_SIZE)
-            total = self.status.master.winfo_width()
-            if total <= 1:
-                return info
-            used = 0
-            for name in ("_problem_btn", "_output_btn", "_tagbar_btn",
-                         "_preview_btn", "_taglib_btn", "_net_btn",
-                         "_tagbox_btn"):
-                b = getattr(self, name, None)
-                if b is None:
-                    continue
-                try:
-                    used += b.winfo_reqwidth() + 8
-                except Exception:
-                    pass
-            try:
-                used += self._activity_frame.winfo_reqwidth() + 16
-            except Exception:
-                pass
-            used += 40                                   # 左右内边距
-            try:
-                used += f.measure(str(self.status.cget("text"))) + 20
-            except Exception:
-                pass
-            avail = total - used
-            # ★ v26：**空间紧张时干脆不显示「视图信息」** ——
-            #   它和左边那句状态消息是抢同一块地方的，硬挤的结果就是
-            #   右边那排按钮被顶出去（实测「标签盒」按钮会只剩几像素）。
-            #   宁可少显示一块次要信息，也不能让按钮点不着。
-            if avail <= 120:
-                return ""                                # 地方不够，不显示
-            if f.measure(info) <= avail:
-                return info
-            lo, hi = 1, len(info)
-            while lo < hi:
-                mid = (lo + hi + 1) // 2
-                if f.measure(info[:mid] + "…") <= avail:
-                    lo = mid
-                else:
-                    hi = mid - 1
-            return info[:max(1, lo)] + "…"
-        except Exception:
-            return info
 
     def _on_status_bar_config(self, event=None):
         """★ v25 补丁42：状态栏尺寸变了 → 重新决定按钮「带字还是只带图标」。
@@ -15419,56 +14871,11 @@ class FileTaggerApp:
         except Exception:
             pass
 
-    def _status_avail_px(self):
-        """★ v25 补丁42 / v26 重写：算一下状态文字最多能占多少像素。
+    def _status_avail_px(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_面板布局.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板面板布局._status_avail_px(self, *a, **k)
 
-        算法：状态栏总宽 − 右边所有按钮的实际宽度 − 余量。
-
-        ★ v26 改了什么、为什么要改：
-          补丁42 那版在这里**硬扣了 220 像素**留给「当前视图信息」，
-          再加上右边 7 个按钮（这台机器缩放 200%，每个要 138~154 像素，
-          合计 1000 多），1400 的窗口一减就只剩 60 像素 ——
-          只够显示「C:\\Us…」五个字符。用户看截图才发现：
-          **状态栏那行什么都看不出来**。
-          现在改成：
-            · 不再盲目硬扣 220，而是**先按「状态文字至少要能看」给个底线**
-              （至少要 220 像素，大约 10 个汉字）；
-            · 「视图信息」那块改成**按剩下的空间自适应**（它自己有
-              _fit_view_info 会截），不再预扣固定值；
-            · 实在放不下（很窄的窗口）就返回一个合理的小值，
-              而不是 60 这种几乎为 0 的数。
-        """
-        try:
-            total = self.status.master.winfo_width()
-            if total <= 1:
-                return 0            # 还没量出来，这轮先不截
-            used = 0
-            for name in ("_problem_btn", "_output_btn", "_tagbar_btn",
-                         "_preview_btn", "_taglib_btn", "_net_btn",
-                         "_tagbox_btn"):
-                b = getattr(self, name, None)
-                if b is None:
-                    continue
-                try:
-                    used += b.winfo_reqwidth() + 8
-                except Exception:
-                    pass
-            # 活动指示器（转圈 + 「统计分类中」）也占地方
-            try:
-                if self._activity_frame.winfo_ismapped():
-                    used += self._activity_frame.winfo_reqwidth() + 16
-            except Exception:
-                pass
-            # 左右内边距 + 余量
-            used += 40                                                    # v26
-            avail = total - used
-            # ★ 底线：至少要能显示十来个汉字（约 220 像素）。
-            #   否则宁可让右边的「视图信息」少显示一点。
-            if avail < 220:
-                avail = min(220, max(80, total // 4))
-            return avail
-        except Exception:
-            return 0
 
     def toggle_tagbar(self):
         """★ v25 补丁7：显示 / 隐藏标签条（默认隐藏）。
@@ -16230,111 +15637,11 @@ class FileTaggerApp:
         except Exception:
             self._spinner_job = None
 
-    def _restore_pane_widths(self):
-        """★★ 把"用户拖过的宽度"摆回 paned 里 —— **最终说话的那一个**。
+    def _restore_pane_widths(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_面板布局.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板面板布局._restore_pane_widths(self, *a, **k)
 
-        ★★★ 2026-10-07 新增（用户要求「**你先多弄些冗余**」，并报
-          「拖动分类库的宽度，点标签库、预览什么的就刷没了」）。
-
-        ★ 为什么需要它（这是整条链的最后一环）：
-          `_reinsert_tag_frame()` 是"全撤 + 重加"，**重加之后 Tk 会按
-          自己的算法把整条分栏重新分一遍**（实测：分类库 320 → **395**）。
-          然后：
-            · `_layout_right_panes()` 会**按这个错值**去摆（它读 sashpos）；
-            · `after(400, _save_pane_sizes)` 会**把错值记下来**。
-          → 结果就是"用户拖的宽度被刷没了"。
-        ★ 所以必须有一个"**拿记住的值去覆盖 Tk 的值**"的动作 —— 就是这个。
-
-        ★ 算法（**故意写得很笨，因为笨的不会错**）：
-          对 paned 里的每一块，**从左往右**累计宽度，
-          把每根分隔条摆到"累计到这个面板右边界"的位置上。
-          · 只摆"记过的"那几块（分类库 / 预览 / 标签库）
-          · 文件列表**不主动摆**（它是"剩下多少占多少"，摆它会把右边挤掉）
-          · 位置必须**夹在 [上一根, 总宽] 之间**，免得越界
-        ★ 踩过的坑：第一版我用了"按 key 名猜属性名"的写法，
-          算出来把标签库推成 1811（布局全乱）。**这版只认固定三块**。
-        """
-        try:
-            pw = self.paned
-            panes = [str(p) for p in pw.panes()]
-            if len(panes) < 2:
-                return
-            total = int(pw.winfo_width())
-            if total <= 1:
-                return
-            data = dict(getattr(self, "_pane_sizes", {}) or {})
-
-            # 三块"有记忆宽度"的面板 → 它们的 key
-            KEYED = []
-            for fr, key in ((getattr(self, "sidebar", None), "pane_sidebar_w"),
-                            (getattr(self, "preview_frame", None),
-                             "pane_preview_w"),
-                            (getattr(self, "tag_frame", None),
-                             "pane_taglib_w")):
-                if fr is not None:
-                    KEYED.append((str(fr), key))
-
-            acc = 0          # 从左边累计过来的宽度
-            for i, s in enumerate(panes):
-                if i == 0:
-                    # 第一块：它自己就是"第一根分隔条的左边"
-                    #   ★ 若它就是分类库且有记忆值 → 直接摆
-                    #
-                    # ★★ 2026-10-07 修「关掉侧栏之后，预览被压成 40」★★
-                    #   病根：分类库**不在**的时候，第一块是"文件列表"——
-                    #   而文件列表**我们故意不摆它**（它是"剩下多少占多少"）。
-                    #   可是原来的代码在这种情况下 `acc` 一直是 0 →
-                    #   下面摆第二块（预览）时就按 "0 + 预览宽" 去摆 →
-                    #   **把预览推到了最左边**（实测宽度只剩 40）。
-                    #   ✅ 修法：第一块如果**不是**"有记忆宽度的面板"
-                    #     （= 它是文件列表），就把 `acc` 设成**它当前的右边界**，
-                    #     让后面的面板从它右边接着算。
-                    _matched = False
-                    for fs, key in KEYED:
-                        if fs == s:
-                            _matched = True
-                            try:
-                                w = int(data.get(key) or 0)
-                            except Exception:
-                                w = 0
-                            if w > 40:
-                                acc = w
-                                pw.sashpos(0, max(40, min(acc, total - 8)))
-                            break
-                    if not _matched:
-                        # 第一块是"没记忆的"（文件列表）→ 从它右边界起算
-                        try:
-                            acc = int(pw.sashpos(0))
-                        except Exception:
-                            acc = 0
-                    continue
-                # 中间/末尾的面板
-                w = 0
-                for fs, key in KEYED:
-                    if fs == s:
-                        try:
-                            w = int(data.get(key) or 0)
-                        except Exception:
-                            w = 0
-                        break
-                if w <= 40:
-                    # 没记过的（比如文件列表）—— **不动它**，
-                    #   把 acc 更新成它"当前"的右边界，继续往右走
-                    try:
-                        acc = int(pw.sashpos(i))
-                    except Exception:
-                        pass
-                    continue
-                acc = acc + w
-                if i < len(panes) - 1:
-                    try:
-                        lo = int(pw.sashpos(i - 1)) + 40
-                        hi = total - 8
-                        pw.sashpos(i, max(lo, min(acc, hi)))
-                    except Exception:
-                        pass
-        except Exception:
-            pass
 
     def toggle_sidebar(self):
         """★ v25 补丁41：分类库的显示 / 隐藏，也改成「改状态 + 整体重排」。
@@ -20521,100 +19828,11 @@ class FileTaggerApp:
             f"{BOOTSTRAP_SETTINGS_PATH}",
             parent=self.root)
 
-    def change_data_dir(self):
-        cur_base = DB_PATH.parent
-        new_dir = filedialog.askdirectory(
-            title=T("选择数据存储位置（建议本地磁盘，不要选网络盘）"),
-            initialdir=str(cur_base),
-            parent=self.root)
-        if not new_dir:
-            return
-        try:
-            new_base = Path(new_dir).expanduser().resolve()
-        except Exception as exc:
-            messagebox.showerror("错误", str(exc), parent=self.root)
-            return
+    def change_data_dir(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_缓存设置.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板缓存设置.change_data_dir(self, *a, **k)
 
-        if new_base == cur_base:
-            messagebox.showinfo("提示", T("和当前位置相同，未做改动。"),
-                                parent=self.root)
-            return
-
-        if is_remote_path(str(new_base)):
-            if not messagebox.askyesno(
-                    "警告",
-                    "你选择的目录在网络盘上。\n\n"
-                    "SQLite 数据库放在网络盘上会非常慢，"
-                    "文件损坏的风险也更高。\n\n"
-                    "确定继续吗？",
-                    parent=self.root):
-                return
-
-        migrate = messagebox.askyesno(
-            "数据迁移",
-            "是否把现有数据（数据库 + 导出目录）搬过去？\n\n"
-            "  · 是 → 复制到新位置（原文件保留）\n"
-            "  · 否 → 只改位置，新位置从空开始",
-            parent=self.root)
-
-        new_db = new_base / DB_PATH.name
-        new_export = new_base / EXPORT_DIR.name
-
-        try:
-            new_base.mkdir(parents=True, exist_ok=True)
-        except Exception as exc:
-            messagebox.showerror("错误", f"无法创建目录：\n{exc}",
-                                 parent=self.root)
-            return
-
-        if migrate:
-            try:
-                # 复制数据库
-                if DB_PATH.exists():
-                    if new_db.exists() and not messagebox.askyesno(
-                            "覆盖？",
-                            f"新位置已存在数据库文件：\n{new_db}\n\n"
-                            "覆盖它吗？",
-                            parent=self.root):
-                        return
-                    shutil.copy2(str(DB_PATH), str(new_db))
-                # 复制导出目录
-                if EXPORT_DIR.exists() and EXPORT_DIR.is_dir():
-                    if new_export.exists():
-                        if not messagebox.askyesno(
-                                "覆盖？",
-                                f"新位置已存在导出目录：\n{new_export}\n\n"
-                                "覆盖它吗？",
-                                parent=self.root):
-                            return
-                        shutil.rmtree(str(new_export))
-                    shutil.copytree(str(EXPORT_DIR), str(new_export))
-            except Exception as exc:
-                messagebox.showerror("迁移失败", str(exc), parent=self.root)
-                return
-
-        # ★ 顺便把当前完整设置也复制到新位置
-        try:
-            old_full = _load_full_settings()
-            if old_full:
-                _write_json_file(new_base / ".file_tagger_settings.json",
-                                 old_full)
-        except Exception:
-            pass
-
-        if save_data_dir(new_base):
-            messagebox.showinfo(
-                "需要重启",
-                f"数据位置已改为：\n{new_base}\n\n"
-                f"数据库：{new_db.name}\n"
-                f"导出目录：{new_export.name}\n"
-                f"设置文件：.file_tagger_settings.json\n\n"
-                "请关闭程序并重新打开，新的位置才会生效。",
-                parent=self.root)
-        else:
-            messagebox.showerror("保存失败",
-                                 "无法写入设置文件，请检查权限。",
-                                 parent=self.root)
             
     def apply_filter(self):
         selected_ids = self.tag_thumb.selected_ids
