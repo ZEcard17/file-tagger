@@ -6171,6 +6171,63 @@ except Exception as _e:
     note_swallowed(T("搬出去的 面板_主题配色.py 没找到"), _e)
 
 
+# ★★★ 「快捷键」这组方法已搬到 `AIxiede拆分开/程序分块/面板_快捷键.py`
+#   ★★ 方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_快捷键 as _面板快捷键
+    _面板快捷键._set_app(sys.modules[__name__])
+    _HAS_PANEL_快捷键 = True
+except Exception as _e:
+    _HAS_PANEL_快捷键 = False
+    note_swallowed(T("搬出去的 面板_快捷键.py 没找到"), _e)
+
+
+# ★★★ 「空白区菜单」这组方法已搬到 `AIxiede拆分开/程序分块/面板_空白区菜单.py`
+#   ★★ 方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_空白区菜单 as _面板空白区菜单
+    _面板空白区菜单._set_app(sys.modules[__name__])
+    _HAS_PANEL_空白区菜单 = True
+except Exception as _e:
+    _HAS_PANEL_空白区菜单 = False
+    note_swallowed(T("搬出去的 面板_空白区菜单.py 没找到"), _e)
+
+
+# ★★★ 「剪切粘贴」这组方法已搬到 `AIxiede拆分开/程序分块/面板_剪切粘贴.py`
+#   ★★ 方法体搬走，类里留**一行转发**（稳定接口）——
+#      所有调用方（菜单/按钮/别的 self.方法）**一个字都不用改**。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：
+#      没有它 → 类里那行转发会 `NameError` ——
+#      而且**平时看不出来**，只有真点到那个按钮才炸。
+try:
+    import 面板_剪切粘贴 as _面板剪切粘贴
+    _面板剪切粘贴._set_app(sys.modules[__name__])
+    _HAS_PANEL_剪切粘贴 = True
+except Exception as _e:
+    _HAS_PANEL_剪切粘贴 = False
+    note_swallowed(T("搬出去的 面板_剪切粘贴.py 没找到"), _e)
+
+
+# ★★★ 「导航」这组方法已搬到 `AIxiede拆分开/程序分块/面板_导航.py`
+#   ★★ 方法体搬走，类里留**一行转发**（稳定接口）——调用方一个字不用改。
+#   ★★★ 但**必须有下面这个 import**（错题本 #166）：没有它 → NameError。
+try:
+    import 面板_导航 as _面板导航
+    _面板导航._set_app(sys.modules[__name__])
+    _HAS_PANEL_导航 = True
+except Exception as _e:
+    _HAS_PANEL_导航 = False
+    note_swallowed(T("搬出去的 面板_导航.py 没找到"), _e)
+
+
 # ★★★ FileList 已拆到 `AIxiede拆分开/程序分块/FileList.py`（2026-10-08）
 #   ★★ 写法（错题本 #158）：① 直接 `from FileList import …`（不带包路径）
 #     ② `_set_app` 取别名 —— 模块名和类名同名时会跑到类上找
@@ -13099,28 +13156,11 @@ class FileTaggerApp:
         self.menu.add_command(label=T("📖 用系统阅读器打开这本书"),
                               command=self.open_selected)
 
-    # ---------- ★ v25 补丁25：快捷键（可自定义） ----------
-    def _shortcut_actions(self):
-        """动作键 → 具体干什么。这里是唯一把「名字」和「功能」连起来的地方。"""
-        return {
-            "delete": self.on_delete_key,
-            "rename": self.on_rename_key,
-            "select_all": self.on_select_all_key,
-            "new_folder": self.on_new_folder_key,
-            "copy": self.on_copy_key,
-            "cut": self.on_cut_key,
-            "paste": self.on_paste_key,
-            "undo": self.on_undo_key,
-            "nav_back": self.on_nav_back_key,
-            "nav_forward": self.on_nav_forward_key,
-            "toggle_tagbar": lambda e=None: self.toggle_tagbar(),
-            "toggle_preview": lambda e=None: self.toggle_preview(),
-            "toggle_taglib": lambda e=None: self.toggle_taglib(),
-            "net_mode": lambda e=None: self.toggle_net_browse(),
-            "refresh": lambda e=None: self.refresh_current_dir(),
-            "search_focus": lambda e=None: self._focus_search_entry(),
-            "quick_preview": self.on_quick_preview_key,
-        }
+    def _shortcut_actions(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_快捷键.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板快捷键._shortcut_actions(self, *a, **k)
+
 
     def _focus_search_entry(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_搜索过滤.py`
@@ -13321,73 +13361,17 @@ class FileTaggerApp:
         except Exception:
             pass
 
-    def _setup_shortcuts(self):
-        """第一次绑定：把设置里的按键按上。"""
-        self._apply_shortcuts(first=True)
+    def _setup_shortcuts(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_快捷键.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板快捷键._setup_shortcuts(self, *a, **k)
 
-    def _apply_shortcuts(self, first=False):
-        """★ 补丁25：按当前的快捷键表重新绑定（改完立刻生效，不用重启）。
 
-        先把上一次绑的**解绑**，再按新表绑 —— 否则改过的键会「新旧一起
-        能用」，冲突起来很莫名其妙。
-        """
-        acts = self._shortcut_actions()
-        # 1) 解绑上一次
-        for name, seqs in list(getattr(self, "_shortcut_binds", {}).items()):
-            cb = acts.get(name)
-            for s in seqs:
-                try:
-                    self.root.unbind(s)
-                except Exception:
-                    pass
-        self._shortcut_binds = {}
-        # 2) 按表重新绑
-        smap = load_shortcut_map()
-        n_ok = 0
-        _failed = []          # ★ 2026-10-06：绑不上的都攒着，最后一起告诉用户
-        for name, label, _default in SHORTCUT_DEFS:
-            key = smap.get(name, "")
-            cb = acts.get(name)
-            if not key or cb is None:
-                continue
-            seqs = shortcut_key_to_seq(key)
-            bound = []
-            for s in seqs:
-                try:
-                    self.root.bind(s, cb, add="+")
-                    bound.append(s)
-                    n_ok += 1
-                except Exception as exc:
-                    try:
-                        note_swallowed(T("快捷键：绑定 {x}（{y}）失败", x=key, y=label),
-                                       exc)
-                    except Exception:
-                        pass
-            if bound:
-                self._shortcut_binds[name] = bound
-            else:
-                _failed.append("%s（%s）" % (label, key))
-        # ★★ 2026-10-06：**绑不上要告诉用户**，不能只记进账本。
-        #   踩的坑：用户报「按空格没反应」，而账本里早就写着
-        #   「绑定 Space 失败」—— 但**用户根本不知道去哪儿看**，
-        #   于是这个功能从做完那天起就是坏的，谁也没发现。
-        #   ★ 只在**第一次**（first=True）弹，免得改一次快捷键就弹一次。
-        if _failed and first:
-            try:
-                self.root.after(1200, lambda: messagebox.showwarning(
-                    "有快捷键没设上",
-                    "下面这些快捷键在这个系统上用不了（其它功能不受影响）：\n\n  "
-                    + "\n  ".join(_failed[:8])
-                    + "\n\n你可以在「界面 → ⌨ 快捷键管理…」里换一个键。",
-                    parent=self.root))
-            except Exception:
-                pass
-        if not first:
-            try:
-                self.log_output(T("快捷键已重新绑定（共 {x} 个按键）", x=n_ok))
-            except Exception:
-                pass
-        return n_ok
+    def _apply_shortcuts(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_快捷键.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板快捷键._apply_shortcuts(self, *a, **k)
+
 
     def open_shortcut_dialog(self):
         """打开「快捷键管理」窗口。"""
@@ -14138,26 +14122,11 @@ class FileTaggerApp:
         return _面板撤销.on_undo_key(self, *a, **k)
 
 
-    def _do_new_folder(self):
-        """在当前文件夹里新建一个文件夹（名字重复就自动加 (2)、(3)…）。"""
-        if not self.current_dir:
-            messagebox.showinfo("提示", T("先打开一个文件夹再说。"), parent=self.root)
-            return
-        base = str(self.current_dir)
-        name = "新建文件夹"
-        i = 1
-        while os.path.exists(os.path.join(base, name)):
-            i += 1
-            name = "新建文件夹 (%d)" % i
-        newp = os.path.join(base, name)
-        try:
-            os.mkdir(newp)
-        except Exception as exc:
-            messagebox.showerror("新建失败", str(exc), parent=self.root)
-            return
-        self.log_output(T("新建文件夹：{x}", x=newp))
-        self.set_status(T("已新建文件夹：{x}", x=name))
-        self.refresh_current_dir()
+    def _do_new_folder(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_空白区菜单.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板空白区菜单._do_new_folder(self, *a, **k)
+
 
     def _do_rename(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
@@ -14189,11 +14158,11 @@ class FileTaggerApp:
         self.file_list.select_all_rows()
         return "break"
 
-    def on_new_folder_key(self, event=None):
-        if self._focus_is_input():
-            return None
-        self._do_new_folder()
-        return "break"
+    def on_new_folder_key(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_空白区菜单.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板空白区菜单.on_new_folder_key(self, *a, **k)
+
 
     def copy_selected(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
@@ -14201,107 +14170,17 @@ class FileTaggerApp:
         return _面板文件操作.copy_selected(self, *a, **k)
 
 
-    def paste_into_current(self):
-        """把剪贴板里的东西粘贴到当前文件夹（Ctrl+V）。"""
-        clip = getattr(self, "_clip", None) or {}
-        srcs = [p for p in (clip.get("paths") or []) if os.path.exists(p)]
-        if not clip.get("paths"):
-            messagebox.showinfo("提示", "剪贴板是空的 —— 先选中东西按 Ctrl+C（复制）"
-                                       "或 Ctrl+X（剪切）。", parent=self.root)
-            return
-        if not clip.get("paths"):
-            return
-        gone = len(clip["paths"]) - len(srcs)
-        if not srcs:
-            messagebox.showinfo("提示", T("要粘贴的东西已经不在了（可能被删掉或改名了）。"),
-                                parent=self.root)
-            self._clip = None
-            return
-        if not self.current_dir:
-            messagebox.showinfo("提示", "先打开一个目标文件夹，再按 Ctrl+V 粘贴。",
-                                parent=self.root)
-            return
-        target = str(self.current_dir)
-        cut = bool(clip.get("cut"))
-        word = "移动" if cut else "复制"
-        extra = "" if not gone else "\n（有 %d 项已经不在了，会跳过）" % gone
-        if cut and not messagebox.askyesno(
-                "粘贴（移动）",
-                "把剪贴板里的 %d 项**移动**到：\n%s\n\n%s"% (len(srcs), target, extra)
-                + "移动会把原位置的东西挪走（不是复制一份）。",
-                parent=self.root):
-            return
-        self.begin_activity("正在%s %d 项…" % (word, len(srcs)))
-        self.log_output("开始%s %d 项 → %s" % (word, len(srcs), target))
+    def paste_into_current(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_剪切粘贴.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板剪切粘贴.paste_into_current(self, *a, **k)
 
-        def worker():
-            done, errs = [], []
-            for src in srcs:
-                try:
-                    name = os.path.basename(str(src).rstrip("\\")) or str(src)
-                    is_dir = os.path.isdir(src)
-                    dst = _unique_target_path(target, name, is_dir)
-                    if cut:
-                        shutil.move(src, dst)
-                    elif is_dir:
-                        shutil.copytree(src, dst)
-                    else:
-                        shutil.copy2(src, dst)
-                    done.append((src, dst))
-                except Exception as exc:
-                    errs.append("%s：%s" % (os.path.basename(str(src)), exc))
-            try:
-                self._ui_threadsafe(self._paste_done, cut, target, done, errs)
-            except Exception as exc:
-                # ★★ 2026-10-03：worker 尾部 _ui_threadsafe 失败时，
-                #   之前 except: pass 默默丢弃，主线程永远不知道活儿没干。
-                #   现在至少留一笔 warn，方便排查。
-                note_swallowed(T("worker(_paste_done)：回主线程通知失败"),
-                               exc, level="warn")
 
-        threading.Thread(target=worker, daemon=True).start()
+    def _paste_done(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_剪切粘贴.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板剪切粘贴._paste_done(self, *a, **k)
 
-    def _paste_done(self, cut, target, done, errs):
-        """粘贴完成（回主线程）：同步数据库路径 + 刷新界面。"""
-        self.end_activity()
-        if cut:
-            # 移动过了 → 数据库里的路径要跟着改（不然标签看着像丢了）
-            for src, dst in done:
-                try:
-                    if os.path.isdir(dst):
-                        self.store.rename_prefix_paths(src, dst)
-                    else:
-                        self.store.move_file_path(src, dst)
-                except Exception as _e:
-                    note_swallowed(T("剪切粘贴后同步数据库路径失败"), _e)
-                try:
-                    self.store.clear_dir_cache_under(os.path.dirname(str(src)))
-                except Exception:
-                    pass
-        # 剪贴板用完了（剪切只能粘一次；复制也清掉，避免误按再粘一次）
-        self._clip = None
-        n = len(done)
-        word = "移动" if cut else "复制"
-        self.log_output(T("完成：{x} {y} 项 → {z}", x=word, y=n, z=target))
-        self.set_status("已%s %d 项 → %s%s"
-                        % (word, n, os.path.basename(target.rstrip("\\")) or target,
-                           "" if not errs else "（%d 项失败）" % len(errs)))
-        if errs:
-            self.log_problem("粘贴失败：%s" % "；".join(errs[:3]), level="error")
-            messagebox.showwarning("有没粘成功的",
-                                   "这些没成功：\n\n%s" % "\n".join(errs[:5]),
-                                   parent=self.root)
-        try:
-            if self.view_mode == "dir" and self.current_dir:
-                self.load_directory(self.current_dir)
-            else:
-                self.refresh_current_dir()
-        except Exception as _e:
-            note_swallowed(T("粘贴后刷新界面失败"), _e)
-        try:
-            self.refresh_rows_tags()
-        except Exception:
-            pass
 
     def _move_paths_to_folder(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_文件操作.py`
@@ -14315,91 +14194,59 @@ class FileTaggerApp:
         return _面板文件操作._drag_move_done(self, *a, **k)
 
 
-    def on_copy_key(self, event=None):
-        if self._focus_is_input():
-            return None
-        self.copy_selected(cut=False)
-        return "break"
+    def on_copy_key(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_剪切粘贴.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板剪切粘贴.on_copy_key(self, *a, **k)
 
-    def on_cut_key(self, event=None):
-        if self._focus_is_input():
-            return None
-        self.copy_selected(cut=True)
-        return "break"
 
-    def on_paste_key(self, event=None):
-        if self._focus_is_input():
-            return None
-        self.paste_into_current()
-        return "break"
+    def on_cut_key(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_剪切粘贴.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板剪切粘贴.on_cut_key(self, *a, **k)
 
-    # ---------------- ★ v25 补丁13：导航（后退/前进/盘符/常用位置）----------------
-    @staticmethod
-    def _clean_path_input(text):
-        """地址栏里手输的路径：去掉引号/空格，如果给的是文件就进它所在的文件夹。
 
-        （从资源管理器复制路径过来常常带一对引号，或者直接粘的是一个文件路径。）
-        """
-        t = (text or "").strip().strip('"').strip("'").strip()
-        if not t:
-            return t
-        try:
-            if os.path.isfile(t):
-                return os.path.dirname(t)
-        except Exception:
-            pass
-        return t
+    def on_paste_key(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_剪切粘贴.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板剪切粘贴.on_paste_key(self, *a, **k)
 
-    def _nav_record(self, path):
-        """走了一个新目录 → 记进历史（后退/前进用）。"""
-        try:
-            p = str(path)
-        except Exception:
-            return
-        if getattr(self, "_nav_hist", None) is None:
-            self._nav_hist = []
-            self._nav_pos = -1
-        # 正在「后退/前进」的路上，就不要再记一遍
-        if getattr(self, "_nav_going", False):
-            return
-        if self._nav_pos >= 0 and self._nav_hist[self._nav_pos] == p:
-            return
-        self._nav_hist = self._nav_hist[:self._nav_pos + 1]
-        self._nav_hist.append(p)
-        if len(self._nav_hist) > 60:
-            self._nav_hist = self._nav_hist[-60:]
-        self._nav_pos = len(self._nav_hist) - 1
-        self._update_nav_buttons()
 
-    def _update_nav_buttons(self):
-        try:
-            hist = getattr(self, "_nav_hist", []) or []
-            pos = getattr(self, "_nav_pos", -1)
-            self._nav_back_btn.state(["!disabled"] if pos > 0 else ["disabled"])
-            self._nav_fwd_btn.state(
-                ["!disabled"] if pos < len(hist) - 1 else ["disabled"])
-        except Exception:
-            pass
+    def _clean_path_input(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_导航.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板导航._clean_path_input(self, *a, **k)
 
-    def _nav_to_pos(self, pos):
-        hist = getattr(self, "_nav_hist", []) or []
-        if not (0 <= pos < len(hist)):
-            return
-        self._nav_pos = pos
-        self._nav_going = True
-        try:
-            self.load_directory(hist[pos])
-        finally:
-            self._nav_going = False
-        self._update_nav_buttons()
 
-    def go_back(self):
-        """后退（Alt+←）。"""
-        self._nav_to_pos(getattr(self, "_nav_pos", 0) - 1)
+    def _nav_record(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_导航.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板导航._nav_record(self, *a, **k)
 
-    def go_forward(self):
-        """前进（Alt+→）。"""
-        self._nav_to_pos(getattr(self, "_nav_pos", 0) + 1)
+
+    def _update_nav_buttons(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_导航.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板导航._update_nav_buttons(self, *a, **k)
+
+
+    def _nav_to_pos(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_导航.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板导航._nav_to_pos(self, *a, **k)
+
+
+    def go_back(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_导航.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板导航.go_back(self, *a, **k)
+
+
+    def go_forward(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_导航.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板导航.go_forward(self, *a, **k)
+
 
     def on_nav_back_key(self, event=None):
         if self._focus_is_input():
@@ -14453,65 +14300,23 @@ class FileTaggerApp:
         return _面板网盘维护._update_net_btn(self, *a, **k)
 
 
-    def _refresh_places(self):
-        """「常用位置」下拉：盘符 + 桌面/下载/文档 + 你收藏的 + 索引根目录。"""
-        try:
-            if getattr(self, "_places", None) is None:
-                self._places = {}
-            self._places = {}
-            adds = []
-            for d in self._drives():
-                adds.append(("💽 " + d, d))
-            # ★★ 2026-10-08：**别再写死 E 盘**（要打包发别人用）——
-            #   原来"桌面/下载"写的是 `E:\桌面` / `E:\下载`，
-            #   别人电脑上**根本没有 E 盘**（或者没这两个文件夹）→
-            #   `os.path.isdir` 为假 → **这两项直接消失**（不算崩，但少了）。
-            #   ★ 改成**问 Windows 要**（`USERPROFILE` / `HOMEDRIVE`）：
-            #     · 桌面 → `%USERPROFILE%\Desktop`
-            #       ★ 中文系统上文件夹真名是"桌面"，但**路径还是 Desktop**
-            #         （Windows 用 `desktop.ini` 做显示名，路径不变）——
-            #         所以 `Desktop` 是对的。
-            #     · 下载 → `%USERPROFILE%\Downloads`
-            #   ★ 还**保留老的 E 盘**兜底：本机用户习惯了 E:\桌面，
-            #     两边都试，哪个存在加哪个（**可逆**，不破坏现状）。
-            _home = Path.home()
-            for label, p in (("🖥 桌面", str(_home / "Desktop")),
-                             ("🖥 桌面", r"E:\桌面"),
-                             ("⬇ 下载", str(_home / "Downloads")),
-                             ("⬇ 下载", r"E:\下载"),
-                             ("📄 文档", str(_home / "Documents")),
-                             ("🏠 主目录", str(_home))):
-                if os.path.isdir(p):
-                    adds.append((label, p))
-            for b in (load_ui_setting("nav_bookmarks", []) or []):
-                if isinstance(b, str) and os.path.isdir(b):
-                    adds.append(("⭐ " + os.path.basename(b.rstrip("\\")) or b, b))
-            try:
-                for r in self.store.all_index_roots():
-                    adds.append(("📚 索引 " + (r["path"] or ""), r["path"]))
-            except Exception:
-                pass
-            vals = []
-            for label, p in adds:
-                if label in self._places:
-                    continue
-                self._places[label] = p
-                vals.append(label)
-            self._drive_cbo.configure(values=self._drives())
-            self._place_cbo.configure(values=vals[:40])
-        except Exception as _e:
-            note_swallowed(T("刷新「常用位置」下拉失败"), _e)
+    def _refresh_places(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_空白区菜单.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板空白区菜单._refresh_places(self, *a, **k)
+
 
     def _on_drive_pick(self, event=None):
         d = (self._drive_var.get() or "").strip()
         if d and os.path.isdir(d):
             self.load_directory(d)
 
-    def _on_place_pick(self, event=None):
-        label = (self._place_var.get() or "").strip()
-        p = (self._places or {}).get(label)
-        if p:
-            self.load_directory(p)
+    def _on_place_pick(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_剪切粘贴.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板剪切粘贴._on_place_pick(self, *a, **k)
+
+
 
     def _add_bookmark(self):
         """把当前文件夹收进「常用位置」（⭐ 按钮）。"""
@@ -14559,79 +14364,29 @@ class FileTaggerApp:
         return _面板文件操作._on_drag_out(self, *a, **k)
 
 
-    def _on_drop_files(self, event):
-        """资源管理器拖过来的文件/文件夹 → 复制到当前文件夹。"""
-        try:
-            raw = event.data or ""
-            items = self.file_list.tk.splitlist(raw)
-        except Exception:
-            items = []
-        items = [str(x) for x in items if x]
-        if not items:
-            return
-        if not self.current_dir:
-            messagebox.showinfo("提示", T("先打开一个文件夹，再把东西拖进来。"),
-                                parent=self.root)
-            return
-        target = str(self.current_dir)
-        names = [(os.path.basename(p.rstrip("\\")) or p) for p in items]
-        preview = "、".join(names[:4]) + ("…" if len(names) > 4 else "")
-        if not messagebox.askyesno(
-                "拖进来了 %d 项" % len(items),
-                "要把这 %d 项**复制到**：\n%s\n\n  内容：%s\n\n"
-                "（是复制，不会动原来的文件）" % (len(items), target, preview),
-                parent=self.root):
-            return
-        self.begin_activity("正在复制拖进来的 %d 项…" % len(items))
-        self.log_output("拖放复制：%d 项 → %s" % (len(items), target))
+    def _on_drop_files(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_空白区菜单.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板空白区菜单._on_drop_files(self, *a, **k)
 
-        def worker():
-            done, errs = [], []
-            for src in items:
-                try:
-                    name = os.path.basename(src.rstrip("\\")) or src
-                    is_dir = os.path.isdir(src)
-                    dst = _unique_target_path(target, name, is_dir)
-                    if is_dir:
-                        shutil.copytree(src, dst)
-                    else:
-                        shutil.copy2(src, dst)
-                    done.append(dst)
-                except Exception as exc:
-                    errs.append("%s：%s" % (os.path.basename(str(src)), exc))
-            try:
-                self._ui_threadsafe(self._drop_done, target, done, errs)
-            except Exception as exc:
-                note_swallowed(T("worker(_drop_done)：回主线程通知失败"),
-                               exc, level="warn")
 
-        threading.Thread(target=worker, daemon=True).start()
+    def _drop_done(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_空白区菜单.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板空白区菜单._drop_done(self, *a, **k)
 
-    def _drop_done(self, target, done, errs):
-        self.end_activity()
-        self.log_output("拖放完成：复制了 %d 项" % len(done))
-        self.set_status("已把拖进来的 %d 项复制到 %s%s"
-                        % (len(done), os.path.basename(target.rstrip("\\")) or target,
-                           "" if not errs else "（%d 项失败）" % len(errs)))
-        if errs:
-            self.log_problem("拖放复制失败：%s" % "；".join(errs[:3]), level="error")
-            messagebox.showwarning("有没复制成功的",
-                                   "这些没成功：\n\n%s" % "\n".join(errs[:5]),
-                                   parent=self.root)
-        try:
-            self.load_directory(target)
-        except Exception as _e:
-            note_swallowed(T("拖放后刷新界面失败"), _e)
 
-    def choose_dir(self):
-        chosen = filedialog.askdirectory(initialdir=str(self.current_dir))
-        if chosen:
-            self.load_directory(chosen)
+    def choose_dir(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_导航.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板导航.choose_dir(self, *a, **k)
 
-    def go_up(self):
-        parent = self.current_dir.parent
-        if parent != self.current_dir:
-            self.load_directory(parent)
+
+    def go_up(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_导航.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板导航.go_up(self, *a, **k)
+
 
     def _apply_stats_display(self, *a, **k):
         # ★★ 转发到 `AIxiede拆分开/程序分块/面板_统计显示.py`
@@ -14978,26 +14733,11 @@ class FileTaggerApp:
         self.sidebar.set_selected("all", None)
         self.set_status(f"全部已管理文件：{self._page_total} 个")
 
-    def navigate_to_path(self, path):
-        """★★ 2026-01-26：文件树节点双击 → 跳转到对应目录
+    def navigate_to_path(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_导航.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板导航.navigate_to_path(self, *a, **k)
 
-        ★★ 2026-10-04 修复（小马留下的坑）：它自己拼了一份「跳转」流程，
-          可是**拼错了两个地方** —— 双击目录树里的目录，文件列表**出不来内容**：
-            · `self.current_dir` 没更新（程序别的地方都认这个属性，
-              不更新的话「当前在看哪个文件夹」还是老地方）；
-            · `self._view_spec` 写成了 {"kind": "dir", "dir": path}，
-              可是程序里别处一律用 **"path"** 这个键 —— 键名不对，
-              下一页就取不到目录、列表一直是空的。
-            · 也没做「上一次还在跑的搜索要作废」等收尾（_load_directory 里都有）。
-          现在直接**转交给正规的 load_directory()** —— 双击目录树
-          就和在文件列表里双击文件夹、或在地址栏敲路径**完全一样**。
-        """
-        if not path or not os.path.isdir(path):
-            return
-        try:
-            self.load_directory(str(path))
-        except Exception as _e:
-            note_swallowed(T("从文件目录树跳转失败"), _e)
 
     def show_category(self, cid):
         cats = {c["id"]: c for c in self.store.all_categories()}
@@ -15752,91 +15492,11 @@ class FileTaggerApp:
             pass
         self.menu.tk_popup(event.x_root, event.y_root)
 
-    def _popup_blank_menu(self, event):
-        """★ 在"空白处"右键时弹出的菜单（对整个当前目录的操作）。
+    def _popup_blank_menu(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_空白区菜单.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板空白区菜单._popup_blank_menu(self, *a, **k)
 
-        ★★ 2026-10-07 新增（用户报「资源管理器新建的空文件夹 →
-          在本程序里无法右键」，待清算 #5）。
-
-        ★ 为什么要单独一个菜单（而不是复用 `self.menu`）：
-          那个菜单里全是"对选中文件做的事"（打标签 / 重命名 / 删除…），
-          空白处**没有选中文件**，那些项点了也没意义 ——
-          **摆一堆点不了的东西比不弹更糟**。
-        ★ 所以这里只放"对目录做的事"，而且**每一项都真的能用**。
-        ★ 每次现建现用（`tk.Menu` 很轻），免得跟主菜单的状态打架。
-
-        ★★ 2026-10-07 **又踩一个"名字不存在"**：
-          我第一版写的是 `self.file_list.current_dir` ——
-          **`FileList` 里根本没有这个属性**（翻遍了它的 `__init__`，
-          只记了 `selected_paths` / `last_clicked_path`）。
-          → `getattr(..., None)` 永远 `None` → 菜单里"新建/打开资源管理器"
-            **全是灰的**（又一个"不报错、就是不给你用"）。
-          ★ **正确的来源是主程序自己的 `self.current_dir`**（见 32312 行）。
-        """
-        cur = None
-        # ★ 先问主程序自己（这是真来源），FileList 那里没有这个属性
-        for attr in ("current_dir", "_current_dir"):
-            try:
-                v = getattr(self, attr, None)
-                if v:
-                    cur = str(v)
-                    break
-            except Exception:
-                continue
-        # ★★ 2026-10-07 **又踩一个"名字不存在"**：这里原来写的是
-        #   `m_tk.Menu(...)` —— **本程序里没有 `m_tk` 这个别名**
-        #   （用的是 `import tkinter as tk`）。
-        #   → `NameError` 被外层 except 吞掉 → 菜单**建不出来**，
-        #     而账本里只留一句"空白处右键菜单失败"。
-        #   ★ 这类错误我这一轮踩了三次（`_clip_files` / `file_list.current_dir`
-        #     / `m_tk`），共同点都是**名字不存在 + 异常被吞**。
-        #   ★ 所以：**写新代码引用别的东西之后，一定要核一遍名字存不存在。**
-        m = tk.Menu(self.root, tearoff=0)
-        # ---- 新建 ----
-        try:
-            m.add_command(label=T("📁 新建文件夹…"),
-                          command=lambda: self._blank_new_folder(cur))
-        except Exception:
-            pass
-        try:
-            m.add_command(label=T("📄 新建文本文件…"),
-                          command=lambda: self._blank_new_file(cur))
-        except Exception:
-            pass
-        m.add_separator()
-        # ---- 目录级操作 ----
-        try:
-            m.add_command(label=T("🔄 刷新"),
-                          command=lambda: self.refresh_all())
-        except Exception:
-            pass
-        try:
-            m.add_command(label=T("⬜ 全选"),
-                          command=lambda: self._select_all_files())
-        except Exception:
-            pass
-        m.add_separator()
-        try:
-            m.add_command(
-                label=T("📂 在资源管理器里打开"),
-                command=lambda: self._open_in_explorer(cur),
-                state=("normal" if cur else "disabled"))
-        except Exception:
-            pass
-        try:
-            m.add_command(
-                label="📋 粘贴到这儿（Ctrl+V）",
-                command=lambda: self.paste_into_current(),
-                state=("normal" if self._clipboard_has_files() else "disabled"))
-        except Exception:
-            pass
-        try:
-            m.tk_popup(event.x_root, event.y_root)
-        finally:
-            try:
-                m.grab_release()
-            except Exception:
-                pass
 
     # ---- 空白处菜单用到的几个小动作（每个都单独兜底）----
 
@@ -15914,81 +15574,17 @@ class FileTaggerApp:
             pass
         return None
 
-    def _blank_new_folder(self, cur=None):
-        """在当前目录新建一个文件夹（弹个小输入框问名字）。"""
-        try:
-            base = cur or self._current_dir()
-            if not base:
-                messagebox.showinfo("新建文件夹", T("先打开一个文件夹。"),
-                                    parent=self.root)
-                return
-            name = self._ask_one_line("新建文件夹", "文件夹名字：", "新建文件夹")
-            if not name:
-                return
-            name = str(name).strip()
-            if not name:
-                return
-            # ★ 防呆：不许带路径分隔符（免得用户写出目录外面去）
-            for ch in ("\\", "/", ":", "*", "?", '"', "<", ">", "|"):
-                name = name.replace(ch, "_")
-            target = os.path.join(base, name)
-            if os.path.exists(target):
-                messagebox.showwarning("新建文件夹",
-                                       "已经有同名的了：\n%s" % name,
-                                       parent=self.root)
-                return
-            os.makedirs(target, exist_ok=False)
-            self.log_output(T("已新建文件夹：{x}", x=target))
-            try:
-                self.refresh_all()
-            except Exception:
-                pass
-        except Exception as _e:
-            note_swallowed(T("新建文件夹失败"), _e)
-            try:
-                messagebox.showerror("新建文件夹", "建不了：%s" % _e,
-                                     parent=self.root)
-            except Exception:
-                pass
+    def _blank_new_folder(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_空白区菜单.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板空白区菜单._blank_new_folder(self, *a, **k)
 
-    def _blank_new_file(self, cur=None):
-        """在当前目录新建一个空文本文件。"""
-        try:
-            base = cur or self._current_dir()
-            if not base:
-                messagebox.showinfo("新建文件", T("先打开一个文件夹。"),
-                                    parent=self.root)
-                return
-            name = self._ask_one_line("新建文本文件", "文件名：", "新建文本.txt")
-            if not name:
-                return
-            name = str(name).strip()
-            if not name:
-                return
-            for ch in ("\\", "/", ":", "*", "?", '"', "<", ">", "|"):
-                name = name.replace(ch, "_")
-            if "." not in name:
-                name += ".txt"
-            target = os.path.join(base, name)
-            if os.path.exists(target):
-                messagebox.showwarning("新建文件",
-                                       "已经有同名的了：\n%s" % name,
-                                       parent=self.root)
-                return
-            with open(target, "x", encoding="utf-8"):
-                pass
-            self.log_output(T("已新建文件：{x}", x=target))
-            try:
-                self.refresh_all()
-            except Exception:
-                pass
-        except Exception as _e:
-            note_swallowed(T("新建文件失败"), _e)
-            try:
-                messagebox.showerror("新建文件", "建不了：%s" % _e,
-                                     parent=self.root)
-            except Exception:
-                pass
+
+    def _blank_new_file(self, *a, **k):
+        # ★★ 转发到 `AIxiede拆分开/程序分块/面板_空白区菜单.py`
+        #   ★ 保留同名方法 = **所有调用方不用改**（稳定接口）
+        return _面板空白区菜单._blank_new_file(self, *a, **k)
+
 
     # ---------- ★ v25 补丁23：右键「属性」 ----------
     def show_properties(self, path=None):
