@@ -247,8 +247,23 @@ def _fill():
 
 
 class TagThumbnail(tk.Frame):
-    MIN_SCALE = 0.25
-    MAX_SCALE = 3.0
+    # ★★★ 2026-10-08 **缩放范围放大**（用户要"能缩放到无限大"）★★★
+    #   ★ 原来 `MIN_SCALE = 0.25` / `MAX_SCALE = 3.0` ——
+    #     放到 3 倍就到顶了，用户说"不够"。
+    #   ★★ 为什么不是真"无限"：Tk 画布的坐标是**浮点数**，
+    #     但 scrollregion 太大会让滚动条**变得极其难用**
+    #     （拖一格跳几万像素）；而且节点坐标乘以极大 scale 会**失真/溢出**。
+    #   → 取一个"实际够用"的范围：**0.05 ~ 40 倍**（800 倍区间）——
+    #     ★ 判据：**"无限"的实际含义是"用户试不到边"**，不是数学上的无穷。
+    MIN_SCALE = 0.05
+    MAX_SCALE = 40.0
+    # ★★★ 2026-10-08 **画布四周留白**（用户要"画布无限大"）★★★
+    #   ★ 原来 scrollregion 只按"节点范围 + 120"算 ——
+    #     也就是**画布刚好裹住内容**，没有可拖的空白：
+    #     节点贴边、滚不到外面、往里拖也没地方放。
+    #   ★★ 改成四周留一大片空白（跟内容大小挂钩，见 `_update_scrollregion`）——
+    #     这样"往外拖/往外滚"都有余地，**感觉上就是无限大**。
+    CANVAS_MARGIN = 4000
     NODE_PAD = 20
     LEVEL_GAP_X = 60
     SIBLING_GAP_Y = 12
@@ -739,6 +754,19 @@ class TagThumbnail(tk.Frame):
 
 
     def _update_scrollregion(self):
+        """★★★ 算画布可以滚到多大（错题本 #181）。
+
+        ★★ 2026-10-08 改（用户要"画布无限大"）：
+          原来只按"节点范围 + 120"算 —— **画布刚好裹住内容**：
+            · 节点一贴边就没法再往外拖
+            · 空白处想放个新节点也没地方
+          ★ 现在四周留 `CANVAS_MARGIN`（4000 逻辑像素）的空白，
+            而且**至少是"视口大小的两倍"** ——
+            这样不管内容多少，"往外拖/往外滚"**永远有地方**。
+          ★★ 判据：**"无限画布"的实际做法 = 留足够大的空白**，
+            而不是真的把 scrollregion 设成无穷（滚动条会废掉）。
+        """
+        M = float(self.CANVAS_MARGIN)
         if not self.nodes:
             min_x, min_y = 0.0, 0.0
             max_x, max_y = 300.0, 300.0
@@ -747,10 +775,24 @@ class TagThumbnail(tk.Frame):
             min_y = min((n.y for n in self.nodes.values()), default=0.0)
             max_x = max((n.x + n.w for n in self.nodes.values()), default=200.0)
             max_y = max((n.y + n.h for n in self.nodes.values()), default=200.0)
-        min_x = min(0.0, min_x - 60.0)
-        min_y = min(0.0, min_y - 60.0)
-        max_x = max_x + 120.0
-        max_y = max_y + 120.0
+        # ★ 四周留白：比原来那 60/120 大得多
+        min_x = min(0.0, min_x - M)
+        min_y = min(0.0, min_y - M)
+        max_x = max_x + M
+        max_y = max_y + M
+        # ★★ 再保证"至少视口的两倍" ——
+        #   内容很小的时候（比如只有 3 个标签），留白也要够拖
+        try:
+            vw = max(1, self.canvas.winfo_width())
+            vh = max(1, self.canvas.winfo_height())
+            need_w = (vw * 2.0) / max(self.scale, 1e-6)
+            need_h = (vh * 2.0) / max(self.scale, 1e-6)
+            if max_x - min_x < need_w:
+                max_x = min_x + need_w
+            if max_y - min_y < need_h:
+                max_y = min_y + need_h
+        except Exception:
+            pass
         self.canvas.configure(
             scrollregion=(min_x * self.scale, min_y * self.scale,
                           max_x * self.scale, max_y * self.scale))

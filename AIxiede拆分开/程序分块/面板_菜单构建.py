@@ -49,7 +49,8 @@ except Exception:
 #  ★ 做法跟拆类一样：主程序启动时把「自己」交进来（`_set_app`）。
 # ==========================================================================
 _MUTABLE = []
-_NEED = ['BALL_SHAPES', 'T', 'ball_style_names', 'note_swallowed', 'theme_get']
+_NEED = ['BALL_SHAPES', 'T', 'ball_style_names', 'load_ui_setting',
+         'note_swallowed', 'theme_get']
 _APP = None
 
 
@@ -507,6 +508,32 @@ def _menu_lang_bg_cache(app, menubar, m_set):
     except Exception:
         pass
     m_set.add_cascade(label=T("🌐 语言 / Language"), menu=m_lang)
+    m_set.add_separator()
+    # ★★★ 2026-10-08：**分类统计间隔**（用户报"动不动就在那动一下"）★★★
+    #   ★ 用户原话：「统计分类中那个可以设置个满多少分钟再启动吗，
+    #     感觉它动不动就在那动一下」
+    #   ★★ 为什么要做成菜单而不是设置文件：这是**凭感觉调**的东西 ——
+    #     用户得能"改一下试试"，不能让他去手改 JSON。
+    m_cat = tk.Menu(m_set, tearoff=0)
+    #   ★ 单位是**分钟**；0 = 不再自动算（只在手动点「刷新」时算）
+    #   ★★ 注意：`load_ui_setting` 是**主程序的模块级函数**（不是 app 的方法）——
+    #      所以这里直接用**借来的名字**，别写 `app.load_ui_setting`
+    #      （那样会 `AttributeError`，而且被 except 吞掉 → "菜单上永远显示推荐值"）。
+    _cur_min = 30
+    try:
+        _cur_min = int(float(load_ui_setting("cat_refresh_minutes", 30) or 30))
+    except Exception:
+        _cur_min = 30
+    for _lbl, _v in ((T("每 5 分钟（最勤）"), 5),
+                     (T("每 15 分钟"), 15),
+                     (T("每 30 分钟（推荐）"), 30),
+                     (T("每 1 小时"), 60),
+                     (T("每 3 小时"), 180),
+                     (T("只在手动刷新时算（不自动）"), 0)):
+        m_cat.add_command(
+            label=("● " if _v == _cur_min else "　") + _lbl,
+            command=lambda m=_v: app.set_cat_refresh_minutes(m))
+    m_set.add_cascade(label=T("🧮 分类统计间隔"), menu=m_cat)
     m_set.add_separator()
     # ★★★ 2026-10-08：**背景图**（用户要"搞个图片当背景"）★★★
     #   ★ 单独一个子菜单，因为"调透不透"这种事**要能反复试** ——
