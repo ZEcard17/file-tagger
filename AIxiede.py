@@ -26069,6 +26069,13 @@ class FloatingBall:
 #    ★★★ 所以**必须由人写下来**。这就是这段存在的理由。
 # ==========================================================================
 
+# ★★★ 「支持这个项目」的地址（2026-10-08）
+#   ★ 现在指向仓库里的 SPONSOR.md ——
+#     等爱发电主页建好，**改成那个链接就行**（一处改，全生效）。
+#   ★★ 为什么要有这个按钮（跟版权声明同一个理由）：
+#     **下载 exe 的人不会去看 README，但他会点「关于」。**
+_SPONSOR_URL = "https://gitee.com/zecard/file-tagger/blob/main/SPONSOR.md"
+
 _REPO_URL = "https://github.com/ZEcard17/file-tagger"
 
 _CREDITS_TEXT = """\
@@ -28123,6 +28130,14 @@ class FileTaggerApp:
             ttk.Button(btns, text=T("版权与来源…"), width=14,
                        command=lambda: self.show_credits(win)
                        ).pack(side="left")
+            # ★★ 支持入口（2026-10-08）
+            #   ★ 为什么放在「关于」里：**这是真实用户唯一会看到的位置**
+            #     （下载 exe 的人不会去翻 README）
+            #   ★★ 用 `♥` 而不是 `💰` —— 前者是"心意"，后者是"要钱"，
+            #     在开源项目里这个区别很重要。
+            ttk.Button(btns, text=T("♥ 支持这个项目"), width=16,
+                       command=lambda: _open_url(_SPONSOR_URL)
+                       ).pack(side="left", padx=(6, 0))
             ttk.Button(btns, text=T("确定"), width=10,
                        command=win.destroy).pack(side="right")
             try:

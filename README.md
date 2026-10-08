@@ -421,6 +421,53 @@ the answer too.
 
 ---
 
+## ★★ 支持者 / Supporters
+
+**★★ 谢谢这些人** —— 他们让这个项目**多活了一段时间**。
+
+**★★ Thanks to these people** — they bought this project more time.
+
+<!-- ★★★ 名单从这里开始（★ 手动维护，一行一个人） -->
+
+<!-- 格式（★ 取消注释就能用）：
+| 名字 / Name | 档位 / Tier |
+|---|---|
+| （★ 你希望显示的名字） | ☕ 请我喝杯茶 |
+-->
+
+**★ 现在还没有人赞助**（★ 这个项目还很新）——
+**★ 但已经用上它、提过 issue、补过翻译的人，同样在这份名单上**（见下）。
+
+**★ No sponsors yet** (the project is new) — **★ but people who used it, filed
+issues or added translations are just as much on this list.**
+
+---
+
+### ★★ 贡献者 / Contributors
+
+**★★ 代码是 AI 写的**（见 [`NOTICE`](NOTICE)）——
+**★ 但下面这些人为它做过事，同样该被记住。**
+
+**★★ The code was written by an AI** (see [`NOTICE`](NOTICE)) — **★ but these
+people did work on it, and deserve to be remembered too.**
+
+| 谁 / Who | 做了什么 / What |
+|---|---|
+| **DeepSeek（深度求索）** | ★★ **全部源代码（约 3.7 万行）** / all of the source code |
+
+<!-- ★ 有新贡献者就往下加一行。格式：
+| **名字 / 名字** | 补了俄语翻译 / added Russian translation |
+-->
+
+**★★★ 想上这个名单？ / Want to be on this list?**
+> **★ 不用给钱** —— **提个说清楚的 issue、补一句翻译、写个插件**都算。
+> **★ 说一声**你希望显示什么名字就行。
+>
+> **★ No money needed** — a clear issue, one translation line or a plugin all
+> count. **★ Just say what name you want shown.**
+
+---
+
 <div align="center">
 
 **★ 用标签管理文件，别再靠文件夹套文件夹了。**
