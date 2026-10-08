@@ -123,6 +123,89 @@ class _Borrowed:
     def items(self):
         return self._v().items()
 
+    # ★★★ 补全「代理协议」（错题本 #171）——
+    #   ★ 之前只实现了常用几个，结果 `open(_USAGE_PATH)` 炸了：
+    #     `TypeError: ... where __fspath__ returns a str, not '_Borrowed'`
+    #   ★★ 判据：**代理会被当成什么用，你猜不到** ——
+    #     宁可多实现几个（多余的方法不会被调用，不占开销）。
+    def __fspath__(self):
+        return os.fspath(self._v())
+
+    def __bytes__(self):
+        return bytes(self._v())
+
+    def __format__(self, spec):
+        return format(self._v(), spec)
+
+    def __abs__(self):
+        return abs(self._v())
+
+    def __neg__(self):
+        return -self._v()
+
+    def __pos__(self):
+        return +self._v()
+
+    def __invert__(self):
+        return ~self._v()
+
+    def __round__(self, n=None):
+        return round(self._v()) if n is None else round(self._v(), n)
+
+    def __sub__(self, o):
+        return self._v() - o
+
+    def __rsub__(self, o):
+        return o - self._v()
+
+    def __truediv__(self, o):
+        return self._v() / o
+
+    def __floordiv__(self, o):
+        return self._v() // o
+
+    def __mod__(self, o):
+        return self._v() % o
+
+    def __pow__(self, o):
+        return self._v() ** o
+
+    def __rmul__(self, o):
+        return o * self._v()
+
+    def __and__(self, o):
+        return self._v() & o
+
+    def __or__(self, o):
+        return self._v() | o
+
+    def __xor__(self, o):
+        return self._v() ^ o
+
+    def __lshift__(self, o):
+        return self._v() << o
+
+    def __rshift__(self, o):
+        return self._v() >> o
+
+    def __enter__(self):
+        return self._v().__enter__()
+
+    def __exit__(self, *a):
+        return self._v().__exit__(*a)
+
+    def __next__(self):
+        return next(self._v())
+
+    def __copy__(self):
+        import copy as _c
+        return _c.copy(self._v())
+
+    def __deepcopy__(self, memo):
+        import copy as _c
+        return _c.deepcopy(self._v(), memo)
+
+
 
 _MISS = object()   # 哨兵：区分「取不到」和「取到 None」
 _NEED = ['BOLD', 'CAT_COLORS', 'FONT']
