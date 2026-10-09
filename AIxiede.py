@@ -4418,6 +4418,21 @@ def _apply_caption_dark(root, dark, tries=0):
     ★ 重试上限 40 次 × 50 毫秒 = 最多等 2 秒。
       2 秒还拿不到句柄，说明这台机器/这个窗口就是不行（老系统），
       那就**安静放弃** —— 「想变好看」绝不能变成「卡住启动」。
+
+    ★★★ 2026-10-09 **改成"所有窗口通用"**（错题本 #189）★★★
+       ★ 用户报的：「夜间模式下还是有不少窗口的标题栏是白底的，
+         **包括主程序也要点击一下标题栏才能变成黑底白字**」。
+       ★★ 真因（两条一起）：
+         ① 这个函数原来**只在换皮肤时对 `root` 调了一次** ——
+            ★★★ **所有 Toplevel / 对话框都没调过**；
+         ② 而且那次调用**时机太早**（窗口还没映射，`GetParent` 返回 0）→
+            重试 40 次 × 50ms ≈ **只等 2 秒**，而**主窗口映射可能更慢** →
+            超时就放弃了 → **"点一下标题栏才变黑"**（点击触发了系统重画）。
+       ★ 修法（三点）：
+         ① 抽出一个**通用函数**（本函数），任何 `Toplevel` 都能用；
+         ② 在 **`_hook_window_caption()`** 里"建窗口时自动挂上"
+            （★ 不去改 20 个子类，而是在**创建这一层统一挂**）；
+         ③ **重试等久一点**（★ 主窗口启动慢，2 秒不够）。
     """
     try:
         import ctypes
@@ -4429,7 +4444,10 @@ def _apply_caption_dark(root, dark, tries=0):
         hwnd = 0
     if not hwnd:
         # ★ 还没映射好 —— 重试，**绝不退回 winfo_id()**
-        if tries < 40:
+        # ★★ 2026-10-09：上限从 40 提到 **120**（≈ 6 秒）——
+        #   实测主窗口"开机慢"那次要十几秒才完全映射好，
+        #   2 秒根本不够 → 就是"点一下才变黑"的根因。
+        if tries < 120:
             try:
                 root.after(50, lambda: _apply_caption_dark(root, dark,
                                                            tries + 1))
@@ -4443,6 +4461,116 @@ def _apply_caption_dark(root, dark, tries=0):
             ctypes.byref(val), ctypes.sizeof(val))
     except Exception:
         pass
+
+
+# ★★★ 2026-10-09 新增：**给每一个窗口自动挂"标题栏跟着皮肤走"**。
+#
+# ★ 用户报的：「夜间模式下还是有不少窗口的标题栏是白底的」
+# ★★ 现状：程序里有 ~20 个 `tk.Toplevel` 子类（主程序 11 个 + 15 个模块里一堆），
+#    ★★★ **一个个去改一定会漏**（而且以后新加窗口还会忘）。
+#
+# ★★★ **我第一版想错了，记下来**（错题本 #189）：
+#   我本来想"包一层 `tk.Toplevel`"（把 `tk.Toplevel` 换成一个包装函数）——
+#   ★★★ **那样不生效！** 原因：
+#     ① 那 ~20 个类**都是 `class XXX(tk.Toplevel)`**，
+#        它们在**导入的时候**就把 `tk.Toplevel` **绑成基类**了；
+#     ② 我**之后再换 `tk.Toplevel` 这个名字** → 只对"以后才定义的类"有用，
+#        ★★ **已经定义好的类继承的还是老的那个** → **一点都不生效**。
+#   ★ 实测证据：主窗口读回 1（深色）✔，但 `SimpleInputDialog` 读回 **0** ✘。
+#   ★★ 判据：**"换掉一个类名"只影响"之后定义的子类"** ——
+#     想影响"已经继承了的子类"，必须**改父类身上的方法**（见下）。
+#
+# ★ 正解：包一层 **`tk.Toplevel.__init__`**（★ 改的是**同一个类对象的方法**）——
+#   ★★ 继承是**动态查找**的，所以"已经继承它的子类"**也会走到**。
+#   ★ 判据：**"影响所有子类"要改父类的方法，不是换掉父类这个名字。**
+
+_CAPTION_HOOKED = {"done": False}
+
+
+def _hook_window_caption():
+    """★ 让**每一个** Toplevel（含已经定义好的子类）标题栏自动跟随皮肤。
+
+    ★★ 怎么做的（★ 很保守）：
+      包一层 **`tk.Toplevel.__init__`** —— 建完窗口后排三次"上色"：
+        · `after(0, ...)`   —— 尽快（窗口一般这时已有句柄）
+        · `after(120, ...)` —— 兜一次
+        · `after(600, ...)` —— ★ 再兜一次（有些窗口会在这期间重设几何/属性，
+                                颜色可能被系统重置）
+      ★ 失败**全部吞掉**（老系统不支持就退回原样，绝不能卡住）。
+    ★★★ 为什么不用"换掉 `tk.Toplevel` 这个名字"：见上面的血泪教训。
+    ★★ 为什么不用"遍历 `winfo_children()`"那种做法：
+       ★ 那样**换皮肤时只对"当时活着的"窗口生效**，
+         **之后新开的窗口还是白的**（★ 这正是用户报的现象之一）。
+    """
+    if _CAPTION_HOOKED["done"]:
+        return
+    if os.name != "nt":
+        _CAPTION_HOOKED["done"] = True
+        return
+    try:
+        _OrigInit = tk.Toplevel.__init__
+        if getattr(_OrigInit, "_weibian_caption_hooked", False):
+            _CAPTION_HOOKED["done"] = True
+            return
+
+        def _init_with_caption(self, *a, **k):
+            _OrigInit(self, *a, **k)
+            try:
+                _sd = (THEME_NAME == "dark")
+            except Exception:
+                _sd = False
+            for _delay in (0, 120, 600):
+                try:
+                    self.after(
+                        _delay,
+                        lambda _w=self, _d=_sd:
+                        _apply_caption_dark(_w, _d, 0))
+                except Exception:
+                    pass
+
+        _init_with_caption._weibian_caption_hooked = True
+        tk.Toplevel.__init__ = _init_with_caption
+        _CAPTION_HOOKED["done"] = True
+    except Exception:
+        pass
+
+
+def _apply_caption_to_all(root, dark):
+    """★ 换皮肤时：把**当前活着的所有窗口**标题栏都刷一遍。
+
+    ★ 跟 `_hook_window_caption()` 分工：
+      · 这个管 **"已经开着的窗口"**（换皮肤要立刻变）
+      · 那个管 **"以后新开的窗口"**（开着的时候就是对的）
+    ★★ 两个都要有 —— 少一个就会出现"某些窗口还是白的"。
+    ★ 递归扫（★ 有的对话框是"窗口里套窗口"）。
+    """
+    if root is None:
+        return
+    try:
+        _apply_caption_dark(root, bool(dark), tries=0)
+    except Exception:
+        pass
+    stack = [root]
+    seen = set()
+    while stack:
+        w = stack.pop()
+        try:
+            if id(w) in seen:
+                continue
+            seen.add(id(w))
+        except Exception:
+            continue
+        try:
+            kids = w.winfo_children()
+        except Exception:
+            kids = []
+        for c in kids:
+            try:
+                if isinstance(c, tk.Toplevel):
+                    _apply_caption_dark(c, bool(dark), tries=0)
+            except Exception:
+                pass
+            stack.append(c)
 
 
 def apply_theme(root, name=None):
@@ -4503,8 +4631,22 @@ def apply_theme(root, name=None):
     # ★★ 2026-10-06：最后把**标题栏和菜单栏**也染成深色（夜间模式的最后一关）。
     #   放在最后做，因为它跟上面那套「扫控件换色」完全是两条路
     #   （那个改的是 Tk 控件，这个改的是 Windows 自己画的东西）。
+    # ★★★ 2026-10-09 改成调 `_apply_caption_to_all`（错题本 #189）——
+    #   ★ 原来只对 `root` 调 → **所有 Toplevel / 对话框的标题栏都没刷**，
+    #     用户看到的就是"还是有不少窗口标题栏是白底的"。
     try:
         _set_native_dark(root, name == "dark")
+    except Exception:
+        pass
+    try:
+        _apply_caption_to_all(root, name == "dark")
+    except Exception:
+        pass
+    # ★★★ 顺便**把"以后新开的窗口也自动跟随"这件事装上**（只装一次）——
+    #   ★ 不装的话，换皮肤之后**新开的对话框还是白的**
+    #     （★ 这正是用户报的现象之一）。
+    try:
+        _hook_window_caption()
     except Exception:
         pass
     try:
@@ -7489,6 +7631,28 @@ except Exception:
 
         def __init__(self, master, cat, app, sidebar):
             super().__init__(master, bg=theme_get("win_bg"), cursor="hand2")
+            # ★★★ 2026-10-09 **补上主题登记**（错题本 #190）★★★
+            #   ★ 用户报的：「左菜单夜间模式还是白底的，
+            #     **就不能和右菜单一样是黑底白字的吗**」。
+            #   ★★★ 真因：左边那一竖条里，**`CategorySidebar` 登记了 5 处**
+            #     （自己 / canvas / inner / sep / tree_header），
+            #     ★★ **但 `CategoryItem`（"全部文件 / 图本 / 软件 / 桌面"那几行）
+            #       一处都没登记**！
+            #   ★ 后果：换皮肤时它们**不走 `apply_themed()`**，
+            #     而走 `_retheme_tree()` 的「按对照表翻色」——
+            #     ★★★ 那张表**分不清"这个值是底还是字"** →
+            #       **底色被当成字色翻** → 浅色模式下翻成浅色、
+            #       夜间模式下翻成**浅灰/白** → **看着就是白底**。
+            #     （★ 这个坑 `CategorySidebar` 自己的注释里就写着，
+            #       见第 7760 行「实测：切到夜间它变成 #d6d7db
+            #       （★ 底色被当成字色翻了）」—— ★ 但 CategoryItem 漏了。）
+            #   ★★ 修法：四个控件**逐个登记**（跟 CategorySidebar 一个做法）。
+            #   ★ 判据：**"一个容器登记了、里面的零件也要各自登记"** ——
+            #     登记的是**控件对象**，不是"容器登记了零件就跟着走"。
+            try:
+                register_themed(self, "win")
+            except Exception:
+                pass
             self.cat = cat
             self.app = app
             self.sidebar = sidebar
@@ -7514,11 +7678,23 @@ except Exception:
             self.name_lbl = tk.Label(self, text=self._short_name(cat.get("name", "")),
                                      bg=theme_get("win_bg"),
                                      fg=theme_get("fg"), font=(FONT, UI_FONT_SIZE), anchor="w")
+            # ★★★ 2026-10-09 登记（错题本 #190）—— 见上面 __init__ 里那段说明
+            try:
+                register_themed(self.name_lbl, "win")
+            except Exception:
+                pass
             self.name_lbl.pack(side="left", fill="x", expand=True, padx=(0, 8))
 
             cnt = cat.get("cnt") or 0
             self.count_lbl = tk.Label(self, text=str(cnt) if cnt else "",
                                       bg=theme_get("win_bg"), fg=theme_get("fg_dim"), font=(FONT, UI_FONT_SIZE))
+            # ★★★ 2026-10-09 登记（错题本 #190）——
+            #   ★ 这个还要**额外登记"字色"**（它是 fg_dim，跟名字用的 fg 不同）。
+            try:
+                register_themed(self.count_lbl, "win",
+                                extra=[("fg", "fg_dim")])
+            except Exception:
+                pass
             self.count_lbl.pack(side="right", padx=(0, 10))
 
             for w in (self, self.avatar, self.name_lbl, self.count_lbl):
